@@ -137,7 +137,7 @@ $ipInfo = json_decode(file_get_contents("http://ipinfo.io/{$ip}/json"));
             function queryEvent(eventId) {
                 var promise = new (Promise||ES6Promise)(function(resolve, reject) {
                     console.info("[event] Querying event "+eventId)
-                    sendRequest("GET", "get?id="+eventId).then(function(response){
+                    sendRequest("GET", "get.php?id="+eventId).then(function(response){
                         resolve(JSON.parse(response)[0]);
                     });
                 });
@@ -335,7 +335,7 @@ $ipInfo = json_decode(file_get_contents("http://ipinfo.io/{$ip}/json"));
                 document.getElementById("agenda").innerHTML = favoritesHTML;
             }
             function refreshFavorites() {
-                sendRequest("GET", "get?favorites").then(function(response) {
+                sendRequest("GET", "get.php?favorites").then(function(response) {
                     if (response == "not logged") {
                         document.getElementById("agenda").innerHTML = '<div class="not-logged">Connecte-toi pour enregistrer des évents !<button onclick="popupLogin().then(refreshFavorites)">Se connecter</button>';
                     } else {
@@ -355,7 +355,7 @@ $ipInfo = json_decode(file_get_contents("http://ipinfo.io/{$ip}/json"));
                     refreshOrga();
                 });
                 function refreshOrga() {
-                    sendRequest("GET", "get?mine").then(function(r) {
+                    sendRequest("GET", "get.php?mine").then(function(r) {
                         var myEventsDiv = document.getElementById("my-events");
                         if (r == "not logged") {
                             myEventsDiv.innerHTML = "";
@@ -511,7 +511,7 @@ $ipInfo = json_decode(file_get_contents("http://ipinfo.io/{$ip}/json"));
                         let date = document.getElementById("searchdate").value;
                         let time = document.getElementById("searchtime").value;
                         let cats = document.getElementById("searchcat").value;
-                        sendRequest("GET", `get?text=${text}&date=${date}&time=${time}&timezoneoffset=${new Date().getTimezoneOffset()}&`+cats.map((e,i)=>"cat"+i+"="+e).join("&")).then(function(r) {
+                        sendRequest("GET", `get.php?text=${text}&date=${date}&time=${time}&timezoneoffset=${new Date().getTimezoneOffset()}&`+cats.map((e,i)=>"cat"+i+"="+e).join("&")).then(function(r) {
                             events = JSON.parse(r);
                             displayResults(events);
                         });

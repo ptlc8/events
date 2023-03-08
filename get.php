@@ -1,7 +1,8 @@
 <?php
 
 // initialisation session + BDD
-$mysqli = new mysqli('localhost', 'user', 'password', 'db');
+include('credentials.php');
+$mysqli = new mysqli(EVENTS_DB_HOSTNAME, EVENTS_DB_USER, EVENTS_DB_PASSWORD, EVENTS_DB_NAME);
 if ($mysqli->connect_errno) {
     echo 'Erreur de connexion côté serveur, veuillez réessayer plus tard';
 	exit;
