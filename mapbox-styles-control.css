@@ -1,0 +1,17 @@
+/* https://github.com/bravecow/mapbox-gl-controls/blob/master/src/styles/styles.scss */
+.mapboxgl-ctrl-styles {
+    display: flex;
+}
+.mapboxgl-ctrl-styles button {
+    width: auto;
+    display: flex;
+    align-items: center;
+    padding: 0 8px;
+}
+.mapboxgl-ctrl-styles button + button {
+    border: none;
+    font: 15px / 20px "Open Sans", "Helvetica Neue", Arial, Helvetica, sans-serif;
+}
+.mapboxgl-ctrl-styles button.-active {
+    background: #f5f5f5;
+}
