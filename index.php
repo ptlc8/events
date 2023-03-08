@@ -2,6 +2,7 @@
 <?php
 $ip = $_SERVER['REMOTE_ADDR'];
 $ipInfo = json_decode(file_get_contents("http://ipinfo.io/{$ip}/json"));
+$ipLoc = $ipInfo->bogon ? "48.8534100,2.3488000" : $ipInfo->loc;
 ?>
 <html>
     <head>
@@ -191,7 +192,7 @@ $ipInfo = json_decode(file_get_contents("http://ipinfo.io/{$ip}/json"));
             var map = new mapboxgl.Map({
                 container: 'map',
                 style: 'mapbox://styles/mapbox/outdoors-v11',
-                center: [<?php echo explode(",", $ipInfo->loc)[1] ?>, <?php echo explode(",", $ipInfo->loc)[0] ?>],
+                center: [<?php echo $ipLoc ?>].reverse(),
                 zoom: 4
             });
             map.on('load', function() {
