@@ -2,35 +2,34 @@
 
 include('../init.php');
 
+initDatabase();
+
 if (isset($_REQUEST['id'])) {
     
-    $result = sendRequest("SELECT * FROM `EVENTS` WHERE id = '", $_REQUEST['id'],"'");
+    $result = queryDatabase("SELECT * FROM `events` WHERE id = '", $_REQUEST['id'],"'");
     
 } else if (isset($_REQUEST['favorite']) || isset($_REQUEST['mine'])) {
     
     session_start();
     // connecté à un compte ? // TODO : sessionToken ?
     if (!isset($_SESSION['username'], $_SESSION['password'])) exitError("not logged");
-	$userRequest = sendRequest("SELECT * FROM USERS WHERE `name` = '", $_SESSION['username'], "' and `password` = '", $_SESSION['password'], "'");
+	$userRequest = queryDatabase("SELECT * FROM USERS WHERE `name` = '", $_SESSION['username'], "' and `password` = '", $_SESSION['password'], "'");
 	if ($userRequest->num_rows === 0) {
         exitError("not logged");
 	}
 	$user = $userRequest->fetch_assoc();
     
-    $result = sendRequest("SELECT * FROM EVENTS".(isset($_REQUEST['favorite']) ? " JOIN UxE ON UxE.eventId = EVENTS.id WHERE UxE.userId = '".$user['id']."'" : "").(isset($_REQUEST['mine']) ? " WHERE EVENTS.author = '".$user['id']."'" : ""));
+    $result = queryDatabase("SELECT * FROM events".(isset($_REQUEST['favorite']) ? " JOIN UxE ON eventId = events.id WHERE userId = '".$user['id']."'" : "").(isset($_REQUEST['mine']) ? " WHERE author = '".$user['id']."'" : ""));
     
 } else {
 
     $text = isset($_REQUEST['text']) ? $_REQUEST['text'] : "";
     $date = isset($_REQUEST['date']) ? $_REQUEST['date'] : "alldate"; // alldate, today, tomorrow, week, nextweek, month
     $time = isset($_REQUEST['time']) ? $_REQUEST['time'] : "alltime"; // alltime, morning(06h-12h), afternoon(12h-18), evening(18h-00h), night(00h-06h), now(-3h-+3h)
-    $categories = [];
-    for ($i = 0; isset($_REQUEST['cat'.$i]); $i++) {
-        array_push($categories, $_REQUEST['cat'.$i]);
-    }
-    $limit = isset($_REQUEST['limit']) && is_numeric($_REQUEST['limit']) ? max(1, min(intval($_REQUEST['limit']), 20)) : 10;
+    $categories = isset($_REQUEST['cats']) && is_array($_REQUEST['cats']) ? $_REQUEST['cats'] : array();
+    $limit = isset($_REQUEST['limit']) && is_numeric($_REQUEST['limit']) ? max(1, min(intval($_REQUEST['limit']), 100)) : 50;
     $offset = isset($_REQUEST['offset']) && is_numeric($_REQUEST['offset']) ? max(0, intval($_REQUEST['offset'])) : 0;
-    
+
     date_default_timezone_set("Etc/GMT");
     $timezoneOffset = (isset($_REQUEST['timezoneoffset'])) ? intval($_REQUEST['timezoneoffset']) : 0; // en minutes
     
@@ -61,7 +60,7 @@ if (isset($_REQUEST['id'])) {
         $timeSup = date("H:i:s", strtotime("now +3 hour"));
     }
     
-    $request = "SELECT * FROM `EVENTS` WHERE public = '1' '$dateInf' <= CAST(datetime AS date)";
+    $request = "SELECT * FROM `events` WHERE public = '1' AND '$dateInf' <= CAST(datetime AS date)";
     if (isset($dateSup)) $request .= " AND CAST(datetime AS date) < '$dateSup'";
     foreach ($categories as $cat)
         $request .= " AND categories LIKE '%".str_replace(array('\\', '\''), array('\\\\', '\\\''), $cat)."%'";
@@ -77,13 +76,15 @@ if (isset($_REQUEST['id'])) {
             $request .= " AND ('$timeInf' <= CAST(datetime AS time) OR CAST(datetime AS time) <= '$timeSup')";
     }
     $request .= " LIMIT $limit OFFSET $offset";
-    $result = sendRequest($request);
+    
+    $result = queryDatabase($request);
 }
 
 $events = [];
 while (($event = $result->fetch_assoc()) != null) {
     $event['coords'] = array(floatval($event['coor1']), floatval($event['coor2']));
-    $event['categories'] = explode(",", $event['categories']);
+    $event['categories'] = $event['categories']=="" ? [] : explode(",", $event['categories']);
+    $event['images'] = $event['images']!="" ? explode(",", $event['images']) : ["https://source.unsplash.com/512x512/?"."_"];
     unset($event['coor1'], $event['coor2']);
     array_push($events, $event);
 }

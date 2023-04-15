@@ -1,15 +1,16 @@
 const EventsApi = {
     getEvents: function (parameters = {}) {
-        return sendApiRequest("/events/get.php", parameters, "Getting events");
+        return sendApiRequest("events/get.php", parameters, "Getting events");
     },
     getEvent: function (id) {
-        return sendApiRequest("/events/get.php", { id }, "Getting event " + id)
+        return sendApiRequest("events/get.php", { id }, "Getting event " + id)
     },
     createEvent: function (event) {
-        return sendApiRequest("/events/create.php", event, "Creating event " + event.name);
+        return sendApiRequest("events/create.php", event, "Creating event " + event.name);
     },
     getCategories: function () {
-        return sendApiRequest("/categories/get.php", {}, "Getting categories");
+        return ["party", "arts", "theater", "music", "online", "children", "shopping", "cinema", "food", "wellbeing", "show", "sport", "literature", "drink", "gardening", "cause", "craft"];
+        //return sendApiRequest("/categories/get.php", {}, "Getting categories");
     }
 };
 

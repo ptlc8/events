@@ -3,11 +3,13 @@ CREATE TABLE `EVENTS` (
   `title` text COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'nom de l''évent',
   `author` int(11) NOT NULL COMMENT 'id de l''organisateur',
   `description` text COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT ('') COMMENT 'description',
-  `datetime` datetime NOT NULL COMMENT 'date et horaire',
+  `datetime` datetime NOT NULL COMMENT 'date et horaire de début',
+  `endDatetime` datetime NOT NULL COMMENT 'date et horaire de fin',
   `coor1` float NOT NULL COMMENT 'longitude',
   `coor2` float NOT NULL COMMENT 'latidude',
   `placename` tinytext COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'nom du lieu',
-  `categories` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT ('[]') COMMENT 'catégories',
+  `categories` text COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT ('') COMMENT 'catégories',
+  `images` text COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT ('') COMMENT 'images',
   `public` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
