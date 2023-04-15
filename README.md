@@ -16,6 +16,11 @@ define('EVENTS_DB_HOSTNAME', 'localhost');
 define('EVENTS_DB_USER', 'user');
 define('EVENTS_DB_PASSWORD', 'password123');
 define('EVENTS_DB_NAME', 'events');
+
+define("SEATGEEK_CLIENT_ID", "PutY0urCl1eNtIdH3r3xxxxxxx");
+define("SEATGEEK_CLIENT_SECRET", "puty0urcli3nt1dh3r3xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+
+define("TICKETMASTER_API_KEY", "PutYourApiKeyHerexxxxxxxxxxxxxxx");
 ?>
 ```
  - exécuter dans la base de données le script SQL [init.sql](init.sql)
