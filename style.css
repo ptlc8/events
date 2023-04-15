@@ -11,11 +11,11 @@ body { margin: 0; padding: 0; height: 100%; }
 }*/
 #menu > button { flex: 1; position: relative; border-width: 1px; border-color: black; border-style: solid; background-color: white; background-image: radial-gradient(#e6fbff, white); cursor: pointer; }
 #menu > button > span { background-repeat: no-repeat; background-position: center; background-size: contain; display: block; position: absolute; top: 10%; left: 10%; width: 80%; height: 80%; }
-#menu-orga > span { background-image: url('orga.svg'); }
-#menu-map > span { background-image: url('map.svg'); }
-#menu-fav > span { background-image: url('fav.svg'); }
-#menu-search > span { background-image: url('search.svg'); }
-#menu-agnd > span { background-image: url('agnd.svg'); }
+#menu-orga > span { background-image: url('assets/orga.svg'); }
+#menu-map > span { background-image: url('assets/map.svg'); }
+#menu-fav > span { background-image: url('assets/fav.svg'); }
+#menu-search > span { background-image: url('assets/search.svg'); }
+#menu-agnd > span { background-image: url('assets/agnd.svg'); }
 #search #results, #orga, .popup { font-family: Helvetica Neue, Arial, Helvetica, sans-serif; }
 #map-container { position: absolute; top: 0; bottom: 0; width: 100%; }
 .map-overlay { position: absolute; top: 0; bottom: 0; width: 100%; pointer-events: none; }

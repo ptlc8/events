@@ -11,7 +11,7 @@ $ipLoc = $ipInfo->bogon ? "48.8534100,2.3488000" : $ipInfo->loc;
         <meta property="og:type" content="website" />
         <meta property="og:title" content="Title" /> <!--TODO-->
         <meta property="og:description" content="Description" />
-        <meta property="og:image" content="https://<?php echo $_SERVER['HTTP_HOST']; ?>/events/map.svg" />
+        <meta property="og:image" content="https://<?php echo $_SERVER['HTTP_HOST']; ?>/events/assets/map.svg" />
         <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
         <link rel="stylesheet" href="style.css?<?php echo time(); ?>" />
         <!-- Mapbox -->
@@ -27,58 +27,11 @@ $ipLoc = $ipInfo->bogon ? "48.8534100,2.3488000" : $ipInfo->loc;
         <link rel="stylesheet" href="mapbox-styles-control.css" />
         <!-- Tiny textarea -->
         <script src="https://cdn.tiny.cloud/1/7hkow4ra868f55cpirrqdbqdwpublcqk7mx9b1s9z84eua44/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
+        <!-- Local scripts -->
+        <script src="utils.js"></script>
+        <script src="api.js"></script>
+        <script src="index.js"></script>
         <script>
-            function sendRequest(method, url, body=undefined, contentType="application/x-www-form-urlencoded") {
-                var promise = new (Promise||ES6Promise)(function(resolve, reject) {
-                    var xhr = new XMLHttpRequest();
-                    xhr.open(method, url);
-                    xhr.setRequestHeader("Content-Type", contentType);
-                    xhr.onreadystatechange = function() {
-                        if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
-                            resolve(this.response);
-                        }
-                    }
-                    xhr.send(body);
-                });
-                return promise;
-            }
-            function createElement(tag, properties={}, inner=[], eventListeners={}) {
-                let el = document.createElement(tag);
-                for (let p of Object.keys(properties)) if (p != "style") el[p] = properties[p];
-                if (properties.style) for (let p of Object.keys(properties.style)) el.style[p] = properties.style[p];
-                if (typeof inner == "object") for (let i of inner) el.appendChild(typeof i == "string" ? document.createTextNode(i) : i);
-                else el.innerText = inner;
-                for (let l of Object.keys(eventListeners)) el.addEventListener(l, eventListeners[l]);
-                return el
-            }
-            var texts = [];
-            function text(id) {
-                if (!texts[lang]) {
-                    sendRequest("GET", "lang-"+"fr"+".json").then(function(response) { // TODO other lang
-                        texts[lang] = JSON.parse(response);
-                    });
-                    return ""; // TODO : promise ?
-                } else {
-                    return texts[lang][id];
-                }
-            }
-            function getDisplayDate(datetime) {
-                var datetime = new Date(datetime);
-                var date = new Date(datetime);
-                date.setHours(0,0,0,0);
-                var now = new Date();
-                var today = new Date();
-                today.setHours(0,0,0,0);
-                
-                if (date.getTime() == today.getTime()-86400000) return text("yesterday");
-                if (date.getTime() < today.getTime()) return text("past");
-                if (date.getTime() == today.getTime()) return text("today");
-                if (date.getTime() == today.getTime()+86400000) return text("tomorrow");
-                if (date.getTime() < today.getTime()+6*86400000) return text("weekdays")[date.getDay()]+text("next");
-                return text("thedate") + date.getDate() + " " + text("months")[date.getMonth()] + (date.getYear()==today.getYear()?"":" "+date.getYear())
-                if (date.getTime() )
-                return "TODO";
-            }
             var allcategories = JSON.parse('{"party":{"emote":"🎉"},"arts":{"emote":"🎨"},"theater":{"emote":"🎭"},"music":{"emote":"🎶"},"online":{"emote":"💻"},"children":{"emote":"👧‍👦"},"shopping":{"emote":"🛍"},"cinema":{"emote":"🎬"},"food":{"emote":"🍽"},"wellbeing":{"emote":"😌"},"show":{"emote":"🎟"},"sport":{"emote":"🎾"},"literature":{"emote":"📚"},"drink":{"emote":"🍹"},"gardening":{"emote":"🌱"},"cause":{"emote":"🎗"},"craft":{"emote":"📐"}}');
             function getDisplayCategories(categories) {
                 return categories.map(c=>allcategories[c].emote +" "+ text(c));
@@ -95,7 +48,7 @@ $ipLoc = $ipInfo->bogon ? "48.8534100,2.3488000" : $ipInfo->loc;
                     popupC.appendChild(popup);
                     var close = document.createElement("img");
                     close.className = "close";
-                    close.src = "cross.svg";
+                    close.src = "assets/cross.svg";
                     close.addEventListener("click", ()=>{popupC.parentElement.removeChild(popupC); resolve();});
                     popup.appendChild(close);
                     for (let el of content) popup.appendChild(el);
@@ -134,15 +87,6 @@ $ipLoc = $ipInfo->bogon ? "48.8534100,2.3488000" : $ipInfo->loc;
                     createElement("div", {className:"footer"}, "Ça a l'air chouette, non ?! 🦉")
                 ]);
                 return popup([banner, body]).then(unsetPoster);
-            }
-            function queryEvent(eventId) {
-                var promise = new (Promise||ES6Promise)(function(resolve, reject) {
-                    console.info("[event] Querying event "+eventId)
-                    sendRequest("GET", "get.php?id="+eventId).then(function(response){
-                        resolve(JSON.parse(response)[0]);
-                    });
-                });
-                return promise;
             }
             function popupLogin() {
                 let title = createElement("span", {className: "title"}, "Connexion");
@@ -204,8 +148,7 @@ $ipLoc = $ipInfo->bogon ? "48.8534100,2.3488000" : $ipInfo->loc;
                     }
                 );
                 
-                sendRequest("GET", "get").then(function(response) {
-                    events = JSON.parse(response);
+                EventsApi.getEvents().then(events => {
                     map.addSource("events", {type:"geojson", data:{type:'FeatureCollection',features:events.map(e=>{return {type:"Feature", "geometry":{type:"Point", coordinates: e.coords}, properties:{eventId:e.id}}})}});
                     map.addLayer({
                         'id': 'events',
@@ -336,14 +279,12 @@ $ipLoc = $ipInfo->bogon ? "48.8534100,2.3488000" : $ipInfo->loc;
                 document.getElementById("agenda").innerHTML = favoritesHTML;
             }
             function refreshFavorites() {
-                sendRequest("GET", "get.php?favorites").then(function(response) {
-                    if (response == "not logged") {
-                        document.getElementById("agenda").innerHTML = '<div class="not-logged">Connecte-toi pour enregistrer des évents !<button onclick="popupLogin().then(refreshFavorites)">Se connecter</button>';
-                    } else {
-                        setFavorites(JSON.parse(response));
-                    }
-                });
-                console.info("[events] Querying favs");
+                EventsApi.getEvents({favorite:true}).then(setFavorites)
+                    .catch(e => {
+                        setFavorites([]);
+                        if (e == "not logged")
+                            document.getElementById("agenda").innerHTML = '<div class="not-logged">Connecte-toi pour enregistrer des évents !<button onclick="popupLogin().then(refreshFavorites)">Se connecter</button>';
+                    });
             }
             refreshFavorites();
             </script>
@@ -356,33 +297,31 @@ $ipLoc = $ipInfo->bogon ? "48.8534100,2.3488000" : $ipInfo->loc;
                     refreshOrga();
                 });
                 function refreshOrga() {
-                    sendRequest("GET", "get.php?mine").then(function(r) {
-                        var myEventsDiv = document.getElementById("my-events");
-                        if (r == "not logged") {
-                            myEventsDiv.innerHTML = "";
-                            myEventsDiv.appendChild(createElement("div", {className:"not-logged"}, ["Connecte-toi pour créer des évents !", createElement("button", {}, "Se connecter", {click:function(){popupLogin().then(refreshOrga)}})]));
-                        } else {
-                            myEventsDiv.innerHTML = "";
-                            var results = JSON.parse(r);
-                            for (let result of results) {
-                                myEventsDiv.appendChild(createElement("div", {}, [
-                                    createElement("div", {className: "preview"}),
-                                    createElement("div", {className: "infos"}, [
-                                        createElement("span", {className:"title"}, result.title),
-                                        createElement("span", {className:"description"}, result.description),
-                                        createElement("span", {className:"categories"}, getDisplayCategories(result.categories).join(", ")),
-                                        createElement("span", {className:"whenwhere"}, '<b>'+getDisplayDate(result.datetime)+'</b> à <b>'+result.coords+'</b>'),
-                                        createElement("button", {className:"infos-button"}, "Plus d'infos", {click:function(){popupEvent(result)}})
-                                    ])
-                                ]));
-                            }
-                            if (results.length == 0) {
-                                myEventsDiv.appendChild(createElement("div", {className:"no-results"}, [
-                                    "Aucun évent créé ?",
-                                    createElement("button", {}, text("organizeit"), {click:function(){popupCreateEvent()}})
-                                ]));
-                            }
+                    var myEventsDiv = document.getElementById("my-events");
+                    EventsApi.getEvents({mine:true}).then(events => {
+                        myEventsDiv.innerHTML = "";
+                        for (let result of events) {
+                            myEventsDiv.appendChild(createElement("div", {}, [
+                                createElement("div", {className: "preview"}),
+                                createElement("div", {className: "infos"}, [
+                                    createElement("span", {className:"title"}, result.title),
+                                    createElement("span", {className:"description"}, result.description),
+                                    createElement("span", {className:"categories"}, getDisplayCategories(result.categories).join(", ")),
+                                    createElement("span", {className:"whenwhere"}, '<b>'+getDisplayDate(result.datetime)+'</b> à <b>'+result.coords+'</b>'),
+                                    createElement("button", {className:"infos-button"}, "Plus d'infos", {click:function(){popupEvent(result)}})
+                                ])
+                            ]));
                         }
+                        if (results.length == 0) {
+                            myEventsDiv.appendChild(createElement("div", {className:"no-results"}, [
+                                "Aucun évent créé ?",
+                                createElement("button", {}, text("organizeit"), {click:function(){popupCreateEvent()}})
+                            ]));
+                        }
+                    }).catch(e => {
+                        myEventsDiv.innerHTML = "";
+                        if (e == "not logged")
+                            myEventsDiv.appendChild(createElement("div", {className:"not-logged"}, ["Connecte-toi pour créer des évents !", createElement("button", {}, "Se connecter", {click:function(){popupLogin().then(refreshOrga)}})]));
                     });
                 }
                 function popupCreateEvent() {
@@ -419,7 +358,7 @@ $ipLoc = $ipInfo->bogon ? "48.8534100,2.3488000" : $ipInfo->loc;
         <div id="search">
             <div style="height: 1px;"></div>            
             <div class="searchbar">
-                <img src="search-icon.svg">
+                <img src="assets/search-icon.svg">
                 <input type="text" id="searchtext" onkeypress="search()" onpaste="search()" oninput="search()">
             </div>
             <div>
@@ -512,11 +451,8 @@ $ipLoc = $ipInfo->bogon ? "48.8534100,2.3488000" : $ipInfo->loc;
                         let date = document.getElementById("searchdate").value;
                         let time = document.getElementById("searchtime").value;
                         let cats = document.getElementById("searchcat").value;
-                        sendRequest("GET", `get.php?text=${text}&date=${date}&time=${time}&timezoneoffset=${new Date().getTimezoneOffset()}&`+cats.map((e,i)=>"cat"+i+"="+e).join("&")).then(function(r) {
-                            events = JSON.parse(r);
-                            displayResults(events);
-                        });
-                        console.info("[events] Searching events");
+                        EventsApi.getEvents({text, date, time, cats, timezoneoffset:new Date().getTimezoneOffset()})
+                            .then(displayResults);
                     }, 500);
                 }
                 function displayResults(results) {
@@ -595,7 +531,7 @@ $ipLoc = $ipInfo->bogon ? "48.8534100,2.3488000" : $ipInfo->loc;
                 onHashChange();
                 let posterId = window.location.hash.match(/@[a-z0-9]*/i) ? window.location.hash.match(/@[a-z0-9]*/i)[0].replace("@", "") : undefined;
                 if (posterId) {
-                    queryEvent(posterId).then(popupEvent);
+                    EventsApi.getEvent(posterId).then(popupEvent);
                 }
                 setPanel = function(panelId) {
                     window.location.hash = panelId;

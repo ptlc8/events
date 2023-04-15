@@ -1,45 +1,23 @@
 <?php
 
-// initialisation session + BDD
-include('credentials.php');
-$mysqli = new mysqli(EVENTS_DB_HOSTNAME, EVENTS_DB_USER, EVENTS_DB_PASSWORD, EVENTS_DB_NAME);
-if ($mysqli->connect_errno) {
-    echo 'Erreur de connexion côté serveur, veuillez réessayer plus tard';
-	exit;
-}
-
-// fonction de requête BDD
-function sendRequest(...$requestFrags) {
-	$request = '';
-	$var = false;
-	foreach ($requestFrags as $frag) {
-	    $request .= ($var ? str_replace(array('\\', '\''), array('\\\\', '\\\''), $frag) : $frag);
-		$var = !$var;
-	}
-	global $mysqli;
-	if (!$result = $mysqli->query($request)) {
-		echo 'Erreur de requête côté serveur, veuillez réessayer plus tard';
-		exit;
-	}
-	return $result;
-}
+include('../init.php');
 
 if (isset($_REQUEST['id'])) {
     
     $result = sendRequest("SELECT * FROM `EVENTS` WHERE id = '", $_REQUEST['id'],"'");
     
-} else if (isset($_REQUEST['favorites']) || isset($_REQUEST['mine'])) {
+} else if (isset($_REQUEST['favorite']) || isset($_REQUEST['mine'])) {
     
     session_start();
     // connecté à un compte ? // TODO : sessionToken ?
-    if (!isset($_SESSION['username'], $_SESSION['password'])) exit("not logged");
+    if (!isset($_SESSION['username'], $_SESSION['password'])) exitError("not logged");
 	$userRequest = sendRequest("SELECT * FROM USERS WHERE `name` = '", $_SESSION['username'], "' and `password` = '", $_SESSION['password'], "'");
 	if ($userRequest->num_rows === 0) {
-        exit("not logged");
+        exitError("not logged");
 	}
 	$user = $userRequest->fetch_assoc();
     
-    $result = sendRequest("SELECT * FROM EVENTS".(isset($_REQUEST['favorites']) ? " JOIN UxE ON UxE.eventId = EVENTS.id WHERE UxE.userId = '".$user['id']."'" : "").(isset($_REQUEST['mine']) ? " WHERE EVENTS.author = '".$user['id']."'" : ""));
+    $result = sendRequest("SELECT * FROM EVENTS".(isset($_REQUEST['favorite']) ? " JOIN UxE ON UxE.eventId = EVENTS.id WHERE UxE.userId = '".$user['id']."'" : "").(isset($_REQUEST['mine']) ? " WHERE EVENTS.author = '".$user['id']."'" : ""));
     
 } else {
 
@@ -110,6 +88,6 @@ while (($event = $result->fetch_assoc()) != null) {
     array_push($events, $event);
 }
 
-echo json_encode($events);
+exitSuccess($events);
 
 ?>
