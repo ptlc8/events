@@ -27,6 +27,8 @@ function queryDatabase(...$requestFrags) {
 	global $mysqli;
 	if (!$result = $mysqli->query($request)) {
 		echo 'Erreur de requête côté serveur, veuillez réessayer plus tard';
+		if ($_SERVER['SERVER_NAME'] == 'localhost')
+			echo " : $request";
 		exit;
 	}
 	return $result;
@@ -37,8 +39,8 @@ function exitError($error) {
     exit;
 }
 
-function exitSuccess($data) {
-    echo json_encode(array('success' => true, 'data' => $data));
+function exitSuccess($data = NULL) {
+    echo json_encode($data === NULL ? array('success' => true) : array('success' => true, 'data' => $data));
     exit;
 }
 

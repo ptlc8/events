@@ -1,0 +1,8 @@
+Require all granted
+Options FollowSymLinks
+
+# return index.html to all unexisting file request 
+RewriteEngine on
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f 
+RewriteRule ^(.*)$ index.html

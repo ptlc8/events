@@ -1,4 +1,9 @@
 {
+    "orga": "Organize",
+    "search": "Search",
+    "map": "Map",
+    "fav": "Favorites",
+    "agnd": "Agenda",
     "yesterday":"Yesterday",
     "past":"Past",
     "today":"Today",

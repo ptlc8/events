@@ -1,14 +1,14 @@
-const http = require("http");
+const https = require("https");
 const unzip = require("unzipper");
 const mysql = require("mysql2");
 const credentials = require("./credentials.json");
 
-//loadDatatourismeZip(require("fs").createReadStream("flux-15996-202303180145.zip"));
-loadDatatourismeZipFromUrl(credentials.DATATOURISME_GET_URL);
+loadDatatourismeZip(require("fs").createReadStream("flux-15996-202303180145.zip"));
+//loadDatatourismeZipFromUrl(credentials.DATATOURISME_GET_URL);
 
 function loadDatatourismeZipFromUrl(url) {
     console.log("Downloading...");
-    http.request(url)
+    https.request(url)
         .on("response", function (response) {
             loadDatatourismeZip(response);
         })

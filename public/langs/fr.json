@@ -1,4 +1,9 @@
 {
+    "orga": "Organiser",
+    "search": "Rechercher",
+    "map": "Carte",
+    "fav": "Favoris",
+    "agnd": "Agenda",
     "yesterday":"Hier",
     "past":"Passé",
     "today":"Aujourd'hui",
@@ -26,5 +31,11 @@
     "craft":"📐 Artisanat",
     "copied":"Copié !",
     "organizeit":"Organise-le !",
-    "noresults":"Tu ne trouves pas l'évent de tes rêves ?"
+    "noresults":"Tu ne trouves pas l'évent de tes rêves ?",
+    "login":"Se connecter",
+    "logintofav":"Connecte-toi pour enregister tes événements préférés",
+    "invalid":"Nom d'utilisatuer ou mot de passe invalide",
+    "logout":"Se déconnecter",
+    "nofavorites":"Tu n'as pas encore d'événements favoris",
+    "searchthem":"Recherches-en !"
 }

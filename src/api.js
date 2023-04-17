@@ -11,6 +11,12 @@ const EventsApi = {
     getCategories: function () {
         return ["party", "arts", "theater", "music", "online", "children", "shopping", "cinema", "food", "wellbeing", "show", "sport", "literature", "drink", "gardening", "cause", "craft"];
         //return sendApiRequest("/categories/get.php", {}, "Getting categories");
+    },
+    login: function (username, password) {
+        return sendApiRequest("users/login.php", { username, password }, "Logging in as " + username);
+    },
+    getSelfUser: function () {
+        return sendApiRequest("users/get.php", { this: true }, "Getting self user");
     }
 };
 
@@ -20,14 +26,18 @@ function sendApiRequest(endpoint, parameters, message) {
         var urlParameters = Object.entries(parameters).map(([k, v]) =>
             v instanceof Array ? v.map(i => k + "[]=" + encodeURIComponent(i)).join("&") : k + "=" + encodeURIComponent(v)
         ).join("&");
-        sendRequest("GET", "api/" + endpoint + "?" + urlParameters).then(function (response) {
-            response = JSON.parse(response);
-            if (!response.success) {
-                console.error("[Events] " + response.error);
-                reject(response.error);
-            } else {
-                resolve(response.data);
-            }
-        });
+        fetch("api/" + endpoint + "?" + urlParameters)
+            .then(res => res.json())
+            .then(function (response) {
+                if (!response.success) {
+                    console.error("[Events] " + response.error);
+                    reject(response.error);
+                } else {
+                    resolve(response.data);
+                }
+            })
+            .catch(reject);
     });
 }
+
+export default EventsApi;

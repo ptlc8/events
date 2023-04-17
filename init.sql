@@ -1,4 +1,4 @@
-CREATE TABLE `EVENTS` (
+CREATE TABLE `events` (
   `id` int(11) NOT NULL COMMENT 'id de l''évent',
   `title` text COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'nom de l''évent',
   `author` int(11) NOT NULL COMMENT 'id de l''organisateur',
@@ -22,5 +22,10 @@ ALTER TABLE `EVENTS`
 
 ALTER TABLE `EVENTS`
   ADD CONSTRAINT `events_link_user` FOREIGN KEY (`author`) REFERENCES `USERS` (`id`) ON DELETE NO ACTION ON UPDATE CASCADE;
+
+CREATE TABLE `favorites` (
+  `user` INT NOT NULL ,
+  `event` VARCHAR(24) NOT NULL
+) ENGINE = InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 COMMIT;

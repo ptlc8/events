@@ -19,7 +19,7 @@ if (isset($_REQUEST['id'])) {
 	}
 	$user = $userRequest->fetch_assoc();
     
-    $result = queryDatabase("SELECT * FROM events".(isset($_REQUEST['favorite']) ? " JOIN UxE ON eventId = events.id WHERE userId = '".$user['id']."'" : "").(isset($_REQUEST['mine']) ? " WHERE author = '".$user['id']."'" : ""));
+    $result = queryDatabase("SELECT * FROM events".(isset($_REQUEST['favorite']) ? " JOIN favorites ON event = events.id WHERE user = '".$user['id']."'" : "").(isset($_REQUEST['mine']) ? " WHERE author = '".$user['id']."'" : ""));
     
 } else {
 
@@ -84,7 +84,7 @@ $events = [];
 while (($event = $result->fetch_assoc()) != null) {
     $event['coords'] = array(floatval($event['coor1']), floatval($event['coor2']));
     $event['categories'] = $event['categories']=="" ? [] : explode(",", $event['categories']);
-    $event['images'] = $event['images']!="" ? explode(",", $event['images']) : ["https://source.unsplash.com/512x512/?"."_"];
+    $event['images'] = $event['images']!="" ? explode(",", $event['images']) : ["https://source.unsplash.com/512x512/?".str_replace(" ", "+", $event['title'])];
     unset($event['coor1'], $event['coor2']);
     array_push($events, $event);
 }

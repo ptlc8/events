@@ -7,9 +7,9 @@ Une version est actuellement à cette URL : [ambi.dev/events](https://ambi.dev/e
 ## Lancer en local
 
 Il est possible de lancer le projet en local.
-Pour cela il faut faudra PHP et mysql.
+Pour cela il faut faudra PHP, mysql et nodeJS.
  - cloner le projet
- - créer un fichier credentials.php dans le dossier api contenant identifiants de la base de données, sous cette forme :
+ - créer un fichier `api/credentials.php` contenant identifiants de la base de données, sous cette forme :
 ```php
 <?php
 define('EVENTS_DB_HOSTNAME', 'localhost');
@@ -23,5 +23,11 @@ define("SEATGEEK_CLIENT_SECRET", "puty0urcli3nt1dh3r3xxxxxxxxxxxxxxxxxxxxxxxxxxx
 define("TICKETMASTER_API_KEY", "PutYourApiKeyHerexxxxxxxxxxxxxxx");
 ?>
 ```
+ - ```sh
+npm install
+```
+ - ```sh
+npm run build
+```
  - exécuter dans la base de données le script SQL [init.sql](init.sql)
- - lancer le serveur php
+ - lancer le serveur php dans le dossier `dist`

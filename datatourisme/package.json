@@ -1,0 +1,26 @@
+{
+  "name": "events-finder",
+  "version": "1.0.0",
+  "description": "Ceci est un site web permettant aux utilisateurs de rechercher des événements autour d'eux ou d'en ajouter.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ptlc8/events.git"
+  },
+  "keywords": [
+    "events"
+  ],
+  "author": "Ambi",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ptlc8/events/issues"
+  },
+  "homepage": "https://github.com/ptlc8/events#readme",
+  "dependencies": {
+    "mysql2": "^3.2.1",
+    "unzipper": "^0.10.11"
+  }
+}

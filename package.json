@@ -1,26 +1,20 @@
 {
-  "name": "events-finder",
-  "version": "1.0.0",
-  "description": "Ceci est un site web permettant aux utilisateurs de rechercher des événements autour d'eux ou d'en ajouter.",
-  "main": "index.js",
+  "name": "events",
+  "version": "0.0.0",
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "vite",
+    "build": "vite build && cp -r api dist/",
+    "preview": "vite preview"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/ptlc8/events.git"
-  },
-  "keywords": [
-    "events"
-  ],
-  "author": "Ambi",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/ptlc8/events/issues"
-  },
-  "homepage": "https://github.com/ptlc8/events#readme",
   "dependencies": {
-    "mysql2": "^3.2.1",
-    "unzipper": "^0.10.11"
+    "pinia": "^2.0.34",
+    "vue": "^3.2.47",
+    "vue-router": "^4.1.6"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^4.0.0",
+    "sass": "^1.62.0",
+    "vite": "^4.1.4"
   }
 }
