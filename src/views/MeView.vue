@@ -1,6 +1,6 @@
 <template>
   <section>
-    <h1>{{ Texts.get('me') }}</h1>
+    <h1>👤 {{ Texts.get('me') }}</h1>
     <MessageBox v-if="!$store.logged" :message="Texts.get('notloggedin')" :button="Texts.get('login')"
       @click="$store.loggingIn = true" />
     <article v-else>
@@ -32,10 +32,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-h1 {
-  text-align: center;
-}
-
 article {
   max-width: 1000px;
   margin: 10px auto 0;
