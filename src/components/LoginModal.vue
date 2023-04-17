@@ -2,7 +2,7 @@
   <Transition name="modal">
     <div class="container" v-if="show" @click.self="close">
       <div class="modal">
-        <img class="close" src="@/assets/cross.svg" @click="close">
+        <img class="close" src="@/assets/icons/cross.svg" @click="close">
         <form @submit.prevent="submit">
           <span class="title">Connexion</span>
           <input v-model="username" placeholder="Nom d'utilisateur" autofocus="true" autocomplete="username">

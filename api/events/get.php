@@ -84,7 +84,7 @@ $events = [];
 while (($event = $result->fetch_assoc()) != null) {
     $event['coords'] = array(floatval($event['coor1']), floatval($event['coor2']));
     $event['categories'] = $event['categories']=="" ? [] : explode(",", $event['categories']);
-    $event['images'] = $event['images']!="" ? explode(",", $event['images']) : ["https://source.unsplash.com/512x512/?".str_replace(" ", "+", $event['title'])];
+    $event['images'] = $event['images']!="" ? explode(",", $event['images']) : [];
     unset($event['coor1'], $event['coor2']);
     array_push($events, $event);
 }

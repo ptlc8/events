@@ -2,7 +2,7 @@
   <section>
     <div class="fields">
       <div class="searchbar">
-        <img src="@/assets/search-icon.svg">
+        <img src="@/assets/icons/search-icon.svg">
         <input type="text" id="searchtext" placeholder="Rechercher des évents..." @keypress="search" @paste="search" @input="search" v-model="searchtext">
       </div>
       <select class="dateselect" v-model="searchdate" @change="search">

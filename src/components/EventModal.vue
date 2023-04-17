@@ -3,7 +3,7 @@
     <div class="container" v-if="show" @click.self="close">
       <div class="modal">
         <div class="banner" :style="'background-image: url(\'' + event.images[0] + '\');'"></div>
-        <img class="close" src="@/assets/cross.svg" @click="close">
+        <img class="close" src="@/assets/icons/cross.svg" @click="close">
         <div class="body">
           <span class="title">{{ event.title }}</span>
           📍 {{ event.placename }}
@@ -244,7 +244,7 @@ export default {
 
         @each $social in facebook twitter whatsapp email tumblr messenger telegram /*reddit linkedin line viber skype wechat*/ {
           &.#{$social} {
-            background-image: url("@/assets/icons/#{$social}.svg");
+            background-image: url("@/assets/icons/socials/#{$social}.svg");
           }
         }
       }

@@ -5,11 +5,11 @@ import LoginModal from './components/LoginModal.vue';
 import EventModal from './components/EventModal.vue';
 import EventsApi from './api';
 
-import orgaIcon from '@/assets/orga.svg';
-import searchIcon from '@/assets/search.svg';
-import mapIcon from '@/assets/map.svg';
-import favIcon from '@/assets/fav.svg';
-import agndIcon from '@/assets/agnd.svg';
+import orgaIcon from '@/assets/icons/orga.svg';
+import searchIcon from '@/assets/icons/search.svg';
+import mapIcon from '@/assets/icons/map.svg';
+import favIcon from '@/assets/icons/fav.svg';
+import meIcon from '@/assets/icons/me.svg';
 
 export default {
   components: {
@@ -26,7 +26,7 @@ export default {
         { name: 'search', icon: searchIcon },
         { name: 'map', icon: mapIcon },
         { name: 'fav', icon: favIcon },
-        { name: 'agnd', icon: agndIcon }
+        { name: 'me', icon: meIcon }
       ]
     };
   }, mounted() {

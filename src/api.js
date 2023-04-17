@@ -17,6 +17,12 @@ const EventsApi = {
     },
     getSelfUser: function () {
         return sendApiRequest("users/get.php", { this: true }, "Getting self user");
+    },
+    logout: function () {
+        return sendApiRequest("users/logout.php", {}, "Logging out");
+    },
+    getUser: function(username) {
+        return sendApiRequest("users/get.php", { username }, "Getting user " + username);
     }
 };
 

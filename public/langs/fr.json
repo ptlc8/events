@@ -3,7 +3,7 @@
     "search": "Rechercher",
     "map": "Carte",
     "fav": "Favoris",
-    "agnd": "Agenda",
+    "me": "Moi",
     "yesterday":"Hier",
     "past":"Passé",
     "today":"Aujourd'hui",
@@ -34,8 +34,9 @@
     "noresults":"Tu ne trouves pas l'évent de tes rêves ?",
     "login":"Se connecter",
     "logintofav":"Connecte-toi pour enregister tes événements préférés",
-    "invalid":"Nom d'utilisatuer ou mot de passe invalide",
+    "invalid":"Nom d'utilisateur ou mot de passe invalide",
     "logout":"Se déconnecter",
     "nofavorites":"Tu n'as pas encore d'événements favoris",
-    "searchthem":"Recherches-en !"
+    "searchthem":"Recherches-en !",
+    "notloggedin":"Tu n'es pas connecté"
 }

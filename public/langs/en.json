@@ -3,7 +3,7 @@
     "search": "Search",
     "map": "Map",
     "fav": "Favorites",
-    "agnd": "Agenda",
+    "me": "Me",
     "yesterday":"Yesterday",
     "past":"Past",
     "today":"Today",
@@ -31,5 +31,8 @@
     "craft":"📐 Craft",
     "copied":"Copied!",
     "organizeit":"Organize it!",
-    "noresults":"You don't find the event of your dreams?"
+    "noresults":"You don't find the event of your dreams?",
+    "notloggedin":"You are not logged in",
+    "login":"Log in",
+    "logintofav":"Log in to save your favorites events"
 }

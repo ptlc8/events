@@ -34,11 +34,11 @@ const router = createRouter({
       redirect: "/"
     },
     {
-      path: "/agnd",
-      name: "agnd",
-      component: () => import("../views/AgendaView.vue"),
+      path: "/me",
+      name: "me",
+      component: () => import("../views/MeView.vue"),
       meta: {
-        title: Texts.get('agnd')
+        title: Texts.get('me')
       }
     },
     {
