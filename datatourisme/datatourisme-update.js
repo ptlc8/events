@@ -63,10 +63,8 @@ function parseEvent(datatourismeEvent) {
         placename: "TODO",
         categories: datatourismeEvent["@type"].concat(datatourismeEvent.hasTheme?.map(theme => theme["@id"]) ?? []),
         public: 1,
-        coords: [
-            datatourismeEvent.isLocatedAt[0]["schema:geo"]["schema:longitude"],
-            datatourismeEvent.isLocatedAt[0]["schema:geo"]["schema:latitude"]
-        ],
+        lng: datatourismeEvent.isLocatedAt[0]["schema:geo"]["schema:longitude"],
+        lat: datatourismeEvent.isLocatedAt[0]["schema:geo"]["schema:latitude"],
         images: (datatourismeEvent.hasMainRepresentation || []).concat(datatourismeEvent.hasRepresentation || []).reduce((acc, rep) => {
             return acc.concat(rep?.["ebucore:hasRelatedResource"]?.reduce((acc, res) => {
                 return acc.concat(res?.["ebucore:locator"] ?? []);
@@ -94,11 +92,11 @@ function updateDatabase(index, events) {
             let event = events.get("objects/" + i.file);
             ids.add(event.id);
             connection.query(
-                "INSERT INTO `events` (`id`, `title`, `author`, `description`, `datetime`, `endDatetime`, `coor1`, `coor2`, `placename`, `categories`, `images`, `public`)"
+                "INSERT INTO `events` (`id`, `title`, `author`, `description`, `datetime`, `endDatetime`, `lng`, `lat`, `placename`, `categories`, `images`, `public`)"
                 + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-                + " ON DUPLICATE KEY UPDATE title = ?, author = ?, description = ?, datetime = ?, endDatetime = ?, coor1 = ?, coor2 = ?, placename = ?, categories = ?, images = ?, public = ?;",
-                [event.id, event.title, -807/*event.author*/, event.description, event.datetime[0], event.endDatetime[0], event.coords[0], event.coords[1], event.placename, event.categories.join(","), event.images.join(","), event.public,
-                event.title, -807/*event.author*/, event.description, event.datetime[0], event.endDatetime[0], event.coords[0], event.coords[1], event.placename, event.categories.join(","), event.images.join(","), event.public],
+                + " ON DUPLICATE KEY UPDATE title = ?, author = ?, description = ?, datetime = ?, endDatetime = ?, lng = ?, lat = ?, placename = ?, categories = ?, images = ?, public = ?;",
+                [event.id, event.title, -807/*event.author*/, event.description, event.datetime[0], event.endDatetime[0], event.lng, event.lat, event.placename, event.categories.join(","), event.images.join(","), event.public,
+                event.title, -807/*event.author*/, event.description, event.datetime[0], event.endDatetime[0], event.lng, event.lat, event.placename, event.categories.join(","), event.images.join(","), event.public],
             )
                 .on("error", console.error)
                 .on("end", () => {

@@ -18,10 +18,8 @@ foreach($ticketmasterEvents->_embedded->events as $event) {
         "placename" => $event->_embedded->venues[0]->name,
         "categories" => array(),
         "public" => 1,
-        "coords" => array(
-            $event->_embedded->venues[0]->location->longitude,
-            $event->_embedded->venues[0]->location->latitude
-        ),
+        "lng" => $event->_embedded->venues[0]->location->longitude,
+        "lat" => $event->_embedded->venues[0]->location->latitude,
         "image" => $event->images[0]->url
     );
 }

@@ -18,10 +18,8 @@ foreach($seatgeekEvents->events as $event) {
         "placename" => $event->venue->name,
         "categories" => array($event->type),
         "public" => 1,
-        "coords" => array(
-            $event->venue->location->lon,
-            $event->venue->location->lat
-        ),
+        "lon" => $event->venue->location->lon,
+        "lat" => $event->venue->location->lat,
         "image" => $event->performers[0]->image,
     );
 }

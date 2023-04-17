@@ -75,6 +75,19 @@ if (isset($_REQUEST['id'])) {
         else
             $request .= " AND ('$timeInf' <= CAST(datetime AS time) OR CAST(datetime AS time) <= '$timeSup')";
     }
+    if (isset($_REQUEST['minlat']) && is_numeric($_REQUEST['minlat']))
+        $request .= " AND lat >= '".floatval($_REQUEST['minlat'])."'";
+    if (isset($_REQUEST['maxlat']) && is_numeric($_REQUEST['maxlat']))
+        $request .= " AND lat <= '".floatval($_REQUEST['maxlat'])."'";
+    if ((isset($_REQUEST['minlng']) && is_numeric($_REQUEST['minlng'])) || (isset($_REQUEST['maxlng']) && is_numeric($_REQUEST['maxlng']))) {
+        $minlng = isset($_REQUEST['minlng']) && is_numeric($_REQUEST['minlng']) ? fixLongitude(floatval($_REQUEST['minlng'])) : -180;
+        $maxlng = isset($_REQUEST['maxlng']) && is_numeric($_REQUEST['maxlng']) ? fixLongitude(floatval($_REQUEST['maxlng'])) : 180;
+        if ($minlng > $maxlng) {
+            $request .= " AND (lng >= '$minlng' OR lng <= '$maxlng')";
+        } else {
+            $request .= " AND lng >= '$minlng' AND lng <= '$maxlng'";
+        }
+    }
     $request .= " LIMIT $limit OFFSET $offset";
     
     $result = queryDatabase($request);
@@ -82,13 +95,17 @@ if (isset($_REQUEST['id'])) {
 
 $events = [];
 while (($event = $result->fetch_assoc()) != null) {
-    $event['coords'] = array(floatval($event['coor1']), floatval($event['coor2']));
+    $event['lng'] = floatval($event['lng']);
+    $event['lat'] = floatval($event['lat']);
     $event['categories'] = $event['categories']=="" ? [] : explode(",", $event['categories']);
     $event['images'] = $event['images']!="" ? explode(",", $event['images']) : [];
-    unset($event['coor1'], $event['coor2']);
     array_push($events, $event);
 }
 
 exitSuccess($events);
+
+function fixLongitude($lon) {
+    return fmod(fmod($lon, 360) + 540, 360) - 180;
+}
 
 ?>

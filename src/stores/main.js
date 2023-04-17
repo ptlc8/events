@@ -4,7 +4,8 @@ export const useMainStore = defineStore('main', {
   state: () => ({
     username: null,
     loggingIn: false,
-    event: null
+    event: null,
+    events: []
   }),
   getters: {
     logged: state => state.username != null
