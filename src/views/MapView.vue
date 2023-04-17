@@ -27,13 +27,15 @@ export default {
             map: null
         };
     },
-    async mounted() {
+    mounted() {
         this.map = new mapboxgl.Map({
             container: 'map-container',
             style: 'mapbox://styles/mapbox/streets-v11',
-            center: await EventsApi.getLocation(),
+            center: [2.35, 48.86],
             zoom: 5
         });
+
+        EventsApi.getLocation().then(loc => this.map.setCenter(loc));
 
         this.map.on('load', () => {
 
@@ -48,7 +50,6 @@ export default {
                     data: this.getEventsAsGeoJson()
                 });
                 watch(() => this.$store.events, () => {
-                    console.log("updating events on map");
                     this.map.getSource('events').setData(this.getEventsAsGeoJson());
                 });
                 this.updateEvents();
@@ -119,9 +120,6 @@ export default {
     },
     methods: {
         getEventsAsGeoJson() {
-            console.log("converting events to geojson")
-            window.store = this.$store
-            window.map = this.map;
             return {
                 type: 'FeatureCollection',
                 features: this.$store.events.map(event => ({
@@ -143,7 +141,6 @@ export default {
         },
         forwardGeocoder(query) {
             var matchingFeatures = [];
-            console.log("local search");
             for (let event of this.$store.events) {
                 if (event.title.toLowerCase().search(query.toLowerCase()) !== -1) {
                     // add a festive emoji as a prefix for custom data results
