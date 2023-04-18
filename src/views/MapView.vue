@@ -33,7 +33,7 @@ export default {
             center: [2.35, 48.86],
             zoom: 5
         });
-        
+
         if (this.$route.query.e !== undefined) {
             EventsApi.getEvent(this.$route.query.e).then(event => {
                 if (!event) return;
@@ -68,11 +68,9 @@ export default {
                     'type': 'symbol',
                     'source': 'events',
                     'layout': {
-                        'icon-image': 'marker', 'icon-size': .5, 'icon-allow-overlap': true,
-                        /*'text-field': ['get', 'eventTitle'],
-                        'text-variable-anchor': ['top', 'bottom', 'left', 'right'],
-                        'text-radial-offset': 0.5,
-                        'text-justify': 'auto'*/
+                        'icon-image': 'marker',
+                        'icon-size': .5,
+                        'icon-allow-overlap': true
                     },
                 });
             });
@@ -88,7 +86,9 @@ export default {
             })
         );
         this.map.addControl(new mapboxgl.NavigationControl());
-        this.map.addControl(new StylesControl(), "bottom-left");
+        /*this.map.addControl(new StylesControl({
+            onChange: () => {}
+        }), "bottom-left");*/
 
         var popup = new mapboxgl.Popup({
             closeButton: false,
