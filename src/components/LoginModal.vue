@@ -7,7 +7,7 @@
           <span class="title">Connexion</span>
           <input v-model="username" placeholder="Nom d'utilisateur" autofocus="true" autocomplete="username">
           <input v-model="password" placeholder="Mot de passe" type="password" autocomplete="current-password">
-          <button>{{ Texts.get("login") }}</button>
+          <button>{{ $text.get("login") }}</button>
           <span class="info">{{ info }}</span>
           <a v-if="info" href="/forgotten-password" target="_blank">J'ai oublié mon mot de passe</a>
         </form>
@@ -18,7 +18,6 @@
 
 <script>
 import EventsApi from '@/api';
-import Texts from '@/texts.js';
 export default {
   name: "LoginModal",
   props: {
@@ -29,7 +28,6 @@ export default {
   },
   setup() {
     return {
-      Texts,
       EventsApi
     };
   },
@@ -53,7 +51,7 @@ export default {
           this.$emit("close");
         })
         .catch(err => {
-          this.info = Texts.get(err);
+          this.info = $text.get(err);
         });
     }
   }

@@ -1,25 +1,24 @@
 <template>
     <article>
-				<span class="title">{{ event.title }}</span>
-				<div class="wrapper">
-						<div class="picture" :style="'background-image: url(\'' + event.images[0] + '\');'"></div>
-						<div class="infos">
-								<span class="description">{{ event.description }}</span>
-								<span class="categories">
-										<span v-for="cat in event.categories">{{ Texts.get(cat) }}</span>
-								</span>
-								<span class="whenwhere">
-										<b>{{ Texts.getDisplayDateTime(event.datetime) }}</b>
-										à <b>{{ event.placename }}</b>
-								</span>
-								<button class="infos-button" @click="$emit('click')">Plus d'infos</button>
-						</div>
-				</div>
+        <span class="title">{{ event.title }}</span>
+        <div class="wrapper">
+            <div class="picture" :style="'background-image: url(\'' + event.images[0] + '\');'"></div>
+            <div class="infos">
+                <span class="description">{{ event.description }}</span>
+                <span class="categories">
+                    <span v-for="cat in event.categories">{{ $text.get(cat) }}</span>
+                </span>
+                <span class="whenwhere">
+                    <b>{{ $text.getDisplayDateTime(event.datetime) }}</b>
+                    à <b>{{ event.placename }}</b>
+                </span>
+                <button class="infos-button" @click="$emit('click')">{{ $text.get('moreinfo') }}</button>
+            </div>
+        </div>
     </article>
 </template>
 
 <script>
-import Texts from "../texts.js";
 export default {
     name: "EventPreview",
     props: {
@@ -28,10 +27,7 @@ export default {
             required: true
         }
     },
-    emits: ["click"],
-    setup() {
-        return { Texts };
-    }
+    emits: ["click"]
 }
 </script>
 
@@ -41,15 +37,15 @@ article {
     border-radius: 4px;
     padding: 8px;
     min-height: 120px;
-		display: flex;
-		flex-direction: column;
-		justify-content: space-between;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 .wrapper {
     display: flex;
     gap: 8px;
-		flex-grow: 1;
+    flex-grow: 1;
 }
 
 .picture {
@@ -62,7 +58,7 @@ article {
 .infos {
     flex: 3;
     position: relative;
-		display: flex;
+    display: flex;
     flex-direction: column;
     justify-content: space-between
 }
@@ -85,20 +81,21 @@ article {
     overflow: hidden;
     text-align: justify;
     line-height: 1.2;
-		max-height: 5em;
+    max-height: 5em;
 }
 
 .categories {
     font-size: .8em;
-		overflow: hidden;
-		line-height: 1.5;
-		max-height: 1.5em;
-		span {
-				border: 1px solid var(--color-border);
-				border-radius: 0.25em;
-				margin: 0.25em;
-				padding: 0 0.25em;
-		}
+    overflow: hidden;
+    line-height: 1.5;
+    max-height: 1.5em;
+
+    span {
+        border: 1px solid var(--color-border);
+        border-radius: 0.25em;
+        margin: 0.25em;
+        padding: 0 0.25em;
+    }
 }
 
 .whenwhere {
@@ -106,8 +103,8 @@ article {
 }
 
 .infos-button {
-		width: 80%;
-		align-self: center;
+    width: 80%;
+    align-self: center;
     font-weight: bold;
 }
 </style>

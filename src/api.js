@@ -9,7 +9,7 @@ const EventsApi = {
         return sendApiRequest("events/create.php", event, "Creating event " + event.name);
     },
     getCategories: function() {
-        return ["party", "arts", "theater", "music", "online", "children", "shopping", "cinema", "food", "wellbeing", "show", "sport", "literature", "drink", "gardening", "cause", "craft"];
+        return ["party", "arts", "theater", "music", "online", "children", "shopping", "cinema", "food", "wellbeing", "show", "sport", "literature", "drink", "gardening", "cause", "craft", "exhibition", "dance", "festival", "videogame", "market", "outdoor", "museum", "tour", "workshop", "garden", "holiday", "free", "parade", "fair", "religion", "science", "seminar", "boardgame"];
         //return sendApiRequest("/categories/get.php", {}, "Getting categories");
     },
     login: function(username, password) {

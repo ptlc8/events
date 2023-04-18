@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import Texts from '../texts.js';
+import Texts from '@/texts';
 
 const router = createRouter({
   base: "./",
