@@ -33,8 +33,19 @@ export default {
             center: [2.35, 48.86],
             zoom: 5
         });
-
-        EventsApi.getLocation().then(loc => this.map.setCenter(loc));
+        
+        if (this.$route.query.e !== undefined) {
+            EventsApi.getEvent(this.$route.query.e).then(event => {
+                if (!event) return;
+                this.map.flyTo({
+                    center: [event.lng, event.lat],
+                    zoom: 12,
+                    essential: true
+                });
+            });
+        } else {
+            EventsApi.getLocation().then(loc => this.map.setCenter(loc));
+        }
 
         this.map.on('load', () => {
 

@@ -86,7 +86,8 @@ export default {
       console.log("TODO");
     },
     showOnMap() {
-      console.log("TODO");
+      this.$router.push({ name: "map", query: { e: this.event.id } });
+      this.close();
     }
   },
   computed: {

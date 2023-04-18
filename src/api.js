@@ -3,7 +3,7 @@ const EventsApi = {
         return sendApiRequest("events/get.php", parameters, "Getting events");
     },
     getEvent: function(id) {
-        return sendApiRequest("events/get.php", { id }, "Getting event " + id)
+        return sendApiRequest("events/get.php", { id }, "Getting event " + id).then(events => events[0]);
     },
     createEvent: function(event) {
         return sendApiRequest("events/create.php", event, "Creating event " + event.name);
