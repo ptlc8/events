@@ -11,15 +11,11 @@
             <span v-for="cat in event.categories">{{ Texts.get(cat) }}</span>
           </div>
           <div class="description">{{ event.description }}</div>
+          <AgendaPage class="datetime" :datetime="event.datetime" />
           <div class="sidebar">
-            <div class="agenda-page">
-              <span class="month">{{ month }}</span>
-              <span class="day">{{ day }}</span>
-              <span class="weekday">{{ weekday }}</span>
-            </div>
             <button class="show-on-map" @click="showOnMap">📍 Afficher sur la carte</button>
             <button class="add-fav" @click="addToFavorites">⭐ Ajouter à mes favoris</button>
-            <button v-if="canShare()" class="large-share-button" @click="">Partager</button>
+            <button v-if="canShare()" class="large-share-button" @click="share()">🚀 Partager</button>
             <div v-else class="share-buttons">
               <a class="tumblr" target="_blank" title="Partager sur Tumblr"
                 :href="`https://www.tumblr.com/share/link?url=${encodeURIComponent(url)}&title=${encodeURIComponent(event.title)}&title=${encodeURIComponent(event.title)}`"></a>
@@ -49,7 +45,8 @@
 </template>
 
 <script>
-import Texts from "../texts.js";
+import Texts from "@/texts";
+import AgendaPage from "./AgendaPage.vue";
 export default {
   name: "EventModal",
   props: {
@@ -63,6 +60,7 @@ export default {
     }
   },
   emits: ['close'],
+  components: { AgendaPage },
   setup() {
     return {
       Texts
@@ -100,15 +98,6 @@ export default {
   computed: {
     url() {
       return document.URL;
-    },
-    month() {
-      return new Date(this.event.datetime).toLocaleString(navigator.language, { month: "long" });
-    },
-    day() {
-      return new Date(this.event.datetime).toLocaleString(navigator.language, { day: "numeric" });
-    },
-    weekday() {
-      return new Date(this.event.datetime).toLocaleString(navigator.language, { weekday: "long" });
     }
   }
 };
@@ -131,10 +120,11 @@ export default {
 .modal {
   background: white;
   border-radius: 0.5em;
-  width: 64em;
+  width: 48em;
+  height: 48em;
+  max-height: 100%;
   box-shadow: 0 0 0.5em rgba(0, 0, 0, 0.5);
   overflow: auto;
-  height: 80%;
 
   .close {
     position: absolute;
@@ -142,6 +132,7 @@ export default {
     right: 1em;
     width: 1.5em;
     height: 1.5em;
+		z-index: 100;
     cursor: pointer;
   }
 }
@@ -161,14 +152,20 @@ export default {
   width: 100%;
   background-color: white;
   border-radius: 0.5em;
-  padding: 1em 5em;
+  padding: 1em 4em;
   margin: auto;
+
+  @media (max-width: 800px) {
+    padding: 1em;
+  }
 
   .title {
     font-size: 1.8em;
     font-weight: bold;
     display: block;
     margin-left: 1em;
+	  line-height: 1;
+	  margin-bottom: .5em;
   }
 
   .categories span {
@@ -181,7 +178,7 @@ export default {
   .description {
     font-size: 1.2em;
     line-height: 1.5;
-    width: 80%;
+    width: calc(100% - 8em);
     text-align: justify;
     border-top: 1px solid var(--color-border);
     padding-top: .5em;
@@ -189,9 +186,16 @@ export default {
     float: left;
   }
 
+  .datetime {
+    margin: 5px 0;
+	  float: right;
+  }
+
   .sidebar {
     float: right;
-    width: 15%;
+    width: 8em;
+	  display: flex;
+  	flex-direction: column;
 
     >* {
       display: block;
@@ -199,36 +203,22 @@ export default {
       margin: 5px 0;
     }
 
-    .agenda-page {
-      text-align: center;
-      overflow: hidden;
-      border: solid 1px var(--color-border);
-      box-shadow: 0 0 10px 2px rgba(0, 0, 0, 0.1);
-
-      .month {
-        display: block;
-        background-color: #f02e2e;
-        font-size: 1.6em;
-        line-height: 1.4;
-      }
-
-      .day {
-        display: block;
-        font-size: 3.2em;
-        line-height: 1.2;
-      }
-    }
-
-    .add-fav {
-      background-color: #ffff88;
+    button {
       color: black;
       height: auto;
-    }
+      width: 100%;
 
-    .show-on-map {
-      background-color: #88ff88;
-      color: black;
-      height: auto;
+      &.add-fav {
+        background-color: #ffff88;
+      }
+
+      &.show-on-map {
+        background-color: #88ff88;
+      }
+
+      &.large-share-button {
+        background-color: #88bbff;
+      }
     }
 
     .share-buttons {
@@ -269,11 +259,10 @@ export default {
     width: 80%;
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
 
     img {
-      max-height: 16em;
-      max-width: 16em;
+		  flex: 1;
+      width: 14em;
       margin: .5em;
     }
   }
@@ -285,5 +274,31 @@ export default {
     padding-top: .5em;
     margin-top: .5em;
   }
+}
+
+
+	
+@media (max-width: 800px) {
+  .modal {
+    height: 100%;
+
+		.close {
+			position: fixed;
+		}
+  }
+  .body {
+    .description, .images {
+			width: 100%
+		}
+
+		.sidebar {
+			float: unset;
+			width: 100%;
+			
+			.share-buttons {
+				grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+	    }
+	  }
+  }	
 }
 </style>

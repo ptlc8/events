@@ -48,7 +48,6 @@ export default {
     border-radius: 4px;
     padding: 8px;
     box-shadow: 0 0 10px 2px rgba(0, 0, 0, .1);
-    margin: 10px 0 0 10px;
     background-color: #fff;
     border: 0;
     font: 15px / 20px "Open Sans", "Helvetica Neue", Arial, Helvetica, sans-serif;

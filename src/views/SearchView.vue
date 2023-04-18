@@ -25,10 +25,10 @@
         :options="EventsApi.getCategories().reduce((acc, c) => (acc[c] = Texts.get(c)) && acc, {})" />
     </div>
     <div id="results">
-      <EventPreview v-for="event in events" :event="event" @click="$store.event = event"></EventPreview>
-      <MessageBox v-if="!events.length" :message="Texts.get('noresults')" :button="Texts.get('organizeit')" @click="$router.push('/orga')"></MessageBox>
-      <button v-else @click="searchMore()">Afficher plus d'évents</button>
+      <EventPreview class="event" v-for="event in events" :event="event" @click="$store.event = event"></EventPreview>
     </div>
+    <MessageBox v-if="!events.length" :message="Texts.get('noresults')" :button="Texts.get('organizeit')" @click="$router.push('/orga')"></MessageBox>
+    <button v-else class="more-button" @click="searchMore()">Afficher plus d'évents</button>
   </section>
 </template>
 
@@ -101,12 +101,12 @@ section {
 
 .fields {
   display: flex;
-  flex-wrap: wrap
+  flex-wrap: wrap;
+	gap: 10px;
 }
 
 .searchbar {
   width: 100%;
-  margin: 10px 0 0 10px;
   display: block;
   background-color: #fff;
   position: relative;
@@ -138,7 +138,7 @@ section {
 .timeselect {
   flex-grow: 1;
   width: 12em;
-  margin-left: 10px;
+  margin-top: 0;
 }
 
 .catselect {
@@ -147,7 +147,19 @@ section {
 
 #results {
   width: 90%;
-  margin: auto;
+  margin: 2em auto;
+	display: flex;
+	flex-wrap: wrap;
+	gap: .5em;
+	>* {
+		width: 24em;
+		flex-grow: 1;
+	}
+}
+
+.more-button {
+		display: block;
+		margin: 1em auto;
 }
 
 @media (orientation: portrait) {

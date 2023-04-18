@@ -1,17 +1,20 @@
 <template>
     <article>
-        <div class="picture" :style="'background-image: url(\'' + event.images[0] + '\');'"></div>
-        <div class="infos">
-            <span class="title">{{ event.title }}</span>
-            <span class="description">{{ event.description }}</span>
-            <span class="categories">{{ event.categories.join(", ") }}</span>
-            <span class="whenwhere">
-                <b>{{ Texts.getDisplayDateTime(event.datetime) }}</b>
-                à <b>{{ event.placename }}</b>
-            </span>
-            <button class="infos-button" @click="$emit('click')">Plus d'infos</button>
-        </div>
-
+				<span class="title">{{ event.title }}</span>
+				<div class="wrapper">
+						<div class="picture" :style="'background-image: url(\'' + event.images[0] + '\');'"></div>
+						<div class="infos">
+								<span class="description">{{ event.description }}</span>
+								<span class="categories">
+										<span v-for="cat in event.categories">{{ Texts.get(cat) }}</span>
+								</span>
+								<span class="whenwhere">
+										<b>{{ Texts.getDisplayDateTime(event.datetime) }}</b>
+										à <b>{{ event.placename }}</b>
+								</span>
+								<button class="infos-button" @click="$emit('click')">Plus d'infos</button>
+						</div>
+				</div>
     </article>
 </template>
 
@@ -38,21 +41,30 @@ article {
     border-radius: 4px;
     padding: 8px;
     min-height: 120px;
-    margin-top: 10px;
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+}
+
+.wrapper {
     display: flex;
+    gap: 8px;
+		flex-grow: 1;
 }
 
 .picture {
     display: inline-block;
-    flex: 1;
+    flex: 3;
     background: center center / cover #f4f4f4;
     border-radius: 4px;
 }
 
 .infos {
-    margin-left: 8px;
     flex: 3;
     position: relative;
+		display: flex;
+    flex-direction: column;
+    justify-content: space-between
 }
 
 .title {
@@ -68,27 +80,34 @@ article {
 
 .description {
     display: -webkit-inline-box;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 4;
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-align: justify;
     line-height: 1.2;
+		max-height: 5em;
 }
 
 .categories {
-    display: block;
     font-size: .8em;
+		overflow: hidden;
+		line-height: 1.5;
+		max-height: 1.5em;
+		span {
+				border: 1px solid var(--color-border);
+				border-radius: 0.25em;
+				margin: 0.25em;
+				padding: 0 0.25em;
+		}
 }
 
 .whenwhere {
-    /*position: absolute; bottom: 10px;*/
     margin-left: 2em;
 }
 
 .infos-button {
-    position: absolute;
-    bottom: 4px;
-    right: 16px;
+		width: 80%;
+		align-self: center;
     font-weight: bold;
 }
 </style>

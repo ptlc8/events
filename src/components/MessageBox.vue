@@ -33,5 +33,6 @@ div {
     padding: 1em 2em;
     box-shadow: 0 0 10px 2px rgba(0, 0, 0, .1);
     border-radius: 4px;
+		text-align: center;
 }
 </style>
