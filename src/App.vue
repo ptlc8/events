@@ -1,6 +1,5 @@
 <script>
-import { RouterLink, RouterView } from 'vue-router'
-import Texts from './texts.js';
+import { RouterLink, RouterView } from 'vue-router';
 import LoginModal from './components/LoginModal.vue';
 import EventModal from './components/EventModal.vue';
 import EventsApi from './api';
@@ -17,7 +16,7 @@ export default {
     EventModal
   },
   setup() {
-    return { RouterLink, RouterView, Texts, EventsApi };
+    return { RouterLink, RouterView, EventsApi };
   },
   data() {
     return {
@@ -44,7 +43,7 @@ export default {
 
   <nav>
     <RouterLink v-for="tab in tabs" :to="{ name: tab.name }" :style="`background-image: url('${tab.icon}');`">
-      {{ Texts.get(tab.name) }}
+      {{ $text.get(tab.name) }}
     </RouterLink>
   </nav>
 

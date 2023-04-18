@@ -6,20 +6,19 @@
             <div class="infos">
                 <span class="description">{{ event.description }}</span>
                 <span class="categories">
-                    <span v-for="cat in event.categories">{{ Texts.get(cat) }}</span>
+                    <span v-for="cat in event.categories">{{ $text.get(cat) }}</span>
                 </span>
                 <span class="whenwhere">
-                    <b>{{ Texts.getDisplayDateTime(event.datetime) }}</b>
+                    <b>{{ $text.getDisplayDateTime(event.datetime) }}</b>
                     à <b>{{ event.placename }}</b>
                 </span>
-                <button class="infos-button" @click="$emit('click')">Plus d'infos</button>
+                <button class="infos-button" @click="$emit('click')">{{ $text.get('moreinfo') }}</button>
             </div>
         </div>
     </article>
 </template>
 
 <script>
-import Texts from "../texts.js";
 export default {
     name: "EventPreview",
     props: {
@@ -28,10 +27,7 @@ export default {
             required: true
         }
     },
-    emits: ["click"],
-    setup() {
-        return { Texts };
-    }
+    emits: ["click"]
 }
 </script>
 

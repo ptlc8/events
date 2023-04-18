@@ -1,18 +1,23 @@
 <template>
   <section>
-    <h1>👤 {{ Texts.get('me') }}</h1>
-    <MessageBox v-if="!$store.logged" :message="Texts.get('notloggedin')" :button="Texts.get('login')"
+    <h1>👤 {{ $text.get('me') }}</h1>
+    <MessageBox v-if="!$store.logged" :message="$text.get('notloggedin')" :button="$text.get('login')"
       @click="$store.loggingIn = true" />
     <article v-else>
       <img class="avatar" width="200" height="200" src="https://source.unsplash.com/200x200/?user" />
       <h2>{{ $store.username }}</h2>
-      <button class="logout" @click="logout">{{ Texts.get('logout') }}</button>
+      <button class="logout" @click="logout">{{ $text.get('logout') }}</button>
+    </article>
+    <article>
+      <h2>{{ $text.get('language') }}</h2>
+      <select @change="$text.setLang($event.target.value, true).then($forceUpdate)">
+        <option v-for="lang in $text.getAvailableLangs()" :value="lang" :selected="lang === $text.getLang()">{{ getFlag(lang) }} {{ lang }}</option>
+      </select>
     </article>
   </section>
 </template>
 
 <script>
-import Texts from '../texts';
 import EventsApi from '../api';
 import MessageBox from '../components/MessageBox.vue';
 
@@ -20,12 +25,16 @@ export default {
   name: 'MeView',
   components: { MessageBox },
   setup() {
-    return { Texts, EventsApi };
+    return { EventsApi };
   },
   methods: {
     logout() {
       EventsApi.logout();
       this.$store.logout();
+    },
+    getFlag(code) {
+      //return code.toUpperCase().replace(/./g, char => String.fromCodePoint(char.charCodeAt(0) + 127397));
+      return code.toUpperCase().split('').map(c => String.fromCodePoint(c.charCodeAt(0) + 127397)).join('');
     }
   }
 }

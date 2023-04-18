@@ -10,9 +10,13 @@ const Texts = function () {
         getLang() {
             return lang;
         },
-        async setLang(newLang) {
-            if (!availableLangs.includes(newLang))
-                throw newLang + " is not an available language";
+        async setLang(newLang, save=false) {
+            if (!availableLangs.includes(newLang)) {
+                console.error(newLang + " is not an available language");
+                newLang = availableLangs[0];
+            } else if (save) {
+                window.localStorage.setItem("lang", newLang);
+            }
             lang = newLang;
             if (!texts[lang]) {
                 texts[lang] = {};
@@ -27,8 +31,8 @@ const Texts = function () {
     };
 }();
 
-// Utiliser la langue du navigateur si possible
-Texts.setLang((navigator.language || navigator.userLanguage || "").match("[^\-]*")[0]);
+// Utiliser la langue enregistrée, sinon la langue du navigateur si possible
+Texts.setLang((window.localStorage.getItem("lang") ?? navigator.language ?? navigator.userLanguage ?? "").match("[^\-]*")[0]);
 
 // Retourne la date sous forme de texte
 Texts.getDisplayDate = function(datetime) {

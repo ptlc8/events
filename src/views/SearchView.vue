@@ -3,31 +3,26 @@
     <div class="fields">
       <div class="searchbar">
         <img src="@/assets/icons/search-icon.svg">
-        <input type="text" id="searchtext" placeholder="Rechercher des évents..." @keypress="search" @paste="search" @input="search" v-model="searchtext">
+        <input type="text" id="searchtext" :placeholder="$text.get('searchevents')" @keypress="search" @paste="search" @input="search" v-model="searchtext">
       </div>
       <select class="dateselect" v-model="searchdate" @change="search">
-        <option value="alldate">Toute période</option>
-        <option value="today">Aujourd'hui</option>
-        <option value="tomorrow">Demain</option>
-        <option value="week">Cette semaine</option>
-        <option value="nextweek">La semaine prochaine</option>
-        <option value="month">Ce mois-ci</option>
+        <option v-for="value in ['alldate', 'today', 'tomorrow', 'week', 'nextweek', 'month']" :value="value">
+          {{ $text.get(value) }}
+        </option>
       </select>
       <select class="timeselect" v-model="searchtime" @change="search">
-        <option value="alltime">N'importe quand</option>
-        <option value="now">Maintenant</option>
-        <option value="morning">Le matin</option>
-        <option value="afternoon">L'après-midi</option>
-        <option value="evening">En soirée</option>
-        <option value="night">La nuit</option>
+        <option v-for="value in ['alltime', 'now', 'morning', 'afternoon', 'evening', 'night']" :value="value">
+          {{ $text.get(value) }}
+        </option>
       </select>
-      <MultiSelect class="catselect" title="Catégories" @change="cats => (searchcats = cats) && search()"
-        :options="EventsApi.getCategories().reduce((acc, c) => (acc[c] = Texts.get(c)) && acc, {})" />
+      <MultiSelect class="catselect" :title="$text.get('categories')" @change="cats => (searchcats = cats) && search()"
+        :options="EventsApi.getCategories().reduce((acc, c) => (acc[c] = $text.get(c)) && acc, {})" />
     </div>
     <div id="results">
       <EventPreview class="event" v-for="event in events" :event="event" @click="$store.event = event"></EventPreview>
     </div>
-    <MessageBox v-if="!events.length" :message="Texts.get('noresults')" :button="Texts.get('organizeit')" @click="$router.push('/orga')"></MessageBox>
+    <MessageBox v-if="!events.length" :message="$text.get('noresults')" :button="$text.get('organizeit')"
+      @click="$router.push('/orga')"></MessageBox>
     <button v-else class="more-button" @click="searchMore()">Afficher plus d'évents</button>
   </section>
 </template>
@@ -36,7 +31,6 @@
 import MultiSelect from '../components/MultiSelect.vue';
 import EventPreview from '../components/EventPreview.vue';
 import EventsApi from '../api';
-import Texts from '../texts';
 import MessageBox from '../components/MessageBox.vue';
 export default {
   name: 'SearchView',
@@ -46,7 +40,7 @@ export default {
     MessageBox
   },
   setup() {
-    return { EventsApi, Texts };
+    return { EventsApi };
   },
   mounted() {
     this.search();

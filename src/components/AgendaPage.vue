@@ -17,13 +17,13 @@ export default {
   },
   computed: {
     month() {
-      return new Date(this.datetime).toLocaleString(navigator.language, { month: "long" });
+      return new Date(this.datetime).toLocaleString(this.$text.getLang(), { month: "long" });
     },
     day() {
-      return new Date(this.datetime).toLocaleString(navigator.language, { day: "numeric" });
+      return new Date(this.datetime).toLocaleString(this.$text.getLang(), { day: "numeric" });
     },
     weekday() {
-      return new Date(this.datetime).toLocaleString(navigator.language, { weekday: "long" });
+      return new Date(this.datetime).toLocaleString(this.$text.getLang(), { weekday: "long" });
     }
   }
 };

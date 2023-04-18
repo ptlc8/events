@@ -4,7 +4,6 @@
 
 <script>
 import EventsApi from '@/api';
-import Texts from '@/texts';
 import { watch } from 'vue';
 
 import mapboxgl from 'mapbox-gl/dist/mapbox-gl';
@@ -39,7 +38,7 @@ export default {
 
         this.map.on('load', () => {
 
-            var mapLang = ['ar', 'en', 'es', 'fr', 'de', 'it', 'pt', 'ru', 'ja', 'ko', 'vi'].includes(Texts.getLang()) ? 'name_' + Texts.getLang() : Texts.getLang() == 'zh' ? 'name_zh-Hans' : 'name';
+            var mapLang = ['ar', 'en', 'es', 'fr', 'de', 'it', 'pt', 'ru', 'ja', 'ko', 'vi'].includes(this.$text.getLang()) ? 'name_' + this.$text.getLang() : this.$text.getLang() == 'zh' ? 'name_zh-Hans' : 'name';
             this.map.setLayoutProperty('country-label', 'text-field', ['get', mapLang]);
 
             this.map.loadImage(this.markerIcon, (error, image) => {

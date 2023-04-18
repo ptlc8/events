@@ -8,13 +8,13 @@
           <span class="title">{{ event.title }}</span>
           📍 {{ event.placename }}
           <div class="categories">
-            <span v-for="cat in event.categories">{{ Texts.get(cat) }}</span>
+            <span v-for="cat in event.categories">{{ $text.get(cat) }}</span>
           </div>
           <div class="description">{{ event.description }}</div>
           <AgendaPage class="datetime" :datetime="event.datetime" />
           <div class="sidebar">
-            <button class="show-on-map" @click="showOnMap">📍 Afficher sur la carte</button>
-            <button class="add-fav" @click="addToFavorites">⭐ Ajouter à mes favoris</button>
+            <button class="show-on-map" @click="showOnMap">📍 {{ $text.get('showonmap') }}</button>
+            <button class="add-fav" @click="addToFavorites">⭐ {{ $text.get('addtofav') }}</button>
             <button v-if="canShare()" class="large-share-button" @click="share()">🚀 Partager</button>
             <div v-else class="share-buttons">
               <a class="tumblr" target="_blank" title="Partager sur Tumblr"
@@ -45,7 +45,6 @@
 </template>
 
 <script>
-import Texts from "@/texts";
 import AgendaPage from "./AgendaPage.vue";
 export default {
   name: "EventModal",
@@ -61,11 +60,6 @@ export default {
   },
   emits: ['close'],
   components: { AgendaPage },
-  setup() {
-    return {
-      Texts
-    };
-  },
   methods: {
     close() {
       this.$emit("close");
@@ -79,7 +73,7 @@ export default {
     },
     copy(event) {
       navigator.clipboard.writeText(this.url).then(() => {
-        event.target.innerText = Texts.get("copied");
+        event.target.innerText = $text.get("copied");
       }).catch(err => {
         event.target.innerText = err;
       });
