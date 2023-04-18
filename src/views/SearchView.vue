@@ -44,7 +44,7 @@ export default {
     MultiSelect,
     EventPreview,
     MessageBox
-},
+  },
   setup() {
     return { EventsApi, Texts };
   },
@@ -102,7 +102,7 @@ section {
 .fields {
   display: flex;
   flex-wrap: wrap;
-	gap: 10px;
+  gap: 10px;
 }
 
 .searchbar {
@@ -148,18 +148,19 @@ section {
 #results {
   width: 90%;
   margin: 2em auto;
-	display: flex;
-	flex-wrap: wrap;
-	gap: .5em;
-	>* {
-		width: 24em;
-		flex-grow: 1;
-	}
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5em;
+
+  >* {
+    width: 24em;
+    flex-grow: 1;
+  }
 }
 
 .more-button {
-		display: block;
-		margin: 1em auto;
+  display: block;
+  margin: 1em auto;
 }
 
 @media (orientation: portrait) {
@@ -173,5 +174,4 @@ section {
     width: 100%;
   }
 
-}
-</style>
+}</style>

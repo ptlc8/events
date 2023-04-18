@@ -184,6 +184,7 @@ export default {
     padding-top: .5em;
     margin-top: .5em;
     float: left;
+    white-space: pre-wrap;
   }
 
   .datetime {

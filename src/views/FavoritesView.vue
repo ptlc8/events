@@ -49,16 +49,17 @@ export default {
 }
 </script>
 
-<style>
+<style scoped lang="scss">
 .favorites {
-		width: 90%;
-		margin: 2em auto;
-		display: flex;
-		flex-wrap: wrap;
-		gap: .5em;
-		>* {
-				width: 24em;
-				flex-grow: 1;
-		}
+    width: 90%;
+    margin: 2em auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5em;
+
+    >* {
+        width: 24em;
+        flex-grow: 1;
+    }
 }
 </style>
