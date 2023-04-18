@@ -1,4 +1,5 @@
-# Events
+
+# Évents 🗺
 
 Ceci est un site web permettant aux utilisateurs de rechercher des événements autour d'eux ou d'en ajouter.
 
@@ -23,11 +24,9 @@ define("SEATGEEK_CLIENT_SECRET", "puty0urcli3nt1dh3r3xxxxxxxxxxxxxxxxxxxxxxxxxxx
 define("TICKETMASTER_API_KEY", "PutYourApiKeyHerexxxxxxxxxxxxxxx");
 ?>
 ```
- - ```sh
-npm install
-```
- - ```sh
-npm run build
-```
+ -
+       npm install
+       npm run build
+
  - exécuter dans la base de données le script SQL [init.sql](init.sql)
  - lancer le serveur php dans le dossier `dist`
