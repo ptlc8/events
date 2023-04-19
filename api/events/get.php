@@ -31,7 +31,7 @@ if (isset($_REQUEST['id'])) {
     $date = isset($_REQUEST['date']) ? $_REQUEST['date'] : "alldate"; // alldate, today, tomorrow, week, nextweek, month
     $time = isset($_REQUEST['time']) ? $_REQUEST['time'] : "alltime"; // alltime, morning(06h-12h), afternoon(12h-18), evening(18h-00h), night(00h-06h), now(-3h-+3h)
     $categories = isset($_REQUEST['cats']) && is_array($_REQUEST['cats']) ? $_REQUEST['cats'] : array();
-    $limit = isset($_REQUEST['limit']) && is_numeric($_REQUEST['limit']) ? max(1, min(intval($_REQUEST['limit']), $min ? 10_000 : 100)) : ($min ? 5_000 : 50);
+    $limit = isset($_REQUEST['limit']) && is_numeric($_REQUEST['limit']) ? max(1, min(intval($_REQUEST['limit']), $min ? 10000 : 100)) : ($min ? 5000 : 50);
     $offset = isset($_REQUEST['offset']) && is_numeric($_REQUEST['offset']) ? max(0, intval($_REQUEST['offset'])) : 0;
 
     date_default_timezone_set("Etc/GMT");
