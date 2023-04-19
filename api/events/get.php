@@ -7,6 +7,7 @@ initDatabase();
 if (isset($_REQUEST['id'])) {
     
     $result = queryDatabase("SELECT * FROM `events` WHERE id = '", $_REQUEST['id'],"'");
+    $min = false;
     
 } else if (isset($_REQUEST['favorite']) || isset($_REQUEST['mine'])) {
     
@@ -20,14 +21,17 @@ if (isset($_REQUEST['id'])) {
 	$user = $userRequest->fetch_assoc();
     
     $result = queryDatabase("SELECT * FROM events".(isset($_REQUEST['favorite']) ? " JOIN favorites ON event = events.id WHERE user = '".$user['id']."'" : "").(isset($_REQUEST['mine']) ? " WHERE author = '".$user['id']."'" : ""));
+    $min = false;
     
 } else {
+    // Minified version of the request, less details but more events
+    $min = isset($_REQUEST['min']);
 
     $text = isset($_REQUEST['text']) ? $_REQUEST['text'] : "";
     $date = isset($_REQUEST['date']) ? $_REQUEST['date'] : "alldate"; // alldate, today, tomorrow, week, nextweek, month
     $time = isset($_REQUEST['time']) ? $_REQUEST['time'] : "alltime"; // alltime, morning(06h-12h), afternoon(12h-18), evening(18h-00h), night(00h-06h), now(-3h-+3h)
     $categories = isset($_REQUEST['cats']) && is_array($_REQUEST['cats']) ? $_REQUEST['cats'] : array();
-    $limit = isset($_REQUEST['limit']) && is_numeric($_REQUEST['limit']) ? max(1, min(intval($_REQUEST['limit']), 100)) : 50;
+    $limit = isset($_REQUEST['limit']) && is_numeric($_REQUEST['limit']) ? max(1, min(intval($_REQUEST['limit']), $min ? 10_000 : 100)) : ($min ? 5_000 : 50);
     $offset = isset($_REQUEST['offset']) && is_numeric($_REQUEST['offset']) ? max(0, intval($_REQUEST['offset'])) : 0;
 
     date_default_timezone_set("Etc/GMT");
@@ -60,7 +64,7 @@ if (isset($_REQUEST['id'])) {
         $timeSup = date("H:i:s", strtotime("now +3 hour"));
     }
     
-    $request = "SELECT * FROM `events` WHERE public = '1' AND '$dateInf' <= CAST(datetime AS date)";
+    $request = "SELECT ".($min ? "id, lng, lat, title" : "*")." FROM `events` WHERE public = '1' AND '$dateInf' <= CAST(datetime AS date)";
     if (isset($dateSup)) $request .= " AND CAST(datetime AS date) < '$dateSup'";
     foreach ($categories as $cat)
         $request .= " AND categories LIKE '%".str_replace(array('\\', '\''), array('\\\\', '\\\''), $cat)."%'";
@@ -79,27 +83,35 @@ if (isset($_REQUEST['id'])) {
         $request .= " AND lat >= '".floatval($_REQUEST['minlat'])."'";
     if (isset($_REQUEST['maxlat']) && is_numeric($_REQUEST['maxlat']))
         $request .= " AND lat <= '".floatval($_REQUEST['maxlat'])."'";
-    if ((isset($_REQUEST['minlng']) && is_numeric($_REQUEST['minlng'])) || (isset($_REQUEST['maxlng']) && is_numeric($_REQUEST['maxlng']))) {
-        $minlng = isset($_REQUEST['minlng']) && is_numeric($_REQUEST['minlng']) ? fixLongitude(floatval($_REQUEST['minlng'])) : -180;
-        $maxlng = isset($_REQUEST['maxlng']) && is_numeric($_REQUEST['maxlng']) ? fixLongitude(floatval($_REQUEST['maxlng'])) : 180;
+    
+    $minlng = isset($_REQUEST['minlng']) && is_numeric($_REQUEST['minlng']) ? floatval($_REQUEST['minlng']) : -180;
+    $maxlng = isset($_REQUEST['maxlng']) && is_numeric($_REQUEST['maxlng']) ? floatval($_REQUEST['maxlng']) : 180;
+    if ($maxlng - $minlng < 360) {
+        $minlng = fixLongitude($minlng);
+        $maxlng = fixLongitude($maxlng);
         if ($minlng > $maxlng) {
             $request .= " AND (lng >= '$minlng' OR lng <= '$maxlng')";
         } else {
             $request .= " AND lng >= '$minlng' AND lng <= '$maxlng'";
         }
     }
-    $request .= " LIMIT $limit OFFSET $offset";
+    $request .= " ORDER BY datetime ASC";
+    $request .= " LIMIT $limit OFFSET $offset;";
     
     $result = queryDatabase($request);
 }
 
 $events = [];
 while (($event = $result->fetch_assoc()) != null) {
-    $event['lng'] = floatval($event['lng']);
-    $event['lat'] = floatval($event['lat']);
-    $event['categories'] = $event['categories']=="" ? [] : explode(",", $event['categories']);
-    $event['images'] = $event['images']!="" ? explode(",", $event['images']) : [];
-    array_push($events, $event);
+    if (!$min) {
+        $event['lng'] = floatval($event['lng']);
+        $event['lat'] = floatval($event['lat']);
+        $event['categories'] = $event['categories']=="" ? [] : explode(",", $event['categories']);
+        $event['images'] = $event['images']!="" ? explode(",", $event['images']) : [];
+        array_push($events, $event);
+    } else {
+        array_push($events, array($event['id'], floatval($event['lng']), floatval($event['lat']), $event['title']));
+    }
 }
 
 exitSuccess($events);

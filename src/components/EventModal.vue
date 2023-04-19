@@ -73,7 +73,7 @@ export default {
     },
     copy(event) {
       navigator.clipboard.writeText(this.url).then(() => {
-        event.target.innerText = $text.get("copied");
+        event.target.innerText = this.$text.get("copied");
       }).catch(err => {
         event.target.innerText = err;
       });
@@ -86,13 +86,13 @@ export default {
       console.log("TODO");
     },
     showOnMap() {
-      this.$router.push({ name: "map", query: { e: this.event.id } });
-      this.close();
+      //this.close();
+      this.$router.push({ name: "map", query: { show: this.event.id } });
     }
   },
   computed: {
     url() {
-      return document.URL;
+      return document.location.origin + import.meta.env.VITE_BASE_URL + '?e=' + this.event.id;
     }
   }
 };

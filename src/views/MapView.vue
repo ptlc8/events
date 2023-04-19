@@ -34,12 +34,14 @@ export default {
             zoom: 5
         });
 
-        if (this.$route.query.e !== undefined) {
-            EventsApi.getEvent(this.$route.query.e).then(event => {
+        var eventId = this.$route.query.show || this.$route.query.e;
+        if (eventId !== undefined) {
+            this.$store.event = null;
+            EventsApi.getEvent(eventId).then(event => {
                 if (!event) return;
                 this.map.flyTo({
                     center: [event.lng, event.lat],
-                    zoom: 12,
+                    zoom: 15,
                     essential: true
                 });
             });
@@ -57,21 +59,52 @@ export default {
                 this.map.addImage('marker', image);
                 this.map.addSource('events', {
                     type: 'geojson',
-                    data: this.getEventsAsGeoJson()
+                    data: this.getEventsAsGeoJson(),
+                    cluster: true,
+                    clusterMaxZoom: 14,
+                    clusterRadius: 50
                 });
                 watch(() => this.$store.events, () => {
                     this.map.getSource('events').setData(this.getEventsAsGeoJson());
                 });
                 this.updateEvents();
                 this.map.addLayer({
-                    'id': 'events',
-                    'type': 'symbol',
-                    'source': 'events',
-                    'layout': {
+                    id: 'events',
+                    type: 'symbol',
+                    source: 'events',
+                    filter: ['!', ['has', 'point_count']],
+                    layout: {
                         'icon-image': 'marker',
                         'icon-size': .5,
-                        'icon-allow-overlap': true
+                        'text-field': ['get', 'eventTitle'],
+                        'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
+                        'text-offset': [0, 1.25],
+                        'text-anchor': 'top'
+                    }
+                });
+                this.map.addLayer({
+                    id: 'events-clusters',
+                    type: 'circle',
+                    source: 'events',
+                    filter: ['has', 'point_count'],
+                    paint: {
+                        'circle-color': '#f00',
+                        'circle-radius': ['+', 15, ['*', 5, ['log10', ['get', 'point_count']]]]
+                    }
+                });
+                this.map.addLayer({
+                    id: 'events-clusters-counts',
+                    type: 'symbol',
+                    source: 'events',
+                    filter: ['has', 'point_count'],
+                    layout: {
+                        'text-field': ['case', ['<', ['get', 'point_count'], 1000], ['get', 'point_count'], "999+"]
                     },
+                    paint: {
+                        'text-color': '#fff',
+                        'text-halo-color': '#fff',
+                        'text-halo-width': .5
+                    }
                 });
             });
         });
@@ -81,7 +114,7 @@ export default {
                 accessToken: mapboxgl.accessToken,
                 localGeocoder: this.forwardGeocoder,
                 zoom: 14,
-                placeholder: 'Enter search' + (this.$store.events.length ? ' e.g. ' + this.$store.events[parseInt(Math.random() * this.$store.events.length)].title : ''),
+                placeholder: 'Enter search' + (this.$store.events.length ? ' e.g. ' + this.$store.events[parseInt(Math.random() * this.$store.events.length)][0] : ''),
                 mapboxgl: mapboxgl
             })
         );
@@ -90,28 +123,12 @@ export default {
             onChange: () => {}
         }), "bottom-left");*/
 
-        var popup = new mapboxgl.Popup({
-            closeButton: false,
-            closeOnClick: false
-        });
-
         this.map.on('mouseenter', 'events', e => {
             this.map.getCanvas().style.cursor = 'pointer';
-            var coordinates = e.features[0].geometry.coordinates.slice();
-            // if multiple features
-            while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-                coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
-            }
-            var [title, description] = [e.features[0].properties.eventTitle, e.features[0].properties.eventDescription];
-            var html = `<b>${title}</b><p>${description}</p>`;
-            popup.setLngLat(coordinates)
-                .setHTML(html)
-                .addTo(this.map);
         });
 
         this.map.on('mouseleave', 'events', () => {
             this.map.getCanvas().style.cursor = '';
-            popup.remove();
         });
 
         this.map.on('click', 'events', e => {
@@ -120,10 +137,26 @@ export default {
             while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
                 coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
             }
-            this.$store.event = this.$store.events.find(evt => evt.id == e.features[0].properties.eventId);
-            this.map.flyTo({
-                center: e.features[0].geometry.coordinates
+            EventsApi.getEvent(e.features[0].properties.eventId).then(event => {
+                this.$store.event = event;
             });
+        });
+
+        this.map.on('click', 'events-clusters', e => {
+            var features = this.map.queryRenderedFeatures(e.point, {
+                layers: ['events-clusters']
+            });
+            var clusterId = features[0].properties.cluster_id;
+            this.map.getSource('events').getClusterExpansionZoom(
+                clusterId,
+                (err, zoom) => {
+                    if (err) return;
+                    this.map.easeTo({
+                        center: features[0].geometry.coordinates,
+                        zoom: zoom
+                    });
+                }
+            );
         });
 
         this.map.on('moveend', this.updateEvents);
@@ -134,8 +167,8 @@ export default {
                 type: 'FeatureCollection',
                 features: this.$store.events.map(event => ({
                     type: 'Feature',
-                    geometry: { type: 'Point', coordinates: [event.lng, event.lat] },
-                    properties: { eventTitle: event.title, eventId: event.id, eventDescription: event.description }
+                    geometry: { type: 'Point', coordinates: [event[1], event[2]] },
+                    properties: { eventTitle: event[3], eventId: event[0] }
                 }))
             };
         },
@@ -145,18 +178,18 @@ export default {
                 minlng: this.map.getBounds().getWest(),
                 maxlat: this.map.getBounds().getNorth(),
                 maxlng: this.map.getBounds().getEast(),
-                limit: 100
+                min: true
             })
                 .then(events => this.$store.events = events);
         },
         forwardGeocoder(query) {
             var matchingFeatures = [];
             for (let event of this.$store.events) {
-                if (event.title.toLowerCase().search(query.toLowerCase()) !== -1) {
+                if (event[3].toLowerCase().search(query.toLowerCase()) !== -1) {
                     // add a festive emoji as a prefix for custom data results
                     var feature = {};
-                    feature.place_name = '✨ ' + event.title;
-                    feature.center = [event.lng, event.lat];
+                    feature.place_name = '✨ ' + event[3];
+                    feature.center = [event[1], event[2]];
                     feature.place_type = ['park'];
                     matchingFeatures.push(feature);
                 }

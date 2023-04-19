@@ -1,5 +1,6 @@
 <script>
 import { RouterLink, RouterView } from 'vue-router';
+import { watch } from 'vue';
 import LoginModal from './components/LoginModal.vue';
 import EventModal from './components/EventModal.vue';
 import EventsApi from './api';
@@ -28,7 +29,22 @@ export default {
         { name: 'me', icon: meIcon }
       ]
     };
-  }, mounted() {
+  },
+  mounted() {
+    // on router init
+    var unwatchRoute = watch(() => this.$route, () => {
+      if (this.$route.query.e) {
+        EventsApi.getEvent(this.$route.query.e).then(event => {
+          this.$store.event = event;
+        });
+      }
+      unwatchRoute();
+    });
+
+    watch(() => this.$store.event, () => {
+      this.$router.replace({ name: this.$route.name, query: { ...this.$route.query, e: this.$store.event?.id } });
+    });
+
     EventsApi.getSelfUser().then(user => {
       this.$store.login(user?.username);
     });
