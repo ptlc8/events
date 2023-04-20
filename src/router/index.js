@@ -1,6 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Texts from '@/texts';
 
+await Texts.init();
+
 const router = createRouter({
   base: "./",
   history: createWebHistory(import.meta.env.BASE_URL),

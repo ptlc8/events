@@ -4,8 +4,11 @@ const Texts = function () {
     var texts = [];
     var lang;
     return {
+        async init() {
+            await this.setLang(window.localStorage.getItem("lang") ?? this.getNavigatorLang(), false);
+        },
         get(id) {
-            return texts[lang][id] ?? "[" + id + "]";
+            return texts[lang]?.[id] ?? "[" + id + "]";
         },
         getLang() {
             return lang;
@@ -27,12 +30,12 @@ const Texts = function () {
         },
         getAvailableLangs() {
             return availableLangs;
+        },
+        getNavigatorLang() {
+            return (navigator.language ?? navigator.userLanguage ?? "").match("[^\-]*")[0]
         }
     };
 }();
-
-// Utiliser la langue enregistrée, sinon la langue du navigateur si possible
-Texts.setLang((window.localStorage.getItem("lang") ?? navigator.language ?? navigator.userLanguage ?? "").match("[^\-]*")[0]);
 
 // Retourne la date sous forme de texte
 Texts.getDisplayDate = function(datetime) {

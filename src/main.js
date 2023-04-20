@@ -11,8 +11,9 @@ const app = createApp(App);
 
 const store = createPinia();
 app.use(store);
-
 app.config.globalProperties.$store = useMainStore();
+
+await Texts.init();
 app.config.globalProperties.$text = Texts;
 
 app.use(router);

@@ -51,8 +51,11 @@ export default {
 
         this.map.on('load', () => {
 
-            var mapLang = ['ar', 'en', 'es', 'fr', 'de', 'it', 'pt', 'ru', 'ja', 'ko', 'vi'].includes(this.$text.getLang()) ? 'name_' + this.$text.getLang() : this.$text.getLang() == 'zh' ? 'name_zh-Hans' : 'name';
-            this.map.setLayoutProperty('country-label', 'text-field', ['get', mapLang]);
+            if (this.$text.getLang() == 'zh') {
+                this.map.setLanguage('zh-Hans');
+            } else {
+                this.map.setLanguage(this.$text.getLang());
+            }
 
             this.map.loadImage(this.markerIcon, (error, image) => {
                 if (error) throw error;
