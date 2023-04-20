@@ -47,7 +47,7 @@ Texts.getDisplayDate = function(datetime) {
     if (date.getTime() == today.getTime()) return Texts.get("today");
     if (date.getTime() == today.getTime() + 86400000) return Texts.get("tomorrow");
     if (date.getTime() < today.getTime() + 6 * 86400000) return date.toLocaleString(Texts.getLang(), { weekday: "long" }) + Texts.get("next");
-    return Texts.get("thedate") + date.getDate() + " " + date.toLocaleString(this.$text.getLang(), { month: "long" }) + (date.getYear() == today.getYear() ? "" : " " + date.getYear())
+    return Texts.get("thedate") + date.getDate() + " " + date.toLocaleString(Texts.getLang(), { month: "long" }) + (date.getYear() == today.getYear() ? "" : " " + date.getYear())
 }
 
 Texts.getDisplayDateTime = function(datetime) {
