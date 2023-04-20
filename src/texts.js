@@ -1,10 +1,12 @@
 // Objet pour retourner les textes en fonction de la langue
 const Texts = function () {
-    var availableLangs = ["fr", "en"];
+    var availableLangs = [];
     var texts = [];
     var lang;
     return {
-        async init() {
+        async init(langs) {
+            if (!langs || !langs.length) throw new Error("No languages provided to Texts.init()");
+            availableLangs = langs;
             await this.setLang(window.localStorage.getItem("lang") ?? this.getNavigatorLang(), false);
         },
         get(id) {
@@ -20,7 +22,7 @@ const Texts = function () {
             } else if (save) {
                 window.localStorage.setItem("lang", newLang);
             }
-            lang = newLang;
+            lang = newLang.match("[^\-]*")[0];
             if (!texts[lang]) {
                 texts[lang] = {};
                 return fetch("langs/" + lang + ".json").then(res => res.text()).then(function (response) {
@@ -32,7 +34,7 @@ const Texts = function () {
             return availableLangs;
         },
         getNavigatorLang() {
-            return (navigator.language ?? navigator.userLanguage ?? "").match("[^\-]*")[0]
+            return navigator.language ?? navigator.userLanguage ?? "";
         }
     };
 }();

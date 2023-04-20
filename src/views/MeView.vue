@@ -11,7 +11,8 @@
     <article>
       <h2>{{ $text.get('language') }}</h2>
       <select @change="$text.setLang($event.target.value, true).then($forceUpdate)">
-        <option v-for="lang in $text.getAvailableLangs()" :value="lang" :selected="lang === $text.getLang()">{{ getFlag(lang) }} {{ lang }}</option>
+        <option v-for="lang in $text.getAvailableLangs()" :value="lang" :selected="lang === $text.getLang()">{{
+          getLangName(lang) }}</option>
       </select>
     </article>
   </section>
@@ -32,9 +33,10 @@ export default {
       EventsApi.logout();
       this.$store.logout();
     },
-    getFlag(code) {
+    getLangName(code) {
       //return code.toUpperCase().replace(/./g, char => String.fromCodePoint(char.charCodeAt(0) + 127397));
-      return code.toUpperCase().split('').map(c => String.fromCodePoint(c.charCodeAt(0) + 127397)).join('');
+      return code.match(/[^-]+$/)[0].toUpperCase().split('').map(c => String.fromCodePoint(c.charCodeAt(0) + 127397)).join('')
+        + ' ' + code.match(/[^-]+/)[0];
     }
   }
 }
@@ -56,6 +58,7 @@ article {
     margin: auto;
     border-radius: 100%;
   }
+
   .logout {
     background-color: #ff6961;
   }

@@ -13,7 +13,7 @@ const store = createPinia();
 app.use(store);
 app.config.globalProperties.$store = useMainStore();
 
-await Texts.init();
+await Texts.init(["fr-FR", "en-GB", "en-US"]);
 app.config.globalProperties.$text = Texts;
 
 app.use(router);
