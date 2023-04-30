@@ -102,5 +102,6 @@
     "heavy-snow-showers":"Heavy snow showers",
     "thunderstorm":"Thunderstorm",
     "thunderstorm-with-slight-hail":"Thunderstorm with slight hail",
-    "thunderstorm-with-heavy-hail":"Thunderstorm with heavy hail"
+    "thunderstorm-with-heavy-hail":"Thunderstorm with heavy hail",
+    "unknown":"Unknown"
 }

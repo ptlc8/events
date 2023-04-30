@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="weather">
     <WeatherIcon :night="isNight" :sky="interpretation.sky" :clouds="interpretation.clouds" :rain="interpretation.rain"
       :snow="interpretation.snow" :stroke="interpretation.stroke" :hail="interpretation.hail" :fog="interpretation.fog"
       :title="description">
@@ -86,7 +86,7 @@ export default {
       return interpretations[this.weatherCode] ?? {};
     },
     description() {
-      return this.interpretation.name ?? "";
+      return this.interpretation.name ?? "unknown";
     },
     isNight() {
       if (!this.weather)

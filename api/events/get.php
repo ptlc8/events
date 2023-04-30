@@ -64,7 +64,7 @@ if (isset($_REQUEST['id'])) {
         $timeSup = date("H:i:s", strtotime("now +3 hour"));
     }
     
-    $request = "SELECT *, CAST(end AS time) AS endT, CAST(start AS time) AS startT FROM `events` WHERE public = '1' AND '$dateInf' <= CAST(start AS date)";
+    $request = "SELECT * FROM `events` WHERE public = '1' AND '$dateInf' <= CAST(start AS date)";
     if (isset($dateSup)) $request .= " AND CAST(start AS date) < '$dateSup'";
     foreach ($categories as $cat)
         $request .= " AND categories LIKE '%".str_replace(array('\\', '\''), array('\\\\', '\\\''), $cat)."%'";
@@ -76,9 +76,9 @@ if (isset($_REQUEST['id'])) {
     // TODO : si event dure plus de 24h, on ignore le time
     if (isset($timeInf, $timeSup)) {
         if (strtotime($timeInf) < strtotime($timeSup))
-            $request .= " AND ((startT < endT AND '$timeInf' <= endT AND startT <= '$timeSup') OR (endT < startT AND ('$timeInf' <= endT OR startT <= '$timeSup')))";
+            $request .= " AND ((CAST(start AS time) < CAST(end AS time) AND '$timeInf' <= CAST(end AS time) AND CAST(start AS time) <= '$timeSup') OR (CAST(end AS time) < CAST(start AS time) AND ('$timeInf' <= CAST(end AS time) OR CAST(start AS time) <= '$timeSup')))";
         else
-            $request .= " AND (endT < startT OR (startT < endT AND ('$timeInf' <= endT OR startT <= '$timeSup')))";
+            $request .= " AND (CAST(end AS time) < CAST(start AS time) OR (CAST(start AS time) < CAST(end AS time) AND ('$timeInf' <= CAST(end AS time) OR CAST(start AS time) <= '$timeSup')))";
     }
     if (isset($_REQUEST['minlat']) && is_numeric($_REQUEST['minlat']))
         $request .= " AND lat >= '".floatval($_REQUEST['minlat'])."'";
@@ -109,7 +109,6 @@ while (($event = $result->fetch_assoc()) != null) {
         $event['lat'] = floatval($event['lat']);
         $event['categories'] = $event['categories']=="" ? [] : explode(",", $event['categories']);
         $event['images'] = $event['images']!="" ? explode(",", $event['images']) : [];
-        unset($event['startT'], $event['endT']);
         array_push($events, $event);
     } else {
         array_push($events, array($event['id'], floatval($event['lng']), floatval($event['lat']), $event['title']));

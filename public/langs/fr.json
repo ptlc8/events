@@ -103,5 +103,6 @@
     "heavy-snow-showers":"Averses de neige fortes",
     "thunderstorm":"Orage",
     "thunderstorm-with-slight-hail":"Orage avec légères chutes de grêle",
-    "thunderstorm-with-heavy-hail":"Orage avec fortes chutes de grêle"
+    "thunderstorm-with-heavy-hail":"Orage avec fortes chutes de grêle",
+    "unknown":"Inconnue"
 }
