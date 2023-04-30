@@ -1,21 +1,25 @@
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';
 import App from './App.vue';
-import router from './router';
+import createRouter from './router';
 import { useMainStore } from './stores/main';
 import Texts from './texts';
 
 import './assets/main.scss';
 
-const app = createApp(App);
+(async () => {
 
-const store = createPinia();
-app.use(store);
-app.config.globalProperties.$store = useMainStore();
+  const app = createApp(App);
 
-await Texts.init(["fr-FR", "en-GB", "en-US"]);
-app.config.globalProperties.$text = Texts;
+  const store = createPinia();
+  app.use(store);
+  app.config.globalProperties.$store = useMainStore();
 
-app.use(router);
+  await Texts.init(["fr-FR", "en-GB", "en-US"]);
+  app.config.globalProperties.$text = Texts;
 
-app.mount('#app');
+  app.use(await createRouter());
+
+  app.mount('#app');
+  
+})();
