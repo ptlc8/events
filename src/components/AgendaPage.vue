@@ -43,6 +43,7 @@ div {
     background-color: #f02e2e;
     font-size: 1.6em;
     line-height: 1.4;
+    color: white;
   }
 
   .day {

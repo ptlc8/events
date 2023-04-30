@@ -64,8 +64,8 @@ if (isset($_REQUEST['id'])) {
         $timeSup = date("H:i:s", strtotime("now +3 hour"));
     }
     
-    $request = "SELECT ".($min ? "id, lng, lat, title" : "*")." FROM `events` WHERE public = '1' AND '$dateInf' <= CAST(datetime AS date)";
-    if (isset($dateSup)) $request .= " AND CAST(datetime AS date) < '$dateSup'";
+    $request = "SELECT *, CAST(end AS time) AS endT, CAST(start AS time) AS startT FROM `events` WHERE public = '1' AND '$dateInf' <= CAST(start AS date)";
+    if (isset($dateSup)) $request .= " AND CAST(start AS date) < '$dateSup'";
     foreach ($categories as $cat)
         $request .= " AND categories LIKE '%".str_replace(array('\\', '\''), array('\\\\', '\\\''), $cat)."%'";
     foreach (explode(" ", $text) as $word) {
@@ -73,11 +73,12 @@ if (isset($_REQUEST['id'])) {
         $word = str_replace(array('\\', '\''), array('\\\\', '\\\''), $word);
         $request .= " AND (title LIKE '%$word%' OR description LIKE '%$word%')";
     }
+    // TODO : si event dure plus de 24h, on ignore le time
     if (isset($timeInf, $timeSup)) {
         if (strtotime($timeInf) < strtotime($timeSup))
-            $request .= " AND '$timeInf' <= CAST(datetime AS time) AND CAST(datetime AS time) <= '$timeSup'";
+            $request .= " AND ((startT < endT AND '$timeInf' <= endT AND startT <= '$timeSup') OR (endT < startT AND ('$timeInf' <= endT OR startT <= '$timeSup')))";
         else
-            $request .= " AND ('$timeInf' <= CAST(datetime AS time) OR CAST(datetime AS time) <= '$timeSup')";
+            $request .= " AND (endT < startT OR (startT < endT AND ('$timeInf' <= endT OR startT <= '$timeSup')))";
     }
     if (isset($_REQUEST['minlat']) && is_numeric($_REQUEST['minlat']))
         $request .= " AND lat >= '".floatval($_REQUEST['minlat'])."'";
@@ -95,7 +96,7 @@ if (isset($_REQUEST['id'])) {
             $request .= " AND lng >= '$minlng' AND lng <= '$maxlng'";
         }
     }
-    $request .= " ORDER BY datetime ASC";
+    $request .= " ORDER BY start ASC";
     $request .= " LIMIT $limit OFFSET $offset;";
     
     $result = queryDatabase($request);
@@ -108,6 +109,7 @@ while (($event = $result->fetch_assoc()) != null) {
         $event['lat'] = floatval($event['lat']);
         $event['categories'] = $event['categories']=="" ? [] : explode(",", $event['categories']);
         $event['images'] = $event['images']!="" ? explode(",", $event['images']) : [];
+        unset($event['startT'], $event['endT']);
         array_push($events, $event);
     } else {
         array_push($events, array($event['id'], floatval($event['lng']), floatval($event['lat']), $event['title']));

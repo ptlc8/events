@@ -11,8 +11,16 @@
             <span v-for="cat in event.categories">{{ $text.get(cat) }}</span>
           </div>
           <div class="description">{{ event.description }}</div>
-          <AgendaPage class="datetime" :datetime="event.datetime" />
           <div class="sidebar">
+            <div v-if="event.start.substring(0, 10) != event.end.substring(0, 10)" class="datetimes">
+              <AgendaPage :datetime="event.start" />
+              <AgendaPage :datetime="event.end" />
+            </div>
+            <AgendaPage v-else :datetime="event.start"></AgendaPage>
+            <span>
+              {{ $text.get('from') }} {{ $text.getDisplayTime(event.start) }}
+              {{ $text.get('to') }} {{ $text.getDisplayTime(event.end) }}
+            </span>
             <button class="show-on-map" @click="showOnMap">📍 {{ $text.get('showonmap') }}</button>
             <button class="add-fav" @click="addToFavorites">⭐ {{ $text.get('addtofav') }}</button>
             <button v-if="canShare()" class="large-share-button" @click="share()">🚀 Partager</button>
@@ -127,7 +135,7 @@ export default {
     right: 1em;
     width: 1.5em;
     height: 1.5em;
-		z-index: 100;
+    z-index: 100;
     cursor: pointer;
   }
 }
@@ -159,8 +167,8 @@ export default {
     font-weight: bold;
     display: block;
     margin-left: 1em;
-	  line-height: 1;
-	  margin-bottom: .5em;
+    line-height: 1;
+    margin-bottom: .5em;
   }
 
   .categories span {
@@ -182,16 +190,16 @@ export default {
     white-space: pre-wrap;
   }
 
-  .datetime {
-    margin: 5px 0;
-	  float: right;
+  .datetimes>* {
+    display: inline-block;
+    font-size: .5em;
   }
 
   .sidebar {
     float: right;
     width: 8em;
-	  display: flex;
-  	flex-direction: column;
+    display: flex;
+    flex-direction: column;
 
     >* {
       display: block;
@@ -252,12 +260,13 @@ export default {
 
   .images {
     float: left;
-    width: 80%;
+    width: calc(100% - 8em);
     display: flex;
     flex-wrap: wrap;
+    align-items: flex-start;
 
     img {
-		  flex: 1;
+      flex: 1;
       width: 14em;
       margin: .5em;
     }
@@ -273,28 +282,31 @@ export default {
 }
 
 
-	
+
 @media (max-width: 800px) {
   .modal {
     height: 100%;
 
-		.close {
-			position: fixed;
-		}
+    .close {
+      position: fixed;
+    }
   }
-  .body {
-    .description, .images {
-			width: 100%
-		}
 
-		.sidebar {
-			float: unset;
-			width: 100%;
-			
-			.share-buttons {
-				grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
-	    }
-	  }
-  }	
+  .body {
+
+    .description,
+    .images {
+      width: 100%
+    }
+
+    .sidebar {
+      float: unset;
+      width: 100%;
+
+      .share-buttons {
+        grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+      }
+    }
+  }
 }
 </style>

@@ -70,5 +70,8 @@
     "categories":"Categories",
     "searchevents":"Search events...",
     "moreinfo":"More info",
-    "language":"Language"
+    "language":"Language",
+    "at":"at",
+    "from":"from",
+    "to":"to"
 }

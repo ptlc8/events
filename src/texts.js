@@ -41,7 +41,6 @@ const Texts = function () {
 
 // Retourne la date sous forme de texte
 Texts.getDisplayDate = function(datetime) {
-    var datetime = new Date(datetime);
     var date = new Date(datetime);
     date.setHours(0, 0, 0, 0);
     var today = new Date();
@@ -55,10 +54,15 @@ Texts.getDisplayDate = function(datetime) {
     return Texts.get("thedate") + date.getDate() + " " + date.toLocaleString(Texts.getLang(), { month: "long" }) + (date.getYear() == today.getYear() ? "" : " " + date.getYear())
 }
 
-Texts.getDisplayDateTime = function(datetime) {
-    // TODO
+// Retourne l'heure sous forme de texte
+Texts.getDisplayTime = function(datetime) {
     var time = new Date(datetime);
-    return Texts.getDisplayDate(datetime) + " à " + time.getHours() + ":" + (time.getMinutes() < 10 ? "0" : "") + time.getMinutes();
+    return time.getHours() + ":" + (time.getMinutes() < 10 ? "0" : "") + time.getMinutes();
+}
+
+// Retourne la date et l'heure sous forme de texte
+Texts.getDisplayDateTime = function(datetime) {
+    return Texts.getDisplayDate(datetime) + " " + Texts.get("at") + " " + Texts.getDisplayTime(datetime);
 }
     
 export default Texts;

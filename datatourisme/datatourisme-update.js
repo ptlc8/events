@@ -1,9 +1,10 @@
 const https = require("https");
 const unzip = require("unzipper");
 const mysql = require("mysql2");
+const crypto = require("crypto");
 const credentials = require("./credentials.json");
 
-loadDatatourismeZip(require("fs").createReadStream("flux-15996-202304171803.zip"));
+loadDatatourismeZip(require("fs").createReadStream("flux-15996-202304191806.zip"));
 //loadDatatourismeZipFromUrl(credentials.DATATOURISME_GET_URL);
 
 function loadDatatourismeZipFromUrl(url) {
@@ -53,17 +54,22 @@ async function parseJSONFromStream(stream) {
 }
 
 function parseEvent(datatourismeEvent) {
+    var id = datatourismeEvent["dc:identifier"];
+    if (id.length > 32)
+        id = crypto.createHash('md5').update(id).digest('hex');
     var address = datatourismeEvent.isLocatedAt[0]["schema:address"][0];
     var title = datatourismeEvent["rdfs:label"].fr[0];
     var description = (datatourismeEvent.hasDescription?.[0]?.["dc:description"] || datatourismeEvent["rdfs:comment"])?.fr?.[0] ?? "";
+    var takesPlaceAt = datatourismeEvent.takesPlaceAt.filter(t => new Date(t.endDate||t.startDate) >= new Date()).sort((a,b)=>new Date(a)-new Date(b))[0];
+    if (!takesPlaceAt) takesPlaceAt = datatourismeEvent.takesPlaceAt.sort((a,b)=>new Date(b)-new Date(a))[0];
     return {
-        id: "DT" + datatourismeEvent["dc:identifier"].substring(0, 22),
+        id: "DT" + id,
         title,
         author: datatourismeEvent.hasBeenCreatedBy["schema:legalName"],
         description,
-        datetime: datatourismeEvent.takesPlaceAt.map(t => t.startDate + " " + (t.startTime || "")),
-        endDatetime: datatourismeEvent.takesPlaceAt.map(t => (t.endDate || t.startDate) + " " + (t.endTime || "")),
-        placename: address["schema:addressLocality"] + ", " + address["schema:postalCode"] + ", " + address["schema:streetAddress"],
+        start: takesPlaceAt.startDate + " " + (takesPlaceAt.startTime || ""),
+        end: (takesPlaceAt.endDate || takesPlaceAt.startDate) + " " + (takesPlaceAt.endTime || ""),
+        placename: [address["schema:addressLocality"], address["schema:postalCode"], address["schema:streetAddress"]].join(", "),
         categories: findCategories(datatourismeEvent["@type"].concat(datatourismeEvent.hasTheme?.map(theme => theme["@id"]) ?? []), title, description),
         public: 1,
         lng: datatourismeEvent.isLocatedAt[0]["schema:geo"]["schema:longitude"],
@@ -87,31 +93,37 @@ function updateDatabase(index, events) {
     });
     connection.connect();
     process.stdout.write("Updating database...\r");
-    var count = 0, insertedCount = 0;
-    var ids = new Set();
+    var count = 0, insertedCount = 0, tryInsertCount = 0;
+    var ids = {};
     for (let i of index) {
         if (new Date(i.lastUpdateDatatourisme) > new Date("2003-03-17")) {
             count++;
             let event = events.get("objects/" + i.file);
-            ids.add(event.id);
+            ids[event.id] = ids[event.id] ? ids[event.id] + 1 : 0;
             connection.query(
-                "INSERT INTO `events` (`id`, `title`, `author`, `description`, `datetime`, `endDatetime`, `lng`, `lat`, `placename`, `categories`, `images`, `public`)"
+                "INSERT INTO `events` (`id`, `title`, `author`, `description`, `start`, `end`, `lng`, `lat`, `placename`, `categories`, `images`, `public`)"
                 + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-                + " ON DUPLICATE KEY UPDATE title = ?, author = ?, description = ?, datetime = ?, endDatetime = ?, lng = ?, lat = ?, placename = ?, categories = ?, images = ?, public = ?;",
-                [event.id, event.title, -807/*event.author*/, event.description, event.datetime[0], event.endDatetime[0], event.lng, event.lat, event.placename, event.categories.join(","), event.images.join(","), event.public,
-                event.title, -807/*event.author*/, event.description, event.datetime[0], event.endDatetime[0], event.lng, event.lat, event.placename, event.categories.join(","), event.images.join(","), event.public],
+                + " ON DUPLICATE KEY UPDATE title = ?, author = ?, description = ?, start = ?, end = ?, lng = ?, lat = ?, placename = ?, categories = ?, images = ?, public = ?;",
+                [event.id, event.title, -807/*event.author*/, event.description, event.start, event.end, event.lng, event.lat, event.placename, event.categories.join(","), event.images.join(","), event.public,
+                event.title, -807/*event.author*/, event.description, event.start, event.end, event.lng, event.lat, event.placename, event.categories.join(","), event.images.join(","), event.public],
             )
                 .on("error", console.error)
+                .on("result", result => {
+                    insertedCount += result.affectedRows;
+                })
                 .on("end", () => {
-                    insertedCount++;
+                    tryInsertCount++;
                     process.stdout.write("Updating database... (" + insertedCount + " events)\r");
-                    if (insertedCount == count) {
-                        console.log("Updating database done (" + count + " events)");
-                        console.log(count - ids.size + " dupplicate event ids");
+                    if (tryInsertCount == count) {
+                        console.log("Updating database done (" + insertedCount + " / " + count + " events)");
+                        console.log(count - Object.keys(ids).size + " dupplicate event ids", Object.keys(ids).filter(id => ids[id] > 1));
                         console.log("Deleting old events...");
-                        connection.query("DELETE FROM `events` WHERE `id` LIKE 'DT%' AND `id` NOT IN (?)", [Array.from(ids)]);
-                        console.log("Deleting old events done");
-                        connection.end();
+                        connection.query("DELETE FROM `events` WHERE `id` LIKE 'DT%' AND `id` NOT IN (?)", [Object.keys(ids)])
+                            .on("error", console.error)
+                            .on("result", result => {
+                                console.log("Deleting old events done (" + result.affectedRows + " events)");
+                                connection.end();
+                            });
                     }
                 });
         }
@@ -124,8 +136,8 @@ var CATEGORIES = {
     "party": ["party", "fête"],
     "arts": [" arts", "artist", " art ", "artsandcraft", "visualart"],
     "theater": ["théâtr", "theater", "théatr", "comédien"],
-    "music": ["musique","music","concert"],
-    "online": ["en ligne","online"],
+    "music": ["musique", "music", "concert"],
+    //"online": ["en ligne","online"],
     "children": ["enfants", "tout public", "en famille", "children", "in family", "all age", "accessible à tous"],
     "exhibition": ["exposition", "expo"],
     "shopping": ["shopping"],
@@ -153,10 +165,10 @@ var CATEGORIES = {
     "tour": ["tour", "visite", "visite"],
     "workshop": ["workshop", "atelier", "atelier"],
     "free": ["free entrance", "gratuit"],
-    "fashion" : ["fashion", "la mode", "vêtement"],
+    "fashion": ["fashion", "la mode", "vêtement"],
     "fair": ["fair", "foire"],
     "videogame": ["gaming", "jeu vid", "jeux vid", "game", "games", "video game", "playstation", "xbox", "nintendo"],
-    "boardgame": ["boardgame", "jeu de société", "jeux de société", "jeu de plateau", "jeux de plateau", "jeu de cartes", "jeux de cartes", "jeu de rôle"],
+    "boardgame": ["boardgame", "jeu de société", "jeux de société", "jeu de plateau", "jeux de plateau", "jeu de cartes", "jeux de cartes", "jeu de rôle", "tarot", "belote"],
 };
 function findCategories(dtCategories, title, description) {
     var result = [];

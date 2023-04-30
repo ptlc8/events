@@ -71,5 +71,8 @@
     "categories":"Catégories",
     "searchevents":"Rechercher des évents...",
     "moreinfo":"Plus d'infos",
-    "language":"Langue"
+    "language":"Langue",
+    "at":"à",
+    "from":"de",
+    "to":"à"
 }

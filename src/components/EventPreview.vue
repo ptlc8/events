@@ -9,7 +9,7 @@
                     <span v-for="cat in event.categories">{{ $text.get(cat) }}</span>
                 </span>
                 <span class="whenwhere">
-                    <b>{{ $text.getDisplayDateTime(event.datetime) }}</b>
+                    <b>{{ $text.getDisplayDateTime(event.start) }}</b>
                     à <b>{{ event.placename }}</b>
                 </span>
                 <button class="infos-button" @click="$emit('click')">{{ $text.get('moreinfo') }}</button>
