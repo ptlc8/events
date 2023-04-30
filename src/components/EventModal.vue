@@ -12,6 +12,7 @@
           </div>
           <div class="description">{{ event.description }}</div>
           <div class="sidebar">
+            <!--<h3>📅 Quand ?</h3>-->
             <div v-if="event.start.substring(0, 10) != event.end.substring(0, 10)" class="datetimes">
               <AgendaPage :datetime="event.start" />
               <AgendaPage :datetime="event.end" />
@@ -21,6 +22,10 @@
               {{ $text.get('from') }} {{ $text.getDisplayTime(event.start) }}
               {{ $text.get('to') }} {{ $text.getDisplayTime(event.end) }}
             </span>
+            <hr />
+            <h3>🌡️ {{ $text.get('weather') }}</h3>
+            <Weather :datetime="event.start" :lat="event.lat" :lng="event.lng"></Weather>
+            <hr />
             <button class="show-on-map" @click="showOnMap">📍 {{ $text.get('showonmap') }}</button>
             <button class="add-fav" @click="addToFavorites">⭐ {{ $text.get('addtofav') }}</button>
             <button v-if="canShare()" class="large-share-button" @click="share()">🚀 Partager</button>
@@ -54,6 +59,7 @@
 
 <script>
 import AgendaPage from "./AgendaPage.vue";
+import Weather from "./Weather.vue";
 export default {
   name: "EventModal",
   props: {
@@ -67,7 +73,7 @@ export default {
     }
   },
   emits: ['close'],
-  components: { AgendaPage },
+  components: { AgendaPage, Weather },
   methods: {
     close() {
       this.$emit("close");
