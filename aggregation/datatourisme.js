@@ -1,47 +1,85 @@
-const https = require("https");
-const unzip = require("unzipper");
-const mysql = require("mysql2");
-const crypto = require("crypto");
-const credentials = require("./credentials.json");
+/**
+ * Module for fetching Datatourisme events
+ * @module datatourisme
+ */
 
-loadDatatourismeZip(require("fs").createReadStream("flux-15996-202304191806.zip"));
-//loadDatatourismeZipFromUrl(credentials.DATATOURISME_GET_URL);
+import unzip from "unzipper";
+import crypto from "crypto";
+import fs from "fs";
+import stream from "stream";
+import EventEmitter from "events";
+import axios from "axios";
 
-function loadDatatourismeZipFromUrl(url) {
-    console.log("Downloading...");
-    https.request(url)
-        .on("response", function (response) {
-            loadDatatourismeZip(response);
-        })
-        .on("finish", () => console.log("Downloading done"))
-        .end();
+/**
+ * Get the index and events from a Datatourisme zip from url
+ * @param {String} url
+ * @param {EventEmitter} [emitter=new EventEmitter()]
+ * @returns {EventEmitter}
+ */
+function loadZipFromUrl(url, emitter = new EventEmitter()) {
+    axios.get(url, { responseType: "stream" })
+        .then(response => {
+            emitter.emit("progress", { downloading: true })
+            loadZip(response.data, emitter);
+            response.data
+                .on("finish", () => {
+                    emitter.emit("progress", { downloading: false });
+                });
+        });
+    return emitter;
 }
 
-function loadDatatourismeZip(stream) {
-    var events = new Map();
+/**
+ * Get the index and events from a Datatourisme zip from file
+ * @param {String} file
+ * @param {EventEmitter} [emitter=new EventEmitter()]
+ * @returns {EventEmitter}
+ */
+function loadZipFromFile(file, emitter = new EventEmitter()) {
+    return loadZip(fs.createReadStream(file), emitter);
+}
+
+/**
+ * Get the index and events from a Datatourisme zip in stream
+ * @param {stream.Readable} stream
+ * @param {EventEmitter} [emitter=new EventEmitter()]
+ * @returns {EventEmitter}
+ */
+function loadZip(stream, emitter = new EventEmitter()) {
+    var events = [];
     var index = null;
-    var count = 0;
-    process.stdout.write("Unzipping and parsing events...\r");
+    emitter.emit("progress", { unzipping: true });
     stream.pipe(unzip.Parse())
         .on("entry", function (entry) {
-            count++;
-            process.stdout.write("Unzipping and parsing events... (" + count + " files)\r");
+            emitter.emit("progress", { unzipped: 1 });
             if (entry.path == "index.json") {
                 parseJSONFromStream(entry).then(obj => index = obj);
+                emitter.emit("progress", { index: 1 })
             } else if (entry.path.endsWith(".json")) {
-                parseJSONFromStream(entry).then(obj => events.set(entry.path, parseEvent(obj)));
+                parseJSONFromStream(entry).then(obj => {
+                    let event = parseEvent(obj);
+                    events.push(event);
+                    emitter.emit("events", [event]);
+                    emitter.emit("progress", { events: 1 });
+                });
             } else {
                 entry.autodrain();
             }
         })
         .on("finish", () => {
-            console.log("Unzipping and parsing events done (" + events.size + " events)");
-            if (index) console.log("index.json found");
-            updateDatabase(index, events);
+            emitter.emit("progress", { unzipping: false });
+            emitter.emit("end", events);
         })
-        .on("error", console.error);
+        .on("error", error => emitter.emit("error", error));
+    return emitter;
 }
 
+
+/**
+ * Parse a JSON from a stream
+ * @param {stream.Readable} stream
+ * @returns {Promise<Object>}
+ */
 async function parseJSONFromStream(stream) {
     return new Promise((resolve, reject) => {
         var chunks = [];
@@ -53,6 +91,11 @@ async function parseJSONFromStream(stream) {
     });
 }
 
+/**
+ * Parse a Datatourisme event to an Event
+ * @param {Object} datatourismeEvent
+ * @returns {Event}
+ */
 function parseEvent(datatourismeEvent) {
     var id = datatourismeEvent["dc:identifier"];
     if (id.length > 32)
@@ -60,8 +103,8 @@ function parseEvent(datatourismeEvent) {
     var address = datatourismeEvent.isLocatedAt[0]["schema:address"][0];
     var title = datatourismeEvent["rdfs:label"].fr[0];
     var description = (datatourismeEvent.hasDescription?.[0]?.["dc:description"] || datatourismeEvent["rdfs:comment"])?.fr?.[0] ?? "";
-    var takesPlaceAt = datatourismeEvent.takesPlaceAt.filter(t => new Date(t.endDate||t.startDate) >= new Date()).sort((a,b)=>new Date(a)-new Date(b))[0];
-    if (!takesPlaceAt) takesPlaceAt = datatourismeEvent.takesPlaceAt.sort((a,b)=>new Date(b)-new Date(a))[0];
+    var takesPlaceAt = datatourismeEvent.takesPlaceAt.filter(t => new Date(t.endDate || t.startDate) >= new Date()).sort((a, b) => new Date(a) - new Date(b))[0];
+    if (!takesPlaceAt) takesPlaceAt = datatourismeEvent.takesPlaceAt.sort((a, b) => new Date(b) - new Date(a))[0];
     return {
         id: "DT" + id,
         title,
@@ -71,67 +114,45 @@ function parseEvent(datatourismeEvent) {
         end: (takesPlaceAt.endDate || takesPlaceAt.startDate) + " " + (takesPlaceAt.endTime || ""),
         placename: [address["schema:addressLocality"], address["schema:postalCode"], address["schema:streetAddress"]].join(", "),
         categories: findCategories(datatourismeEvent["@type"].concat(datatourismeEvent.hasTheme?.map(theme => theme["@id"]) ?? []), title, description),
-        public: 1,
+        public: true,
         lng: datatourismeEvent.isLocatedAt[0]["schema:geo"]["schema:longitude"],
         lat: datatourismeEvent.isLocatedAt[0]["schema:geo"]["schema:latitude"],
         images: (datatourismeEvent.hasMainRepresentation || []).concat(datatourismeEvent.hasRepresentation || []).reduce((acc, rep) => {
             return acc.concat(rep?.["ebucore:hasRelatedResource"]?.reduce((acc, res) => {
                 return acc.concat(res?.["ebucore:locator"] ?? []);
             }, []) ?? []);
-        }, []) ?? []
+        }, []) ?? [],
+        lastUpdate: datatourismeEvent.lastUpdateDatatourisme
     };
 }
 
-function updateDatabase(index, events) {
-    console.log("Index contains " + index.length + " events")
-    console.log("Connecting to database...");
-    var connection = mysql.createConnection({
-        host: credentials.EVENTS_DB_HOSTNAME,
-        user: credentials.EVENTS_DB_USER,
-        password: credentials.EVENTS_DB_PASSWORD,
-        database: credentials.EVENTS_DB_NAME
-    });
-    connection.connect();
-    process.stdout.write("Updating database...\r");
-    var count = 0, insertedCount = 0, tryInsertCount = 0;
-    var ids = {};
-    for (let i of index) {
-        if (new Date(i.lastUpdateDatatourisme) > new Date("2003-03-17")) {
-            count++;
-            let event = events.get("objects/" + i.file);
-            ids[event.id] = ids[event.id] ? ids[event.id] + 1 : 0;
-            connection.query(
-                "INSERT INTO `events` (`id`, `title`, `author`, `description`, `start`, `end`, `lng`, `lat`, `placename`, `categories`, `images`, `public`)"
-                + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-                + " ON DUPLICATE KEY UPDATE title = ?, author = ?, description = ?, start = ?, end = ?, lng = ?, lat = ?, placename = ?, categories = ?, images = ?, public = ?;",
-                [event.id, event.title, -807/*event.author*/, event.description, event.start, event.end, event.lng, event.lat, event.placename, event.categories.join(","), event.images.join(","), event.public,
-                event.title, -807/*event.author*/, event.description, event.start, event.end, event.lng, event.lat, event.placename, event.categories.join(","), event.images.join(","), event.public],
-            )
-                .on("error", console.error)
-                .on("result", result => {
-                    insertedCount += result.affectedRows;
-                })
-                .on("end", () => {
-                    tryInsertCount++;
-                    process.stdout.write("Updating database... (" + insertedCount + " events)\r");
-                    if (tryInsertCount == count) {
-                        console.log("Updating database done (" + insertedCount + " / " + count + " events)");
-                        console.log(count - Object.keys(ids).size + " dupplicate event ids", Object.keys(ids).filter(id => ids[id] > 1));
-                        console.log("Deleting old events...");
-                        connection.query("DELETE FROM `events` WHERE `id` LIKE 'DT%' AND `id` NOT IN (?)", [Object.keys(ids)])
-                            .on("error", console.error)
-                            .on("result", result => {
-                                console.log("Deleting old events done (" + result.affectedRows + " events)");
-                                connection.end();
-                            });
-                    }
-                });
-        }
-    }
-    if (count == 0) console.log("Updating database done (0 events)");
+/**
+ * Fetch all events from Datatourisme
+ * @param {String} datatourismeUrl Datatourisme stream link
+ * @returns {EventEmitter}
+ */
+function fetchAll(datatourismeUrl) {
+    return loadZipFromUrl(datatourismeUrl);
+}
+
+/**
+ * Fetch all events from Datatourisme and only return the last updated
+ * @param {String} datatourismeUrl
+ * @returns {EventEmitter}
+ */
+function fetchLastUpdated(datatourismeUrl, date = Date.now()) {
+    var emitter = new EventEmitter();
+    loadZipFromUrl(datatourismeUrl)
+        .on("events", events => emitter.emit("events", events.filter(e => new Date(e.lastUpdate) > date)))
+        .on("progress", progress => emitter.emit("progress", progress))
+        .on("error", error => emitter.emit("error", error))
+        .on("end", events => emitter.emit("end", events.filter(e => new Date(e.lastUpdate) > date)));
 }
 
 // https://gitlab.adullact.net/adntourisme/datatourisme/ontology/-/blob/master/thesaurus/thesaurus.ttl
+/**
+ * @type {Map<String, Array<String>>}
+ */
 var CATEGORIES = {
     "party": ["party", "fête"],
     "arts": [" arts", "artist", " art ", "artsandcraft", "visualart"],
@@ -170,6 +191,14 @@ var CATEGORIES = {
     "videogame": ["gaming", "jeu vid", "jeux vid", "game", "games", "video game", "playstation", "xbox", "nintendo"],
     "boardgame": ["boardgame", "jeu de société", "jeux de société", "jeu de plateau", "jeux de plateau", "jeu de cartes", "jeux de cartes", "jeu de rôle", "tarot", "belote"],
 };
+
+/**
+ * Find corresponding categories for a given Datatourisme event
+ * @param {Array<String>} dtCategories 
+ * @param {String} title 
+ * @param {String} description 
+ * @returns {Array<String>}
+ */
 function findCategories(dtCategories, title, description) {
     var result = [];
     for (let cat in CATEGORIES) {
@@ -188,3 +217,5 @@ function findCategories(dtCategories, title, description) {
     }
     return result;
 }
+
+export default { fetchAll, fetchLastUpdated, loadZipFromFile, loadZipFromUrl, loadZip };

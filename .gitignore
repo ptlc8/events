@@ -1,6 +1,6 @@
 # Secret files
 /api/credentials.php
-/datatourisme/credentials.json
+/aggregation/credentials.json
 .env
 
 # Logs
