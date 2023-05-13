@@ -1,12 +1,23 @@
 {
   "name": "events",
   "version": "0.0.0",
+  "description": "Ceci est un site web permettant aux utilisateurs de rechercher des événements autour d'eux ou d'en ajouter.",
   "private": true,
   "scripts": {
     "dev": "vite",
     "build": "vite build && cp -r api dist/",
     "preview": "vite preview"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ptlc8/events.git"
+  },
+  "author": "Ambi",
+  "license": "This work is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/ or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.",
+  "bugs": {
+    "url": "https://github.com/ptlc8/events/issues"
+  },
+  "homepage": "https://github.com/ptlc8/events#readme",
   "dependencies": {
     "@mapbox/mapbox-gl-geocoder": "^5.0.1",
     "mapbox-gl": "^2.14.1",
