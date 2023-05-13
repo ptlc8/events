@@ -103,5 +103,9 @@
     "thunderstorm":"Thunderstorm",
     "thunderstorm-with-slight-hail":"Thunderstorm with slight hail",
     "thunderstorm-with-heavy-hail":"Thunderstorm with heavy hail",
-    "unknown":"Unknown"
+    "unknown":"Unknown",
+    "status":["Unknown","Programmed","Rescheduled","Moved online","Postponed","Full","Cancelled"],
+    "by":"by",
+    "contact":"Contact",
+    "registration":"Registration"
 }

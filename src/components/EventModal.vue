@@ -2,10 +2,11 @@
   <Transition name="modal">
     <div class="container" v-if="show" @click.self="close">
       <div class="modal">
-        <div class="banner" :style="'background-image: url(\'' + event.images[0] + '\');'"></div>
+        <div class="banner" :style="'background-image: url(\'' + banner + '\');'"></div>
         <img class="close" src="@/assets/icons/cross.svg" @click="close">
         <div class="body">
           <span class="title">{{ event.title }}</span>
+          <span class="author">{{ $text.get("by") }} {{ event.author }}</span>
           📍 {{ event.placename }}
           <div class="categories">
             <span v-for="cat in event.categories">{{ $text.get(cat) }}</span>
@@ -26,6 +27,15 @@
             <h3>🌡️ {{ $text.get('weather') }}</h3>
             <Weather :datetime="event.start" :lat="event.lat" :lng="event.lng"></Weather>
             <hr />
+            <div v-if="event.contact.length > 0">
+              <h3>📞 {{ $text.get('contact') }}</h3>
+              <Contacts :contacts="event.contact"></Contacts>
+              <hr />
+            </div>
+            <div v-if="event.registration.length > 0">
+              <h3>📝 {{ $text.get('registration') }}</h3>
+              <Contacts :contacts="event.registration"></Contacts>
+            </div>
             <button class="show-on-map" @click="showOnMap">📍 {{ $text.get('showonmap') }}</button>
             <button class="add-fav" @click="addToFavorites">⭐ {{ $text.get('addtofav') }}</button>
             <button v-if="canShare()" class="large-share-button" @click="share()">🚀 Partager</button>
@@ -48,7 +58,10 @@
             </div>
           </div>
           <div class="images">
-            <img v-for="img in event.images" :src="img">
+            <figure v-for="(img, i) in event.images">
+              <img :src="img">
+              <figcaption>{{ getImageCredits(i) }}</figcaption>
+            </figure>
           </div>
           <div class="footer">Ça a l'air chouette, non ?! 🦉</div>
         </div>
@@ -60,6 +73,7 @@
 <script>
 import AgendaPage from "./AgendaPage.vue";
 import Weather from "./Weather.vue";
+import Contacts from "./Contacts.vue";
 export default {
   name: "EventModal",
   props: {
@@ -73,7 +87,7 @@ export default {
     }
   },
   emits: ['close'],
-  components: { AgendaPage, Weather },
+  components: { AgendaPage, Weather, Contacts },
   methods: {
     close() {
       this.$emit("close");
@@ -102,12 +116,19 @@ export default {
     showOnMap() {
       //this.close();
       this.$router.push({ name: "map", query: { show: this.event.id } });
+    },
+    getImageCredits(i) {
+      return this.event.imagesCredits.length > 0 ? this.event.imagesCredits[i % this.event.imagesCredits.length] : "";
     }
   },
   computed: {
     url() {
       return document.location.origin + import.meta.env.VITE_BASE_URL + '?e=' + this.event.id;
-    }
+    },
+    banner() {
+      return this.event.images[0]
+        ?? "https://source.unsplash.com/200x200/?event+" + this.event.categories.join("+");
+      }
   }
 };
 </script>
@@ -174,6 +195,12 @@ export default {
     display: block;
     margin-left: 1em;
     line-height: 1;
+    margin-bottom: .2em;
+  }
+
+  .author {
+    display: block;
+    margin-left: .5em;
     margin-bottom: .5em;
   }
 
@@ -242,7 +269,10 @@ export default {
         padding-top: 100%;
         border-radius: .2em;
 
-        @each $social in facebook twitter whatsapp email tumblr messenger telegram /*reddit linkedin line viber skype wechat*/ {
+        @each $social in facebook twitter whatsapp email tumblr messenger telegram
+
+        /*reddit linkedin line viber skype wechat*/
+          {
           &.#{$social} {
             background-image: url("@/assets/icons/socials/#{$social}.svg");
           }
@@ -271,10 +301,22 @@ export default {
     flex-wrap: wrap;
     align-items: flex-start;
 
-    img {
+    figure {
       flex: 1;
-      width: 14em;
-      margin: .5em;
+      
+      img {
+        display: block;
+        width: 14em;
+        min-width: calc(100% - 1em);
+        margin: .5em .5em 0 .5em;
+      }
+
+      figcaption {
+        font-size: .8em;
+        text-align: center;
+        color: gray;
+        font-style: italic;
+      }
     }
   }
 
@@ -314,5 +356,4 @@ export default {
       }
     }
   }
-}
-</style>
+}</style>

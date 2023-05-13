@@ -2,7 +2,7 @@
     <article>
         <span class="title">{{ event.title }}</span>
         <div class="wrapper">
-            <div class="picture" :style="'background-image: url(\'' + event.images[0] + '\');'"></div>
+            <div class="picture" :style="'background-image: url(\'' + banner + '\');'"></div>
             <div class="infos">
                 <span class="description">{{ event.description }}</span>
                 <span class="categories">
@@ -27,7 +27,13 @@ export default {
             required: true
         }
     },
-    emits: ["click"]
+    emits: ["click"],
+    computed: {
+        banner() {
+            return this.event.images[0]
+                ?? "https://source.unsplash.com/200x200/?event+" + this.event.categories.join("+");
+        }
+    }
 }
 </script>
 
