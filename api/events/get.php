@@ -107,8 +107,14 @@ while (($event = $result->fetch_assoc()) != null) {
     if (!$min) {
         $event['lng'] = floatval($event['lng']);
         $event['lat'] = floatval($event['lat']);
-        $event['categories'] = $event['categories']=="" ? [] : explode(",", $event['categories']);
-        $event['images'] = $event['images']!="" ? explode(",", $event['images']) : [];
+        $event['categories'] = parseDatabaseArray($event['categories']);
+        $event['images'] = parseDatabaseArray($event['images']);
+        $event['imagesCredits'] = parseDatabaseArray($event['imagesCredits']);
+        $event['contact'] = parseDatabaseArray($event['contact']);
+        $event['registration'] = parseDatabaseArray($event['registration']);
+        $event['public'] = boolval($event['public']);
+        unset($event['source']);
+        unset($event['sourceUrl']);
         array_push($events, $event);
     } else {
         array_push($events, array($event['id'], floatval($event['lng']), floatval($event['lat']), $event['title']));

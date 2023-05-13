@@ -1,22 +1,23 @@
 /**
  * Module for fetching Datatourisme events
  * @module datatourisme
+ * @see https://www.datatourisme.fr
  */
 
 import unzip from "unzipper";
 import crypto from "crypto";
 import fs from "fs";
 import stream from "stream";
-import EventEmitter from "events";
 import axios from "axios";
+import { Event, Status, EventsFetch } from "./event.js";
 
 /**
  * Get the index and events from a Datatourisme zip from url
- * @param {String} url
- * @param {EventEmitter} [emitter=new EventEmitter()]
- * @returns {EventEmitter}
+ * @param {string} url
+ * @returns {EventsFetch}
  */
-function loadZipFromUrl(url, emitter = new EventEmitter()) {
+function loadZipFromUrl(url) {
+    var emitter = new EventsFetch();
     axios.get(url, { responseType: "stream" })
         .then(response => {
             emitter.emit("progress", { downloading: true })
@@ -31,21 +32,20 @@ function loadZipFromUrl(url, emitter = new EventEmitter()) {
 
 /**
  * Get the index and events from a Datatourisme zip from file
- * @param {String} file
- * @param {EventEmitter} [emitter=new EventEmitter()]
- * @returns {EventEmitter}
+ * @param {string} file
+ * @returns {EventsFetch}
  */
-function loadZipFromFile(file, emitter = new EventEmitter()) {
-    return loadZip(fs.createReadStream(file), emitter);
+function loadZipFromFile(file) {
+    return loadZip(fs.createReadStream(file));
 }
 
 /**
  * Get the index and events from a Datatourisme zip in stream
  * @param {stream.Readable} stream
- * @param {EventEmitter} [emitter=new EventEmitter()]
- * @returns {EventEmitter}
+ * @param {EventsFetch} [emitter=new EventsFetch()]
+ * @returns {EventsFetch}
  */
-function loadZip(stream, emitter = new EventEmitter()) {
+function loadZip(stream, emitter = new EventsFetch()) {
     var events = [];
     var index = null;
     emitter.emit("progress", { unzipping: true });
@@ -93,43 +93,54 @@ async function parseJSONFromStream(stream) {
 
 /**
  * Parse a Datatourisme event to an Event
- * @param {Object} datatourismeEvent
+ * @param {Object} dtEvent
  * @returns {Event}
  */
-function parseEvent(datatourismeEvent) {
-    var id = datatourismeEvent["dc:identifier"];
+function parseEvent(dtEvent) {
+    var id = dtEvent["dc:identifier"];
     if (id.length > 32)
         id = crypto.createHash('md5').update(id).digest('hex');
-    var address = datatourismeEvent.isLocatedAt[0]["schema:address"][0];
-    var title = datatourismeEvent["rdfs:label"].fr[0];
-    var description = (datatourismeEvent.hasDescription?.[0]?.["dc:description"] || datatourismeEvent["rdfs:comment"])?.fr?.[0] ?? "";
-    var takesPlaceAt = datatourismeEvent.takesPlaceAt.filter(t => new Date(t.endDate || t.startDate) >= new Date()).sort((a, b) => new Date(a) - new Date(b))[0];
-    if (!takesPlaceAt) takesPlaceAt = datatourismeEvent.takesPlaceAt.sort((a, b) => new Date(b) - new Date(a))[0];
+    var address = dtEvent.isLocatedAt[0]["schema:address"][0];
+    var title = dtEvent["rdfs:label"].fr[0];
+    var description = (dtEvent.hasDescription?.[0]?.["dc:description"] || dtEvent["rdfs:comment"])?.fr?.[0] ?? "";
+    var takesPlaceAt = dtEvent.takesPlaceAt.filter(t => new Date(t.endDate || t.startDate) >= new Date()).sort((a, b) => new Date(a) - new Date(b))[0];
+    if (!takesPlaceAt) takesPlaceAt = dtEvent.takesPlaceAt.sort((a, b) => new Date(b) - new Date(a))[0];
     return {
         id: "DT" + id,
         title,
-        author: datatourismeEvent.hasBeenCreatedBy["schema:legalName"],
+        author: dtEvent.hasBeenCreatedBy["schema:legalName"],
         description,
         start: takesPlaceAt.startDate + " " + (takesPlaceAt.startTime || ""),
         end: (takesPlaceAt.endDate || takesPlaceAt.startDate) + " " + (takesPlaceAt.endTime || ""),
+        lng: dtEvent.isLocatedAt[0]["schema:geo"]["schema:longitude"],
+        lat: dtEvent.isLocatedAt[0]["schema:geo"]["schema:latitude"],
         placename: [address["schema:addressLocality"], address["schema:postalCode"], address["schema:streetAddress"]].join(", "),
-        categories: findCategories(datatourismeEvent["@type"].concat(datatourismeEvent.hasTheme?.map(theme => theme["@id"]) ?? []), title, description),
+        categories: findCategories(dtEvent["@type"].concat(dtEvent.hasTheme?.map(theme => theme["@id"]) ?? []), title, description),
+        images: (dtEvent.hasMainRepresentation || []).concat(dtEvent.hasRepresentation || []).map(rep =>
+            rep["ebucore:hasRelatedResource"]?.map(res =>
+                res["ebucore:locator"] ?? []
+            )?.flat() ?? []
+        ).flat(),
+        imagesCredits: (dtEvent.hasMainRepresentation || []).concat(dtEvent.hasRepresentation || []).map(rep =>
+            rep["ebucore:hasAnnotation"]?.map(ann =>
+                ann.credits ?? ann["ebucore:isCoveredBy"] ?? []
+            )?.flat() ?? []
+        ).flat(),
+        status: Status.programmed,
+        contact: dtEvent.hasContact.map(c => [c["schema:email"] ?? [], c["schema:telephone"] ?? [], c["foaf:homepage"] ?? []].flat()).flat(),
+        registration: dtEvent.hasBookingContact ? dtEvent.hasBookingContact.map(c => [c["schema:email"] ?? [], c["schema:telephone"] ?? [], c["foaf:homepage"] ?? []].flat()).flat() : [],
         public: true,
-        lng: datatourismeEvent.isLocatedAt[0]["schema:geo"]["schema:longitude"],
-        lat: datatourismeEvent.isLocatedAt[0]["schema:geo"]["schema:latitude"],
-        images: (datatourismeEvent.hasMainRepresentation || []).concat(datatourismeEvent.hasRepresentation || []).reduce((acc, rep) => {
-            return acc.concat(rep?.["ebucore:hasRelatedResource"]?.reduce((acc, res) => {
-                return acc.concat(res?.["ebucore:locator"] ?? []);
-            }, []) ?? []);
-        }, []) ?? [],
-        lastUpdate: datatourismeEvent.lastUpdateDatatourisme
+        createdAt: dtEvent.creationDate,
+        updatedAt: dtEvent.lastUpdateDatatourisme.replace("Z", "+00:00"),
+        source: "datatourisme",
+        sourceUrl: dtEvent["@id"]
     };
 }
 
 /**
  * Fetch all events from Datatourisme
- * @param {String} datatourismeUrl Datatourisme stream link
- * @returns {EventEmitter}
+ * @param {string} datatourismeUrl Datatourisme stream link
+ * @returns {EventsFetch}
  */
 function fetchAll(datatourismeUrl) {
     return loadZipFromUrl(datatourismeUrl);
@@ -137,21 +148,22 @@ function fetchAll(datatourismeUrl) {
 
 /**
  * Fetch all events from Datatourisme and only return the last updated
- * @param {String} datatourismeUrl
- * @returns {EventEmitter}
+ * @param {string} datatourismeUrl
+ * @returns {EventsFetch}
  */
 function fetchLastUpdated(datatourismeUrl, date = Date.now()) {
-    var emitter = new EventEmitter();
+    var emitter = new EventsFetch();
     loadZipFromUrl(datatourismeUrl)
-        .on("events", events => emitter.emit("events", events.filter(e => new Date(e.lastUpdate) > date)))
+        .on("events", events => emitter.emit("events", events.filter(e => new Date(e.updatedAt) > date)))
         .on("progress", progress => emitter.emit("progress", progress))
         .on("error", error => emitter.emit("error", error))
-        .on("end", events => emitter.emit("end", events.filter(e => new Date(e.lastUpdate) > date)));
+        .on("end", events => emitter.emit("end", events.filter(e => new Date(e.updatedAt) > date)));
+    return emitter;
 }
 
 // https://gitlab.adullact.net/adntourisme/datatourisme/ontology/-/blob/master/thesaurus/thesaurus.ttl
 /**
- * @type {Map<String, Array<String>>}
+ * @type {Map<string, Array<string>>}
  */
 var CATEGORIES = {
     "party": ["party", "fête"],
@@ -194,10 +206,10 @@ var CATEGORIES = {
 
 /**
  * Find corresponding categories for a given Datatourisme event
- * @param {Array<String>} dtCategories 
- * @param {String} title 
- * @param {String} description 
- * @returns {Array<String>}
+ * @param {Array<string>} dtCategories 
+ * @param {string} title 
+ * @param {string} description 
+ * @returns {Array<string>}
  */
 function findCategories(dtCategories, title, description) {
     var result = [];

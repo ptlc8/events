@@ -6,6 +6,8 @@
 import mysql from "mysql2";
 import EventEmitter from "events";
 
+const eventsColumns = ["title", "author", "description", "start", "end", "lng", "lat", "placename", "categories", "images", "imagesCredits", "status", "contact", "registration", "public", "createdAt", "updatedAt", "source", "sourceUrl"];
+
 /**
  * Class for updating the events database
  * @class
@@ -18,7 +20,7 @@ export default class Database extends EventEmitter {
     constructor(connectionConfig) {
         super();
         /** @type {mysql.Pool} */
-        this.pool = mysql.createPool(connectionConfig);
+        this.pool = mysql.createPool({ ...connectionConfig, flags: [connectionConfig.flags, "-FOUND_ROWS"].join(",") });
         /** @type {Map<string, Array<function>>} */
         this.listeners = {};
         /** @type {Map<string, number>} */
@@ -36,16 +38,21 @@ export default class Database extends EventEmitter {
                 if (!this.keys[event.id]) this.keys[event.id] = 0;
                 else this.emit("progress", { dupplicate: 1 });
                 this.keys[event.id]++;
+                var values = Object.keys(event)
+                    .filter(k => eventsColumns.includes(k))
+                    .reduce((obj, k) => {
+                        obj[k] = event[k] instanceof Array ? event[k].map(v => v.replace("\\", "\\\\").replace(",", "\\,")).join(",") : event[k];
+                        return obj;
+                    }, {});
                 this.pool.query(
-                    "INSERT INTO `events` (`id`, `title`, `author`, `description`, `start`, `end`, `lng`, `lat`, `placename`, `categories`, `images`, `public`)"
-                    + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-                    + " ON DUPLICATE KEY UPDATE title = ?, author = ?, description = ?, start = ?, end = ?, lng = ?, lat = ?, placename = ?, categories = ?, images = ?, public = ?;",
-                    [event.id, event.title, -807/*event.author*/, event.description, event.start, event.end, event.lng, event.lat, event.placename, event.categories.join(","), event.images.join(","), event.public,
-                    event.title, -807/*event.author*/, event.description, event.start, event.end, event.lng, event.lat, event.placename, event.categories.join(","), event.images.join(","), event.public],
+                    "INSERT INTO `events` (`id`, " + Object.keys(values).map(k => "`" + k + "`").join(", ") + ")"
+                    + " VALUES (?, ?)"
+                    + " ON DUPLICATE KEY UPDATE ?;",
+                    [event.id].concat([Object.values(values)]).concat(values)
                 )
                     .on("error", error => this.emit("error", error))
                     .on("result", result => {
-                        this.emit("progress", { updated: result.affectedRows });
+                        this.emit("progress", { updated: result.affectedRows == 2 ? 1 : 0, inserted: result.affectedRows == 1 ? 1 : 0 });
                     })
                     .on("end", () => resolve);
             }

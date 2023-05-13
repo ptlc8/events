@@ -34,6 +34,30 @@ function queryDatabase(...$requestFrags) {
 	return $result;
 }
 
+function parseDatabaseArray($stringArray) {
+	if ($stringArray == "")
+		return [];
+	$array = [""];
+	$i = 0;
+	$ignoreNext = false;
+	foreach (str_split($stringArray) as $char) {
+		if (!$ignoreNext) {
+			if ($char == '\\') {
+				$ignoreNext = true;
+				continue;
+			}
+			if ($char == ',') {
+				$i++;
+				$array[$i] = "";
+				continue;
+			}
+		}
+		$ignoreNext = false;
+		$array[$i] .= $char;
+	}
+	return $array;
+}
+
 function exitError($error) {
     echo json_encode(array('success' => false, 'error' => $error));
     exit;
