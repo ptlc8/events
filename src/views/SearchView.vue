@@ -3,18 +3,13 @@
     <div class="fields">
       <div class="searchbar">
         <img src="@/assets/icons/search-icon.svg">
-        <input type="text" id="searchtext" :placeholder="$text.get('searchevents')" @keypress="search" @paste="search" @input="search" v-model="searchtext">
+        <input type="text" id="searchtext" :placeholder="$text.get('searchevents')" @keypress="search" @paste="search"
+          @input="search" v-model="searchtext">
       </div>
-      <select class="dateselect" v-model="searchdate" @change="search">
-        <option v-for="value in ['alldate', 'today', 'tomorrow', 'week', 'nextweek', 'month']" :value="value">
-          {{ $text.get(value) }}
-        </option>
-      </select>
-      <select class="timeselect" v-model="searchtime" @change="search">
-        <option v-for="value in ['alltime', 'now', 'morning', 'afternoon', 'evening', 'night']" :value="value">
-          {{ $text.get(value) }}
-        </option>
-      </select>
+      <IntervalSelect class="dateselect" type="date" :min="searchDate.min" :max="searchDate.max"
+        @change="date => (searchDate = date) && search()" :options="defaultDateOptions" />
+      <IntervalSelect class="timeselect" type="time" :min="searchTime.min" :max="searchTime.max"
+        @change="time => (searchTime = time) && search()" :options="defaultTimeOptions" />
       <MultiSelect class="catselect" :title="$text.get('categories')" @change="cats => (searchcats = cats) && search()"
         :options="EventsApi.getCategories().reduce((acc, c) => (acc[c] = $text.get(c)) && acc, {})" />
     </div>
@@ -28,7 +23,8 @@
 </template>
 
 <script>
-import MultiSelect from '../components/MultiSelect.vue';
+import MultiSelect from '../components/inputs/MultiSelect.vue';
+import IntervalSelect from '../components/inputs/IntervalSelect.vue';
 import EventPreview from '../components/EventPreview.vue';
 import EventsApi from '../api';
 import MessageBox from '../components/MessageBox.vue';
@@ -36,6 +32,7 @@ export default {
   name: 'SearchView',
   components: {
     MultiSelect,
+    IntervalSelect,
     EventPreview,
     MessageBox
   },
@@ -49,21 +46,23 @@ export default {
     return {
       events: [],
       searchtext: '',
-      searchdate: 'alldate',
-      searchtime: 'alltime',
+      searchDate: { min: this.formatRelativeDate(0), max: null },
+      searchTime: { min: null, max: null },
       searchcats: [],
-      lastSearchTime: 0
+      searchId: 0
     };
   },
   methods: {
     search() {
-      this.lastSearchTime = Date.now();
+      let searchId = ++this.searchId;
       setTimeout(() => {
-        if (Date.now() - 450 < this.lastSearchTime) return;
+        if (searchId != this.searchId) return;
         EventsApi.getEvents({
           text: this.searchtext,
-          date: this.searchdate,
-          time: this.searchtime,
+          datemin: this.searchDate.min,
+          datemax: this.searchDate.max,
+          timemin: this.searchTime.min,
+          timemax: this.searchTime.max,
           cats: this.searchcats,
           timezoneoffset: new Date().getTimezoneOffset()
         }).then(events => {
@@ -74,14 +73,44 @@ export default {
     searchMore() {
       EventsApi.getEvents({
         text: this.searchtext,
-        date: this.searchdate,
-        time: this.searchtime,
+        datemin: this.searchDate.min,
+        datemax: this.searchDate.max,
+        timemin: this.searchTime.min,
+        timemax: this.searchTime.max,
         cats: this.searchcats,
         timezoneoffset: new Date().getTimezoneOffset(),
         offset: this.events.length
       }).then(events => {
         this.events = this.events.concat(events);
       });
+    },
+    formatRelativeDate(days = 0) {
+      return new Date(Date.now() + days * 24 * 3600 * 1000).toISOString().split('T')[0];
+    },
+    formatRelativeTime(hours = 0) {
+      return new Date(Date.now() + (hours * 60 - new Date().getTimezoneOffset()) * 60 * 1000).toISOString().substring(11, 19);
+    }
+  },
+  computed: {
+    defaultDateOptions() {
+      return [
+        { min: this.formatRelativeDate(0), max: null, label: this.$text.get("fromtoday") },
+        { min: null, max: null, label: this.$text.get("alldate") },
+        { min: this.formatRelativeDate(0), max: this.formatRelativeDate(1), label: this.$text.get("today") },
+        { min: this.formatRelativeDate(1), max: this.formatRelativeDate(2), label: this.$text.get("tomorrow") },
+        { min: this.formatRelativeDate(0), max: this.formatRelativeDate(7), label: this.$text.get("week") },
+        { min: this.formatRelativeDate(0), max: this.formatRelativeDate(30), label: this.$text.get("month") }
+      ];
+    },
+    defaultTimeOptions() {
+      return [
+        { min: null, max: null, label: this.$text.get('alltime') },
+        { min: this.formatRelativeTime(-3), max: this.formatRelativeTime(3), label: this.$text.get('now') },
+        { min: '00:00', max: '06:00', label: this.$text.get('night') },
+        { min: '06:00', max: '12:00', label: this.$text.get('morning') },
+        { min: '12:00', max: '18:00', label: this.$text.get('afternoon') },
+        { min: '18:00', max: '00:00', label: this.$text.get('evening') }
+      ];
     }
   }
 }
@@ -147,7 +176,7 @@ section {
   gap: .5em;
 
   >* {
-    width: 24em;
+    width: 32em;
     flex-grow: 1;
   }
 }
@@ -168,4 +197,5 @@ section {
     width: 100%;
   }
 
-}</style>
+}
+</style>

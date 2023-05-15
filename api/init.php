@@ -18,13 +18,13 @@ function initDatabase() {
 
 // fonction de requête BDD
 function queryDatabase(...$requestFrags) {
+	global $mysqli;
 	$request = '';
 	$var = false;
 	foreach ($requestFrags as $frag) {
-	    $request .= ($var ? str_replace(array('\\', '\''), array('\\\\', '\\\''), $frag) : $frag);
+	    $request .= ($var ? $mysqli->real_escape_string($frag) : $frag);
 		$var = !$var;
 	}
-	global $mysqli;
 	if (!$result = $mysqli->query($request)) {
 		echo 'Erreur de requête côté serveur, veuillez réessayer plus tard';
 		if ($_SERVER['SERVER_NAME'] == 'localhost')
@@ -56,6 +56,25 @@ function parseDatabaseArray($stringArray) {
 		$array[$i] .= $char;
 	}
 	return $array;
+}
+
+function escapeDatabaseValue($value) {
+	global $mysqli;
+	return $mysqli->real_escape_string($value);
+}
+
+function parseDate($date, $default=false) {
+	$timestamp = strtotime($date);
+	if ($timestamp === false)
+		return $default;
+	return date("Y-m-d", $timestamp);
+}
+
+function parseTime($time, $default=false) {
+	$timestamp = strtotime($time);
+	if ($timestamp === false)
+		return $default;
+	return date("H:i:s", $timestamp);
 }
 
 function exitError($error) {

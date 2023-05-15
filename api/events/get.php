@@ -26,65 +26,57 @@ if (isset($_REQUEST['id'])) {
 } else {
     // Minified version of the request, less details but more events
     $min = isset($_REQUEST['min']);
-
-    $text = isset($_REQUEST['text']) ? $_REQUEST['text'] : "";
-    $date = isset($_REQUEST['date']) ? $_REQUEST['date'] : "alldate"; // alldate, today, tomorrow, week, nextweek, month
-    $time = isset($_REQUEST['time']) ? $_REQUEST['time'] : "alltime"; // alltime, morning(06h-12h), afternoon(12h-18), evening(18h-00h), night(00h-06h), now(-3h-+3h)
-    $categories = isset($_REQUEST['cats']) && is_array($_REQUEST['cats']) ? $_REQUEST['cats'] : array();
-    $limit = isset($_REQUEST['limit']) && is_numeric($_REQUEST['limit']) ? max(1, min(intval($_REQUEST['limit']), $min ? 10000 : 100)) : ($min ? 5000 : 50);
-    $offset = isset($_REQUEST['offset']) && is_numeric($_REQUEST['offset']) ? max(0, intval($_REQUEST['offset'])) : 0;
-
+    
+    // Timezone offset in minutes, TODO: use to convert dates from UTC to local time
     date_default_timezone_set("Etc/GMT");
     $timezoneOffset = (isset($_REQUEST['timezoneoffset'])) ? intval($_REQUEST['timezoneoffset']) : 0; // en minutes
     
-    if ($date == "today") {
-        $dateInf = date("Y-m-d", strtotime("now +".$timezoneOffset." minute"));
-        $dateSup = date("Y-m-d", strtotime("now +1 day +".$timezoneOffset." minute"));
-    } else if ($date == "tomorrow") {
-        $dateInf = date("Y-m-d", strtotime("now +1 day +".$timezoneOffset." minute"));
-        $dateSup = date("Y-m-d", strtotime("now +2 day +".$timezoneOffset." minute"));
-    } else if ($date == "week") {
-        $dateInf = date("Y-m-d", strtotime(date("Y-m-d", strtotime("now +".$timezoneOffset." minute"))." this week"));
-        $dateSup = date("Y-m-d", strtotime(date("Y-m-d", strtotime("now +".$timezoneOffset." minute"))." next week"));
-    } else if ($date == "nextweek") {
-        $dateInf = date("Y-m-d", strtotime(date("Y-m-d", strtotime("now +".$timezoneOffset." minute"))." next week"));
-        $dateSup = date("Y-m-d", strtotime(date("Y-m-d", strtotime("now +".$timezoneOffset." minute"))." next week +1 week"));
-    } else if ($date == "month") {
-        $dateInf = date("Y-m-01", strtotime("now +".$timezoneOffset." minute"));
-        $dateSup = date("Y-m-01", strtotime("now +".$timezoneOffset." minute +1 month"));
-    } else {
-        $dateInf = date("Y-m-d");
-    }
+    $request = "SELECT * FROM `events` WHERE public = '1'";
     
-    if (in_array($time, array("morning", "afternoon", "evening", "night"))) {
-        $timeInf = date("H:i:s", strtotime("today ".($time=="morning"?"+6 hour":($time=="afternoon"?"+12 hour":($time=="evening"?"+18 hour":"")))." +".$timezoneOffset." minute"));
-        $timeSup = date("H:i:s", strtotime("today ".($time=="morning"?"+12 hour":($time=="afternoon"?"+18 hour":($time=="evening"?"":"+6 hour")))." +".$timezoneOffset." minute"));
-    } else if ($time == "now") {
-        $timeInf = date("H:i:s", strtotime("now -3 hour"));
-        $timeSup = date("H:i:s", strtotime("now +3 hour"));
-    }
+    // Date filter
+    $dateInf = isset($_REQUEST['datemin']) ? parseDate($_REQUEST['datemin']) : date("Y-m-d");
+    $dateSup = isset($_REQUEST['datemax']) ? parseDate($_REQUEST['datemax']) : null;
+    if ($dateInf) $request .= " AND '$dateInf' <= CAST(start AS date)";
+    if ($dateSup) $request .= " AND CAST(start AS date) < '$dateSup'";
     
-    $request = "SELECT * FROM `events` WHERE public = '1' AND '$dateInf' <= CAST(start AS date)";
-    if (isset($dateSup)) $request .= " AND CAST(start AS date) < '$dateSup'";
+    // Categories filter
+    $categories = isset($_REQUEST['cats']) && is_array($_REQUEST['cats']) ? $_REQUEST['cats'] : array();
     foreach ($categories as $cat)
-        $request .= " AND categories LIKE '%".str_replace(array('\\', '\''), array('\\\\', '\\\''), $cat)."%'";
+    $request .= " AND categories LIKE '%".str_replace(array('\\', '\''), array('\\\\', '\\\''), $cat)."%'";
+    
+    // Text filter
+    $text = isset($_REQUEST['text']) ? $_REQUEST['text'] : "";
     foreach (explode(" ", $text) as $word) {
         if (strlen($word) < 3) continue;
         $word = str_replace(array('\\', '\''), array('\\\\', '\\\''), $word);
         $request .= " AND (title LIKE '%$word%' OR description LIKE '%$word%')";
     }
-    // TODO : si event dure plus de 24h, on ignore le time
+    
+    // Time filter
+    $timeInf = isset($_REQUEST['timemin']) ? parseTime($_REQUEST['timemin']) : null;
+    $timeSup = isset($_REQUEST['timemax']) ? parseTime($_REQUEST['timemax']) : null;
+    $request .= " AND (end > DATE_ADD(start, INTERVAL 1 DAY) OR "; // ignore time filters if event lasts more than 24h
     if (isset($timeInf, $timeSup)) {
         if (strtotime($timeInf) < strtotime($timeSup))
-            $request .= " AND ((CAST(start AS time) < CAST(end AS time) AND '$timeInf' <= CAST(end AS time) AND CAST(start AS time) <= '$timeSup') OR (CAST(end AS time) < CAST(start AS time) AND ('$timeInf' <= CAST(end AS time) OR CAST(start AS time) <= '$timeSup')))";
+        $request .= "((CAST(start AS time) < CAST(end AS time) AND '$timeInf' <= CAST(end AS time) AND CAST(start AS time) <= '$timeSup') OR (CAST(end AS time) < CAST(start AS time) AND ('$timeInf' <= CAST(end AS time) OR CAST(start AS time) <= '$timeSup')))";
         else
-            $request .= " AND (CAST(end AS time) < CAST(start AS time) OR (CAST(start AS time) < CAST(end AS time) AND ('$timeInf' <= CAST(end AS time) OR CAST(start AS time) <= '$timeSup')))";
+        $request .= "(CAST(end AS time) < CAST(start AS time) OR (CAST(start AS time) < CAST(end AS time) AND ('$timeInf' <= CAST(end AS time) OR CAST(start AS time) <= '$timeSup')))";
+    } else if (isset($timeInf)) {
+        $request .= "'$timeInf' < CAST(end AS time) OR '$timeInf' <= CAST(start AS time) OR CAST(end AS time) < CAST(start AS time)";
+    } else if (isset($timeSup)) {
+        $request .= "CAST(start AS time) < '$timeSup' OR CAST(end AS time) <= '$timeSup' OR CAST(end AS time) < CAST(start AS time)";
+    } else {
+        $request .= "1 = 1";
     }
-    if (isset($_REQUEST['minlat']) && is_numeric($_REQUEST['minlat']))
-        $request .= " AND lat >= '".floatval($_REQUEST['minlat'])."'";
-    if (isset($_REQUEST['maxlat']) && is_numeric($_REQUEST['maxlat']))
-        $request .= " AND lat <= '".floatval($_REQUEST['maxlat'])."'";
+    $request .= ")";
     
+    // Latitude filter
+    if (isset($_REQUEST['minlat']) && is_numeric($_REQUEST['minlat']))
+    $request .= " AND lat >= '".floatval($_REQUEST['minlat'])."'";
+    if (isset($_REQUEST['maxlat']) && is_numeric($_REQUEST['maxlat']))
+    $request .= " AND lat <= '".floatval($_REQUEST['maxlat'])."'";
+    
+    // Longitude filter
     $minlng = isset($_REQUEST['minlng']) && is_numeric($_REQUEST['minlng']) ? floatval($_REQUEST['minlng']) : -180;
     $maxlng = isset($_REQUEST['maxlng']) && is_numeric($_REQUEST['maxlng']) ? floatval($_REQUEST['maxlng']) : 180;
     if ($maxlng - $minlng < 360) {
@@ -96,12 +88,16 @@ if (isset($_REQUEST['id'])) {
             $request .= " AND lng >= '$minlng' AND lng <= '$maxlng'";
         }
     }
+    
+    // Sort by start datetime, limit and offset
+    $limit = isset($_REQUEST['limit']) && is_numeric($_REQUEST['limit']) ? max(1, min(intval($_REQUEST['limit']), $min ? 10000 : 100)) : ($min ? 5000 : 50);
+    $offset = isset($_REQUEST['offset']) && is_numeric($_REQUEST['offset']) ? max(0, intval($_REQUEST['offset'])) : 0;
     $request .= " ORDER BY start ASC";
     $request .= " LIMIT $limit OFFSET $offset;";
     
     $result = queryDatabase($request);
 }
-
+    
 $events = [];
 while (($event = $result->fetch_assoc()) != null) {
     if (!$min) {

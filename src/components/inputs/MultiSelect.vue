@@ -1,6 +1,6 @@
 <template>
-    <div class="multiselect" onchange="search()" @mouseleave="opened = false" @mouseover="opened = true">
-        <span class="add" @click="opened = true">➕ {{ title }}</span>
+    <div class="multiselect" tabindex="0" onchange="search()" @mouseleave="close" @mouseover="open">
+        <span class="add" @click="open">➕ {{ title }}</span>
         <option v-for="option in value" :value="option" @click="removeOption">{{ options[option] }}</option>
         <div class="menu" v-if="opened">
             <hr />
@@ -37,6 +37,12 @@ export default {
         removeOption(event) {
             this.value.splice(this.value.indexOf(event.target.value), 1);
             this.$emit("change", this.value);
+        },
+        open() {
+            this.opened = true;
+        },
+        close() {
+            this.opened = false;
         }
     }
 }
