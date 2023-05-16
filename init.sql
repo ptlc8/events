@@ -26,7 +26,7 @@ ALTER TABLE `events`
   /*ADD KEY `author` (`author`)*/;
 
 /*ALTER TABLE `events`
-  ADD CONSTRAINT `events_author` FOREIGN KEY (`author`) REFERENCES `USERS` (`id`) ON DELETE NO ACTION ON UPDATE CASCADE;*/
+  ADD CONSTRAINT `events_author` FOREIGN KEY (`author`) REFERENCES `users` (`id`) ON DELETE NO ACTION ON UPDATE CASCADE;*/
 
 CREATE TABLE `favorites` (
   `user` INT NOT NULL ,
@@ -34,6 +34,8 @@ CREATE TABLE `favorites` (
 ) ENGINE = InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 ALTER TABLE `favorites`
-  ADD CONSTRAINT `favorites_events` FOREIGN KEY (`event`) REFERENCES `events` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `favorites_event` FOREIGN KEY (`event`) REFERENCES `events` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  /*ADD CONSTRAINT `favorites_user` FOREIGN KEY (`user`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,*/
+  ADD UNIQUE `favorites_unique` (`user`, `event`);
 
 COMMIT;

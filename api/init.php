@@ -63,6 +63,17 @@ function escapeDatabaseValue($value) {
 	return $mysqli->real_escape_string($value);
 }
 
+function getLoggedUser() {
+	session_start();
+    // connecté à un compte ? // TODO : sessionToken ?
+    if (!isset($_SESSION['username'], $_SESSION['password'])) exitError("not logged");
+	$userRequest = queryDatabase("SELECT * FROM USERS WHERE `name` = '", $_SESSION['username'], "' and `password` = '", $_SESSION['password'], "'");
+	if ($userRequest->num_rows === 0) {
+		return false;
+	}
+	return $userRequest->fetch_assoc();
+}
+
 function parseDate($date, $default=false) {
 	$timestamp = strtotime($date);
 	if ($timestamp === false)

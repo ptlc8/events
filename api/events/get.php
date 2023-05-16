@@ -4,25 +4,34 @@ include('../init.php');
 
 initDatabase();
 
+// Add fav if logged
+$user = getLoggedUser();
+if (!$user) {
+    $request = "SELECT * FROM `events` WHERE 1 = 1";
+} else {
+    $request = "SELECT events.*, T.fav FROM `events` LEFT JOIN (SELECT *, TRUE AS fav FROM favorites WHERE user = '".$user['id']."') AS T ON event = events.id WHERE 1 = 1";
+}
+
 if (isset($_REQUEST['id'])) {
     
-    $result = queryDatabase("SELECT * FROM `events` WHERE id = '", $_REQUEST['id'],"'");
+    // Event details by id
+    $request .= " AND id = '".escapeDatabaseValue($_REQUEST['id'])."';";
     $min = false;
     
-} else if (isset($_REQUEST['favorite']) || isset($_REQUEST['mine'])) {
+} else if (isset($_REQUEST['favorite'])) {
     
-    session_start();
-    // connecté à un compte ? // TODO : sessionToken ?
-    if (!isset($_SESSION['username'], $_SESSION['password'])) exitError("not logged");
-	$userRequest = queryDatabase("SELECT * FROM USERS WHERE `name` = '", $_SESSION['username'], "' and `password` = '", $_SESSION['password'], "'");
-	if ($userRequest->num_rows === 0) {
-        exitError("not logged");
-	}
-	$user = $userRequest->fetch_assoc();
-    
-    $result = queryDatabase("SELECT * FROM events".(isset($_REQUEST['favorite']) ? " JOIN favorites ON event = events.id WHERE user = '".$user['id']."'" : "").(isset($_REQUEST['mine']) ? " WHERE author = '".$user['id']."'" : ""));
+    // Events favorited by the logged user
+    if (!$user) exitError("not logged");
+    $request = "SELECT *, TRUE AS fav FROM events JOIN favorites ON event = events.id WHERE user = '".$user['id']."';";
     $min = false;
-    
+
+} else if (isset($_REQUEST['mine'])) {
+
+    // Events created by the logged user
+    if (!$user) exitError("not logged");
+    $request .= " AND author = '".$user['id']."';";
+    $min = false;
+
 } else {
     // Minified version of the request, less details but more events
     $min = isset($_REQUEST['min']);
@@ -31,7 +40,7 @@ if (isset($_REQUEST['id'])) {
     date_default_timezone_set("Etc/GMT");
     $timezoneOffset = (isset($_REQUEST['timezoneoffset'])) ? intval($_REQUEST['timezoneoffset']) : 0; // en minutes
     
-    $request = "SELECT * FROM `events` WHERE public = '1'";
+    $request .= " AND public = '1'";
     
     // Date filter
     $dateInf = isset($_REQUEST['datemin']) ? parseDate($_REQUEST['datemin']) : date("Y-m-d");
@@ -94,9 +103,9 @@ if (isset($_REQUEST['id'])) {
     $offset = isset($_REQUEST['offset']) && is_numeric($_REQUEST['offset']) ? max(0, intval($_REQUEST['offset'])) : 0;
     $request .= " ORDER BY start ASC";
     $request .= " LIMIT $limit OFFSET $offset;";
-    
-    $result = queryDatabase($request);
 }
+
+$result = queryDatabase($request);
     
 $events = [];
 while (($event = $result->fetch_assoc()) != null) {

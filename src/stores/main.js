@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia';
+import { watch } from 'vue';
 
 export const useMainStore = defineStore('main', {
   state: () => ({
@@ -11,11 +12,21 @@ export const useMainStore = defineStore('main', {
     logged: state => state.username != null
   },
   actions: {
-    login(username) {
+    setLoggedUser(username) {
       this.username = username;
     },
-    logout() {
-      this.username = null;
+    login() {
+      return new Promise((resolve, reject) => {
+        if (this.logged) return resolve();
+        this.loggingIn = true;
+        watch(() => this.loggingIn, () => {
+          if (this.logged) resolve();
+          else reject("aborted by user");
+        });
+      });
+    },
+    endLoggingIn() {
+      this.loggingIn = false;
     }
   }
 });

@@ -2,10 +2,12 @@
 <template>
     <section>
         <h1>⭐ {{ $text.get('fav') }}</h1>
-        <MessageBox v-if="!$store.logged" :message="$text.get('logintofav')" :button="$text.get('login')" @click="$store.loggingIn = true" />
+        <MessageBox v-if="!$store.logged" :message="$text.get('logintofav')" :button="$text.get('login')" @click="$store.login" />
         <MessageBox v-else-if="!events.length" :message="$text.get('nofavorites')" :button="$text.get('searchthem')" @click="$router.push('/search')"></MessageBox>
         <div class="favorites">
-            <EventPreview v-for="event in events" :event="event" @click="$store.event = event"></EventPreview>
+            <EventPreview v-for="event in events" :event="event" @click="$store.event = event">
+                <button class="delete-event" @click="remove(event.id)">{{ $text.get('removefromfav') }}</button>
+            </EventPreview>
         </div>
     </section>
 </template>
@@ -42,6 +44,11 @@ export default {
             }).then(events => {
                 this.events = events;
             });
+        },
+        remove(id) {
+            EventsApi.removeFavorite(id).then(() => {
+                this.refresh();
+            });
         }
     }
 }
@@ -58,6 +65,10 @@ export default {
     >* {
         width: 24em;
         flex-grow: 1;
+    }
+
+    .delete-event {
+        background-color: indianred;
     }
 }
 </style>

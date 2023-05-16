@@ -2,7 +2,7 @@
   <section>
     <h1>👤 {{ $text.get('me') }}</h1>
     <MessageBox v-if="!$store.logged" :message="$text.get('notloggedin')" :button="$text.get('login')"
-      @click="$store.loggingIn = true" />
+      @click="$store.login" />
     <article v-else>
       <img class="avatar" width="200" height="200" src="https://source.unsplash.com/200x200/?user" />
       <h2>{{ $store.username }}</h2>
@@ -31,7 +31,7 @@ export default {
   methods: {
     logout() {
       EventsApi.logout();
-      this.$store.logout();
+      this.$store.setLoggedUser(null);
     },
     getLangName(code) {
       //return code.toUpperCase().replace(/./g, char => String.fromCodePoint(char.charCodeAt(0) + 127397));

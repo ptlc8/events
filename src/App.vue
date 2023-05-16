@@ -1,9 +1,9 @@
 <script>
 import { RouterLink, RouterView } from 'vue-router';
 import { watch } from 'vue';
-import LoginModal from './components/LoginModal.vue';
-import EventModal from './components/EventModal.vue';
-import EventsApi from './api';
+import LoginModal from '@/components/modals/LoginModal.vue';
+import EventModal from '@/components/modals/EventModal.vue';
+import EventsApi from '@/api';
 
 import orgaIcon from '@/assets/icons/orga.svg';
 import searchIcon from '@/assets/icons/search.svg';
@@ -46,7 +46,7 @@ export default {
     });
 
     EventsApi.getSelfUser().then(user => {
-      this.$store.login(user?.username);
+      this.$store.setLoggedUser(user?.username);
     });
   }
 }
@@ -64,7 +64,7 @@ export default {
   </nav>
 
   <EventModal :show="$store.event != null" :event="$store.event" @close="$store.event = null" />
-  <LoginModal :show="$store.loggingIn" @close="$store.loggingIn = false" />
+  <LoginModal :show="$store.loggingIn" @close="$store.endLoggingIn" />
 </template>
 
 <style lang="scss" scoped>

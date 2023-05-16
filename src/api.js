@@ -26,6 +26,12 @@ const EventsApi = {
     },
     getLocation: function () {
         return sendApiRequest("tools/location.php", {}, "Getting location");
+    },
+    addFavorite: function (id) {
+        return sendApiRequest("events/addfavorite.php", { id }, "Adding favorite " + id);
+    },
+    removeFavorite: function (id) {
+        return sendApiRequest("events/removefavorite.php", { id }, "Removing favorite " + id);
     }
 };
 
