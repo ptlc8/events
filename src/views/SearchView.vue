@@ -18,7 +18,7 @@
     </div>
     <MessageBox v-if="!events.length" :message="$text.get('noresults')" :button="$text.get('organizeit')"
       @click="$router.push('/orga')"></MessageBox>
-    <button v-else class="more-button" @click="searchMore()">Afficher plus d'évents</button>
+    <button v-else-if="canSearchMore" class="more-button" @click="searchMore()">Afficher plus d'évents</button>
   </section>
 </template>
 
@@ -49,7 +49,8 @@ export default {
       searchDate: { min: this.formatRelativeDate(0), max: null },
       searchTime: { min: null, max: null },
       searchcats: [],
-      searchId: 0
+      searchId: 0,
+      canSearchMore: false
     };
   },
   methods: {
@@ -64,9 +65,11 @@ export default {
           timemin: this.searchTime.min,
           timemax: this.searchTime.max,
           cats: this.searchcats,
-          timezoneoffset: new Date().getTimezoneOffset()
+          timezoneoffset: new Date().getTimezoneOffset(),
+          limit: 50
         }).then(events => {
           this.events = events;
+          this.canSearchMore = events.length == 50;
         });
       }, 500);
     },
@@ -79,9 +82,11 @@ export default {
         timemax: this.searchTime.max,
         cats: this.searchcats,
         timezoneoffset: new Date().getTimezoneOffset(),
+        limit: 50,
         offset: this.events.length
       }).then(events => {
         this.events = this.events.concat(events);
+        this.canSearchMore = events.length == 50;
       });
     },
     formatRelativeDate(days = 0) {
