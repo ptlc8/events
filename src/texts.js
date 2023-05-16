@@ -27,7 +27,7 @@ const Texts = function () {
             shortLang = newLang.match("[^\-]*")[0];
             if (!texts[shortLang]) {
                 texts[shortLang] = {};
-                return fetch("langs/" + shortLang + ".json").then(res => res.text()).then(function (response) {
+                return fetch(import.meta.env.VITE_BASE_URL + "/langs/" + shortLang + ".json").then(res => res.text()).then(function (response) {
                     texts[shortLang] = JSON.parse(response);
                 }).then(() => console.info("[Texts] Lang loaded: " + shortLang));
             }

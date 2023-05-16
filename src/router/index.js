@@ -26,7 +26,7 @@ const createMainRouter = async () => {
         }
       },
       {
-        path: "/fav",
+        path: "/me/fav",
         name: "fav",
         component: () => import("../views/FavoritesView.vue"),
         meta: {
@@ -46,7 +46,7 @@ const createMainRouter = async () => {
         }
       },
       {
-        path: "/orga",
+        path: "/me/orga",
         name: "orga",
         component: () => import("../views/OrganizeView.vue"),
         meta: {

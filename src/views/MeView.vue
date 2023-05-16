@@ -8,6 +8,12 @@
       <h2>{{ $store.username }}</h2>
       <button class="logout" @click="logout">{{ $text.get('logout') }}</button>
     </article>
+    <article class="button" @click="$router.push({name:'fav'})">
+      <h2>⭐ {{ $text.get('fav') }}</h2>
+    </article>
+    <article class="button" @click="$router.push({name:'orga'})">
+      <h2>📝 {{ $text.get('orga') }}</h2>
+    </article>
     <article>
       <h2>{{ $text.get('language') }}</h2>
       <select @change="$text.setLang($event.target.value, true).then($forceUpdate)">
@@ -52,6 +58,24 @@ article {
   display: flex;
   flex-direction: column;
   align-items: center;
+
+  &.button {
+    display: flex;
+    flex-direction: row;
+    cursor: pointer;
+
+    >* {
+      flex: 1;
+      text-align: center;
+    }
+
+    &::after {
+      content: '🞂';
+      content: 'ᐳ';
+      justify-self: flex-end;
+      margin-right: 8px;
+    }
+  }
 
   .avatar {
     display: block;

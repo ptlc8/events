@@ -5,10 +5,8 @@ import LoginModal from '@/components/modals/LoginModal.vue';
 import EventModal from '@/components/modals/EventModal.vue';
 import EventsApi from '@/api';
 
-import orgaIcon from '@/assets/icons/orga.svg';
 import searchIcon from '@/assets/icons/search.svg';
 import mapIcon from '@/assets/icons/map.svg';
-import favIcon from '@/assets/icons/fav.svg';
 import meIcon from '@/assets/icons/me.svg';
 
 export default {
@@ -22,10 +20,8 @@ export default {
   data() {
     return {
       tabs: [
-        { name: 'orga', icon: orgaIcon },
         { name: 'search', icon: searchIcon },
         { name: 'map', icon: mapIcon },
-        { name: 'fav', icon: favIcon },
         { name: 'me', icon: meIcon }
       ]
     };

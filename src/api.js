@@ -43,7 +43,7 @@ function sendApiRequest(endpoint, parameters, message) {
             .map(([k, v]) =>
                 v instanceof Array ? v.map(i => k + "[]=" + encodeURIComponent(i)).join("&") : k + "=" + encodeURIComponent(v)
             ).join("&");
-        fetch("api/" + endpoint + "?" + urlParameters)
+        fetch(import.meta.env.VITE_BASE_URL + "/api/" + endpoint + "?" + urlParameters)
             .then(res => res.json())
             .then(function (response) {
                 if (!response.success) {
