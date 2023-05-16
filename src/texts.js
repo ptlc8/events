@@ -3,6 +3,7 @@ const Texts = function () {
     var availableLangs = [];
     var texts = [];
     var lang;
+    var shortLang;
     return {
         async init(langs) {
             if (!langs || !langs.length) throw new Error("No languages provided to Texts.init()");
@@ -10,7 +11,7 @@ const Texts = function () {
             await this.setLang(window.localStorage.getItem("lang") ?? this.getNavigatorLang(), false);
         },
         get(id) {
-            return texts[lang]?.[id] ?? "[" + id + "]";
+            return texts[shortLang]?.[id] ?? "[" + id + "]";
         },
         getLang() {
             return lang;
@@ -22,12 +23,13 @@ const Texts = function () {
             } else if (save) {
                 window.localStorage.setItem("lang", newLang);
             }
-            lang = newLang.match("[^\-]*")[0];
-            if (!texts[lang]) {
-                texts[lang] = {};
-                return fetch("langs/" + lang + ".json").then(res => res.text()).then(function (response) {
-                    texts[lang] = JSON.parse(response);
-                }).then(() => console.info("[Texts] Lang loaded: " + lang));
+            lang = newLang;
+            shortLang = newLang.match("[^\-]*")[0];
+            if (!texts[shortLang]) {
+                texts[shortLang] = {};
+                return fetch("langs/" + shortLang + ".json").then(res => res.text()).then(function (response) {
+                    texts[shortLang] = JSON.parse(response);
+                }).then(() => console.info("[Texts] Lang loaded: " + shortLang));
             }
         },
         getAvailableLangs() {

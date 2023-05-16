@@ -5,12 +5,12 @@
       <div class="option" v-for="option in options" @click="void (_min = option.min) || (_max = option.max)">
         {{ option.label }}
       </div>
-      <label>date minimum</label>
+      <label>minimum</label>
       <div class="inputs-wrapper">
         <input :type="type" v-model="_min" />
         <button class="reset" @click="min=null">✖</button>
       </div>
-      <label>date maximum</label>
+      <label>maximum</label>
       <div class="inputs-wrapper">
         <input :type="type" v-model="_max" />
         <button class="reset" @click="max=null">✖</button>
