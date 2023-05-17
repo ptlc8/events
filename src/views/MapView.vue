@@ -14,7 +14,7 @@ import { StylesControl } from 'mapbox-gl-controls';
 import 'mapbox-gl-controls/lib/controls.css';
 
 import markerIcon from '@/assets/icons/marker.png';
-mapboxgl.accessToken = 'pk.eyJ1IjoicHRsYyIsImEiOiJja2Qxb2tmN2Uwc2s1MndxbXk2dmdjMGNrIn0.bame3uGYhs6O4cIFUGAkhA';
+mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
 
 export default {
     name: 'MapView',

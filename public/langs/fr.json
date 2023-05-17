@@ -109,5 +109,9 @@
     "status":["Inconnu","Programmé","Reprogrammé","Déplacé en ligne","Reporté","Complet","Annulé"],
     "by":"par",
     "contact":"Contact",
-    "registration":"Inscription"
+    "registration":"Inscription",
+    "sortbydate":"Trier par date",
+    "sortbyrelevance":"Trier par pertinence",
+    "sortbypopularity":"Trier par popularité",
+    "sortbydistance":"Trier par distance"
 }

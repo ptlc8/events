@@ -10,6 +10,15 @@
         @change="date => (searchDate = date) && search()" :options="defaultDateOptions" />
       <IntervalSelect class="timeselect" type="time" :min="searchTime.min" :max="searchTime.max"
         @change="time => (searchTime = time) && search()" :options="defaultTimeOptions" />
+      <select class="sort-select" v-model="searchSort" @change="search">
+        <option value="datetime">{{ $text.get('sortbydate') }}</option>
+        <option value="relevance">{{ $text.get('sortbyrelevance') }}</option>
+        <option value="popularity">{{ $text.get('sortbypopularity') }}</option>
+        <option value="distance">{{ $text.get('sortbydistance') }}</option>
+      </select>
+      <GeolocationInput class="geolocation-input" v-model="searchLocation" :placeholder="defaultLocationName"
+        @change="search" />
+      <DistanceInput class="distance-input" v-model="searchDistance" @input="search" />
       <MultiSelect class="catselect" :title="$text.get('categories')" @change="cats => (searchcats = cats) && search()"
         :options="EventsApi.getCategories().reduce((acc, c) => (acc[c] = $text.get(c)) && acc, {})" />
     </div>
@@ -28,19 +37,35 @@ import IntervalSelect from '../components/inputs/IntervalSelect.vue';
 import EventPreview from '../components/EventPreview.vue';
 import EventsApi from '../api';
 import MessageBox from '../components/MessageBox.vue';
+import GeolocationInput from '../components/inputs/GeolocationInput.vue';
+import DistanceInput from '../components/inputs/DistanceInput.vue';
 export default {
   name: 'SearchView',
   components: {
     MultiSelect,
     IntervalSelect,
     EventPreview,
-    MessageBox
-  },
+    MessageBox,
+    GeolocationInput,
+    DistanceInput
+},
   setup() {
     return { EventsApi };
   },
   mounted() {
     this.search();
+    EventsApi.getLocation().then(loc => {
+      fetch(`https://api.mapbox.com/search/searchbox/v1/reverse?longitude=${loc[0]}&latitude=${loc[1]}&access_token=${import.meta.env.VITE_MAPBOX_ACCESS_TOKEN}`)
+        .then(res => res.json())
+        .then(res => {
+          this.defaultLocationName = res.features[0].properties.place_formatted;
+        });
+      this.searchLocation = {
+        name: '',
+        lon: loc[0],
+        lat: loc[1]
+      };
+    });
   },
   data() {
     return {
@@ -49,8 +74,12 @@ export default {
       searchDate: { min: this.formatRelativeDate(0), max: null },
       searchTime: { min: null, max: null },
       searchcats: [],
+      searchLocation: null,
+      searchDistance: null,
+      searchSort: 'relevance',
       searchId: 0,
-      canSearchMore: false
+      canSearchMore: false,
+      defaultLocationName: ''
     };
   },
   methods: {
@@ -65,6 +94,10 @@ export default {
           timemin: this.searchTime.min,
           timemax: this.searchTime.max,
           cats: this.searchcats,
+          lon: this.searchLocation?.lon,
+          lat: this.searchLocation?.lat,
+          distance: this.searchDistance,
+          sort: this.searchSort,
           timezoneoffset: new Date().getTimezoneOffset(),
           limit: 50
         }).then(events => {
@@ -81,6 +114,7 @@ export default {
         timemin: this.searchTime.min,
         timemax: this.searchTime.max,
         cats: this.searchcats,
+        sort: this.searchSort,
         timezoneoffset: new Date().getTimezoneOffset(),
         limit: 50,
         offset: this.events.length
@@ -90,7 +124,7 @@ export default {
       });
     },
     formatRelativeDate(days = 0) {
-      return new Date(Date.now() + days * 24 * 3600 * 1000).toISOString().split('T')[0];
+      return new Date(Date.now() + (days * 24 * 60 - new Date().getTimezoneOffset()) * 60 * 1000).toISOString().split('T')[0];
     },
     formatRelativeTime(hours = 0) {
       return new Date(Date.now() + (hours * 60 - new Date().getTimezoneOffset()) * 60 * 1000).toISOString().substring(11, 19);
@@ -163,14 +197,24 @@ section {
 }
 
 .dateselect,
-.timeselect {
+.timeselect,
+.sort-select,
+.geolocation-input {
   flex-grow: 1;
-  width: 12em;
+  width: 24em;
+  min-width: 30%;
   margin-top: 0;
 }
 
 .catselect {
-  width: 50%;
+  min-width: 50%;
+  width: 24em;
+  flex-grow: 1;
+}
+
+.distance-input {
+  width: 8em;
+  min-width: 15%;
 }
 
 #results {
@@ -189,18 +233,5 @@ section {
 .more-button {
   display: block;
   margin: 1em auto;
-}
-
-@media (orientation: portrait) {
-
-  .dateselect,
-  .timeselect {
-    min-width: 40%;
-  }
-
-  .catselect {
-    width: 100%;
-  }
-
 }
 </style>

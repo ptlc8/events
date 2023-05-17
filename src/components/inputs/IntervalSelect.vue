@@ -112,7 +112,6 @@ export default {
   border-radius: 4px;
   padding: 12px 8px;
   box-shadow: 0 0 10px 2px rgba(0, 0, 0, 0.1);
-  margin-top: 10px;
   background-color: #fff;
   border: 0;
   font: 15px/20px "Open Sans", "Helvetica Neue", Arial, Helvetica, sans-serif;
@@ -135,17 +134,21 @@ export default {
   }
 
   .value {
-    margin: 1em;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    margin: 0 1em;
   }
 
   .dropdown {
     position: absolute;
     border-radius: 0 0 4px 4px;
     background-color: #fff;
+    top: 100%;
     left: 0;
     width: 100%;
     padding: 8px;
-    margin-top: 12px;
+    margin-top: -2px;
     display: flex;
     flex-direction: column;
     box-shadow: 0 5px 4px 2px rgba(0, 0, 0, .1);

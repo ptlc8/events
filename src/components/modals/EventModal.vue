@@ -107,7 +107,7 @@ export default {
           .catch(() => { });
       } else {
         this.$store.login()
-          .then(EventsApi.addFavorite(this.event.id)
+          .then(() => EventsApi.addFavorite(this.event.id)
             .then(() => this.event.fav = true)
           ).catch(() => { });
       }

@@ -16,6 +16,9 @@ const Texts = function () {
         getLang() {
             return lang;
         },
+        getShortLang() {
+            return shortLang;
+        },
         async setLang(newLang, save=false) {
             if (!availableLangs.includes(newLang)) {
                 console.error(newLang + " is not an available language");

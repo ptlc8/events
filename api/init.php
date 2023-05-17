@@ -66,12 +66,19 @@ function escapeDatabaseValue($value) {
 function getLoggedUser() {
 	session_start();
     // connecté à un compte ? // TODO : sessionToken ?
-    if (!isset($_SESSION['username'], $_SESSION['password'])) exitError("not logged");
+    if (!isset($_SESSION['username'], $_SESSION['password'])) return false;
 	$userRequest = queryDatabase("SELECT * FROM USERS WHERE `name` = '", $_SESSION['username'], "' and `password` = '", $_SESSION['password'], "'");
 	if ($userRequest->num_rows === 0) {
 		return false;
 	}
 	return $userRequest->fetch_assoc();
+}
+
+function getLocation() { // TODO: put result in session
+	$ip = $_SERVER['REMOTE_ADDR'];
+	$ipInfo = json_decode(file_get_contents("http://ipinfo.io/{$ip}/json"));
+	$ipLoc = isset($ipInfo->bogon) && $ipInfo->bogon ? "48.86,2.35" : $ipInfo->loc;
+	return array_reverse(array_map("floatval", explode(",", $ipLoc)));
 }
 
 function parseDate($date, $default=false) {
@@ -86,6 +93,10 @@ function parseTime($time, $default=false) {
 	if ($timestamp === false)
 		return $default;
 	return date("H:i:s", $timestamp);
+}
+
+function fixLongitude($lon) {
+    return fmod(fmod($lon, 360) + 540, 360) - 180;
 }
 
 function exitError($error) {

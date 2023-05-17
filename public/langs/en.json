@@ -108,5 +108,9 @@
     "status":["Unknown","Programmed","Rescheduled","Moved online","Postponed","Full","Cancelled"],
     "by":"by",
     "contact":"Contact",
-    "registration":"Registration"
+    "registration":"Registration",
+    "sortbydate":"Sort by date",
+    "sortbyrelevance":"Sort by relevance",
+    "sortbypopularity":"Sort by popularity",
+    "sortbydistance":"Sort by distance"
 }
