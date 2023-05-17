@@ -22,8 +22,8 @@ CREATE TABLE `events` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 ALTER TABLE `events`
-  ADD PRIMARY KEY (`id`),
-  /*ADD KEY `author` (`author`)*/;
+  ADD PRIMARY KEY (`id`)/*,
+  ADD KEY `author` (`author`)*/;
 
 /*ALTER TABLE `events`
   ADD CONSTRAINT `events_author` FOREIGN KEY (`author`) REFERENCES `users` (`id`) ON DELETE NO ACTION ON UPDATE CASCADE;*/

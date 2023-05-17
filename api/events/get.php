@@ -65,7 +65,7 @@ if (isset($_REQUEST['id'])) {
     $request .= " AND public = '1'";
     
     // Date filter
-    $dateInf = isset($_REQUEST['datemin']) ? parseDate($_REQUEST['datemin']) : null;
+    $dateInf = isset($_REQUEST['datemin']) ? parseDate($_REQUEST['datemin']) : date('Y-m-d');
     $dateSup = isset($_REQUEST['datemax']) ? parseDate($_REQUEST['datemax']) : null;
     if ($dateInf) $request .= " AND '$dateInf' <= CAST(start AS date)";
     if ($dateSup) $request .= " AND CAST(start AS date) < '$dateSup'";

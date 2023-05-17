@@ -88,6 +88,7 @@ export default {
         text-align: justify;
         line-height: 1.2;
         max-height: 5em;
+        word-break: break-word;
     }
 
     .categories {

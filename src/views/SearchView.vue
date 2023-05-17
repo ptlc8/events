@@ -200,7 +200,7 @@ section {
 .timeselect,
 .sort-select,
 .geolocation-input {
-  flex-grow: 1;
+  flex-grow: 10;
   width: 24em;
   min-width: 30%;
   margin-top: 0;
@@ -209,12 +209,13 @@ section {
 .catselect {
   min-width: 50%;
   width: 24em;
-  flex-grow: 1;
+  flex-grow: 10;
 }
 
 .distance-input {
   width: 8em;
   min-width: 15%;
+  flex-grow: 1;
 }
 
 #results {

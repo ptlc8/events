@@ -1,7 +1,8 @@
 <template>
-  <div class="geolocation-input">
-    <input type="text" v-model="query" @input="search" :placeholder="placeholder" />
-    <div class="results">
+  <div class="geolocation-input" @mouseenter="mouseover = true" @mouseleave="mouseover = false">
+    <input type="text" v-model="query" @input="search($event.target.value)" :placeholder="placeholder"
+      @focusin="focus = true" @focusout="focus = false" />
+    <div v-if="opened" class="results">
       <div v-for="result in results" class="result" @click="change(result)">{{ result.name }}</div>
       <button class="result reset" @click="change(null)" tabindex="-1">✖</button>
     </div>
@@ -26,7 +27,9 @@ export default {
   data() {
     return {
       query: '',
-      results: []
+      results: [],
+      focus: false,
+      mouseover: false
     };
   },
   watch: {
@@ -34,9 +37,14 @@ export default {
       this.query = value?.name ?? '';
     }
   },
+  computed: {
+    opened() {
+      return this.focus || this.mouseover;
+    }
+  },
   methods: {
-    search() {
-      fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(this.query)}.json?language=${this.$text.getShortLang()}&access_token=${import.meta.env.VITE_MAPBOX_ACCESS_TOKEN}`)
+    search(query = this.query) {
+      fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?language=${this.$text.getShortLang()}&access_token=${import.meta.env.VITE_MAPBOX_ACCESS_TOKEN}`)
         .then(res => res.json())
         .then(results => {
           this.results = results.features.map(f => ({
@@ -49,6 +57,7 @@ export default {
     change(value) {
       this.query = value?.name ?? '';
       this.$emit('update:modelValue', value);
+      this.mouseover = false;
     }
   }
 }
@@ -70,17 +79,13 @@ export default {
     left: 0;
     width: 100%;
     padding: 8px;
-    display: none;
+    display: flex;
     flex-direction: column;
     background-color: #fff;
     border-radius: 0 0 4px 4px;
     border-top: solid 1px var(--color-border);
     box-shadow: 0 5px 4px 2px rgba(0, 0, 0, .1);
     user-select: none;
-
-    &:hover {
-      display: flex;
-    }
 
     .result {
       padding: 2px 1em;
@@ -101,10 +106,6 @@ export default {
         background-color: indianred;
       }
     }
-  }
-
-  input:focus+.results {
-    display: flex;
   }
 }
 </style>
