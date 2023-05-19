@@ -1,5 +1,5 @@
 <template>
-    <div class="multiselect" tabindex="0" onchange="search()" @mouseleave="close" @mouseover="open">
+    <div class="multiselect" tabindex="0" @mouseleave="close" @mouseover="open">
         <span class="add" @click="open">➕ {{ title }}</span>
         <option v-for="option in value" :value="option" @click="removeOption">{{ options[option] }}</option>
         <div class="menu" v-if="opened">
@@ -22,21 +22,33 @@ export default {
         options: {
             type: Object,
             required: true
+        },
+        modelValue: {
+            type: Array,
+            required: false,
+            default: () => []
         }
     },
-    emits: ["change"],
+    emits: ["update:modelValue", "change"],
     data: () => ({
         opened: false,
         value: []
     }),
+    watch: {
+        modelValue(value) {
+            this.value = value;
+        }
+    },
     methods: {
         addOption(event) {
             this.value.push(event.target.value);
-            this.$emit("change", this.value);
+            this.$emit("update:modelValue", this.value);
+            this.$emit("change");
         },
         removeOption(event) {
             this.value.splice(this.value.indexOf(event.target.value), 1);
-            this.$emit("change", this.value);
+            this.$emit("update:modelValue", this.value);
+            this.$emit("change");
         },
         open() {
             this.opened = true;

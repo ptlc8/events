@@ -1,6 +1,6 @@
 <template>
   <div class="geolocation-input" @mouseenter="mouseover = true" @mouseleave="mouseover = false">
-    <input type="text" v-model="query" @input="search($event.target.value)" :placeholder="placeholder"
+    <input type="text" v-model="query" :placeholder="placeholder"
       @focusin="focus = true" @focusout="focus = false" />
     <div v-if="opened" class="results">
       <div v-for="result in results" class="result" @click="change(result)">{{ result.name }}</div>
@@ -16,7 +16,7 @@ export default {
     modelValue: {
       type: Object,
       required: false,
-      default: null
+      default: undefined
     },
     placeholder: {
       type: String,
@@ -24,6 +24,7 @@ export default {
       default: ''
     }
   },
+  emits: ['update:modelValue', 'change'],
   data() {
     return {
       query: '',
@@ -35,15 +36,8 @@ export default {
   watch: {
     modelValue(value) {
       this.query = value?.name ?? '';
-    }
-  },
-  computed: {
-    opened() {
-      return this.focus || this.mouseover;
-    }
-  },
-  methods: {
-    search(query = this.query) {
+    },
+    query(query) {
       fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?language=${this.$text.getShortLang()}&access_token=${import.meta.env.VITE_MAPBOX_ACCESS_TOKEN}`)
         .then(res => res.json())
         .then(results => {
@@ -53,10 +47,18 @@ export default {
             lat: f.center[1]
           }));
         });
-    },
+    }
+  },
+  computed: {
+    opened() {
+      return this.focus || this.mouseover;
+    }
+  },
+  methods: {
     change(value) {
       this.query = value?.name ?? '';
       this.$emit('update:modelValue', value);
+      this.$emit('change');
       this.mouseover = false;
     }
   }

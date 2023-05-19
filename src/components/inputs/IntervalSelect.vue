@@ -8,12 +8,12 @@
       <label>minimum</label>
       <div class="inputs-wrapper">
         <input :type="type" v-model="_min" />
-        <button class="reset" @click="min=null">✖</button>
+        <button class="reset" @click="_min=undefined">✖</button>
       </div>
       <label>maximum</label>
       <div class="inputs-wrapper">
         <input :type="type" v-model="_max" />
-        <button class="reset" @click="max=null">✖</button>
+        <button class="reset" @click="_max=undefined">✖</button>
       </div>
       <button @click="close">OK</button>
     </div>
@@ -24,50 +24,45 @@
 export default {
   name: "IntervalSelect",
   props: {
-    min: {
-      type: String,
+    modelValue: {
+      type: Object,
       required: false,
-      default: null
-    },
-    max: {
-      type: String,
-      required: false,
-      default: null
+      default: () => ({ min: undefined, max: undefined })
     },
     options: {
       type: Array,
       required: false,
-      default: []
+      default: () => []
     },
     type: {
       type: String,
       required: true
     }
   },
+  emits: ['change', 'update:modelValue'],
   data: () => ({
     opened: false,
     _min: null,
     _max: null
   }),
   watch: {
-    min(min) {
-      this._min = min;
-    },
-    max(max) {
-      this._max = max;
+    modelValue(value) {
+      this._min = value.min;
+      this._max = value.max;
     },
     _min(min) {
-      this.$emit('change', { min, max: this._max });
+      this.$emit('update:modelValue', { min, max: this._max });
+      this.$emit('change');
     },
     _max(max) {
-      this.$emit('change', { min: this._min, max });
+      this.$emit('update:modelValue', { min: this._min, max });
+      this.$emit('change');
     }
   },
   mounted() {
-    this._min = this.min;
-    this._max = this.max;
+    this._min = this.modelValue.min;
+    this._max = this.modelValue.max;
   },
-  emits: ['change'],
   methods: {
     open() {
       this.opened = true;

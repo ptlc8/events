@@ -52,6 +52,14 @@ const createMainRouter = async () => {
         meta: {
           title: Texts.get('orga')
         }
+      },
+      {
+        path: "/categories",
+        name: "categories",
+        component: () => import("../views/CategoriesView.vue"),
+        meta: {
+          title: Texts.get('categories')
+        }
       }
     ]
   });

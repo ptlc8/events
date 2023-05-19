@@ -3,31 +3,31 @@
     <div class="fields">
       <div class="searchbar">
         <img src="@/assets/icons/search-icon.svg">
-        <input type="text" id="searchtext" :placeholder="$text.get('searchevents')" @keypress="search" @paste="search"
-          @input="search" v-model="searchtext">
+        <input type="text" id="searchtext" :placeholder="$text.get('searchevents')" v-model="search.text"
+          @keypress="prelaunchSearch" @paste="prelaunchSearch" @input="prelaunchSearch">
       </div>
-      <IntervalSelect class="dateselect" type="date" :min="searchDate.min" :max="searchDate.max"
-        @change="date => (searchDate = date) && search()" :options="defaultDateOptions" />
-      <IntervalSelect class="timeselect" type="time" :min="searchTime.min" :max="searchTime.max"
-        @change="time => (searchTime = time) && search()" :options="defaultTimeOptions" />
-      <select class="sort-select" v-model="searchSort" @change="search">
+      <IntervalSelect class="dateselect" type="date" v-model="search.date" :options="defaultDateOptions"
+        @change="prelaunchSearch" />
+      <IntervalSelect class="timeselect" type="time" v-model="search.time" :options="defaultTimeOptions"
+        @change="prelaunchSearch" />
+      <select class="sort-select" v-model="search.sort" @change="prelaunchSearch">
         <option value="datetime">{{ $text.get('sortbydate') }}</option>
         <option value="relevance">{{ $text.get('sortbyrelevance') }}</option>
         <option value="popularity">{{ $text.get('sortbypopularity') }}</option>
         <option value="distance">{{ $text.get('sortbydistance') }}</option>
       </select>
-      <GeolocationInput class="geolocation-input" v-model="searchLocation" :placeholder="defaultLocationName"
-        @change="search" />
-      <DistanceInput class="distance-input" v-model="searchDistance" @input="search" />
-      <MultiSelect class="catselect" :title="$text.get('categories')" @change="cats => (searchcats = cats) && search()"
-        :options="EventsApi.getCategories().reduce((acc, c) => (acc[c] = $text.get(c)) && acc, {})" />
+      <GeolocationInput class="geolocation-input" v-model="search.gloc" :placeholder="defaultLocationName"
+        @change="prelaunchSearch" />
+      <DistanceInput class="distance-input" v-model="search.dist" @change="prelaunchSearch" />
+      <MultiSelect class="catselect" :title="$text.get('categories')" v-model="search.cats" @change="prelaunchSearch"
+        :options="categories.reduce((acc, c) => (acc[c] = $text.get(c)) && acc, {})" />
     </div>
     <div id="results">
       <EventPreview class="event" v-for="event in events" :event="event" @click="$store.event = event"></EventPreview>
     </div>
     <MessageBox v-if="!events.length" :message="$text.get('noresults')" :button="$text.get('organizeit')"
       @click="$router.push('/orga')"></MessageBox>
-    <button v-else-if="canSearchMore" class="more-button" @click="searchMore()">Afficher plus d'évents</button>
+    <button v-else-if="canSearchMore" class="more-button" @click="launchSearch(true)">Afficher plus d'évents</button>
   </section>
 </template>
 
@@ -48,78 +48,83 @@ export default {
     MessageBox,
     GeolocationInput,
     DistanceInput
-},
+  },
   setup() {
     return { EventsApi };
   },
   mounted() {
-    this.search();
+    this.search.text = this.$route.query.q ?? '';
+    this.search.cats = this.$route.query.c?.split(',') ?? [];
+    this.search.sort = this.$route.query.s ?? 'relevance';
+    [this.search.date.min, this.search.date.max] = this.$route.query.d?.split(',') ?? [];
+    [this.search.time.min, this.search.time.max] = this.$route.query.t?.split(',') ?? [];
+    // gloc
+    this.search.dist = isNaN(parseInt(this.$route.query.r)) ? undefined : parseInt(this.$route.query.r);
+
+    this.launchSearch();
+    EventsApi.getCategories().then(cats => this.categories = cats);
     EventsApi.getLocation().then(loc => {
       fetch(`https://api.mapbox.com/search/searchbox/v1/reverse?longitude=${loc[0]}&latitude=${loc[1]}&access_token=${import.meta.env.VITE_MAPBOX_ACCESS_TOKEN}`)
         .then(res => res.json())
         .then(res => {
           this.defaultLocationName = res.features[0].properties.place_formatted;
         });
-      this.searchLocation = {
-        name: '',
-        lon: loc[0],
-        lat: loc[1]
-      };
     });
   },
   data() {
     return {
+      categories: [],
       events: [],
-      searchtext: '',
-      searchDate: { min: this.formatRelativeDate(0), max: null },
-      searchTime: { min: null, max: null },
-      searchcats: [],
-      searchLocation: null,
-      searchDistance: null,
-      searchSort: 'relevance',
+      search: {
+        text: '',
+        date: { min: this.formatRelativeDate(0), max: undefined },
+        time: { min: undefined, max: undefined },
+        cats: [],
+        gloc: undefined,
+        dist: undefined,
+        sort: 'relevance',
+      },
       searchId: 0,
       canSearchMore: false,
       defaultLocationName: ''
     };
   },
   methods: {
-    search() {
+    prelaunchSearch() {
       let searchId = ++this.searchId;
       setTimeout(() => {
         if (searchId != this.searchId) return;
-        EventsApi.getEvents({
-          text: this.searchtext,
-          datemin: this.searchDate.min,
-          datemax: this.searchDate.max,
-          timemin: this.searchTime.min,
-          timemax: this.searchTime.max,
-          cats: this.searchcats,
-          lon: this.searchLocation?.lon,
-          lat: this.searchLocation?.lat,
-          distance: this.searchDistance,
-          sort: this.searchSort,
-          timezoneoffset: new Date().getTimezoneOffset(),
-          limit: 50
-        }).then(events => {
-          this.events = events;
-          this.canSearchMore = events.length == 50;
-        });
+        this.launchSearch();
       }, 500);
     },
-    searchMore() {
+    launchSearch(more = false) {
+      this.$router.replace({
+        query: {
+          q: this.search.text ? this.search.text : undefined,
+          c: this.search.cats.length > 0 ? this.search.cats.join(',') : undefined,
+          s: this.search.sort == 'relevance' ? undefined : this.search.sort,
+          d: (this.search.date.min || this.search.date.max) ? (this.search.date.min ?? '') + ',' + (this.search.date.max ?? '') : undefined,
+          t: (this.search.time.min || this.search.date.max) ? (this.search.time.min ?? '') + ',' + (this.search.time.max ?? '') : undefined,
+          g: this.search.gloc ? this.search.gloc.lon + "," + this.search.gloc.lat : undefined,
+          r: this.search.dist // r like radius
+        }
+      });
       EventsApi.getEvents({
-        text: this.searchtext,
-        datemin: this.searchDate.min,
-        datemax: this.searchDate.max,
-        timemin: this.searchTime.min,
-        timemax: this.searchTime.max,
-        cats: this.searchcats,
-        sort: this.searchSort,
+        text: this.search.text,
+        datemin: this.search.date.min,
+        datemax: this.search.date.max,
+        timemin: this.search.time.min,
+        timemax: this.search.time.max,
+        cats: this.search.cats,
+        lon: this.search.gloc?.lon,
+        lat: this.search.gloc?.lat,
+        distance: this.search.dist,
+        sort: this.search.sort,
         timezoneoffset: new Date().getTimezoneOffset(),
         limit: 50,
-        offset: this.events.length
+        offset: more ? this.events.length : null
       }).then(events => {
-        this.events = this.events.concat(events);
+        this.events = more ? this.events.concat(events) : events;
         this.canSearchMore = events.length == 50;
       });
     },

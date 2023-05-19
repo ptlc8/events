@@ -2,7 +2,9 @@
     <article class="event-preview">
         <span class="title">{{ event.title }}</span>
         <div class="wrapper">
-            <div class="picture" :style="'background-image: url(\'' + banner + '\');'"></div>
+            <div class="picture" :style="'background-image: url(\'' + banner + '\');'" :title="event.imagesCredits[0]">
+                <span v-if="event.images.length == 0" title="Image non représentative">❗</span>
+            </div>
             <div class="infos">
                 <span class="description">{{ event.description }}</span>
                 <span class="categories">
@@ -31,8 +33,11 @@ export default {
     emits: ["click"],
     computed: {
         banner() {
-            return this.event.images[0]
-                ?? "https://source.unsplash.com/200x200/?event+" + this.event.categories.join("+");
+            if (this.event.images[0])
+                return this.event.images[0]
+            if (this.event.categories.length > 0)
+                return "https://source.unsplash.com/600x300/?+" + this.event.categories.join(",");
+            return "https://source.unsplash.com/600x300/?event";
         }
     }
 }

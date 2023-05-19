@@ -1,6 +1,6 @@
 <template>
     <div class="distance-input">
-        <input type="number" v-model="value" min="0" step="0.1">
+        <input type="number" v-model="value" min="0" step="0.1" />
         <select v-model="unit" tabindex="-1">
             <option value="1">km</option>
             <option value="1.609344">mi</option>
@@ -13,10 +13,12 @@ export default {
     name: "DistanceInput",
     props: {
         modelValue: {
-            type: [Number, null],
-            required: true
+            type: Number,
+            required: false,
+            default: undefined
         }
     },
+    emits: ["update:modelValue", "change", "input"],
     data() {
         return {
             value: this.modelValue,
@@ -29,9 +31,11 @@ export default {
         },
         value(value) {
             this.$emit("update:modelValue", value * this.unit);
+            this.$emit("change");
         },
         unit(unit) {
             this.$emit("update:modelValue", this.value * unit);
+            this.$emit("change");
         }
     }
 };

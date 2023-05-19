@@ -125,8 +125,11 @@ export default {
       return document.location.origin + import.meta.env.VITE_BASE_URL + '?e=' + this.event.id;
     },
     banner() {
-      return this.event.images[0]
-        ?? "https://source.unsplash.com/200x200/?event+" + this.event.categories.join("+");
+      if (this.event.images[0])
+        return this.event.images[0]
+      if (this.event.categories.length > 0)
+        return "https://source.unsplash.com/600x300/?+" + this.event.categories.join(",");
+      return "https://source.unsplash.com/600x300/?event";
     }
   }
 };
