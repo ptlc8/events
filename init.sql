@@ -15,7 +15,7 @@ CREATE TABLE `events` (
   `contact` text COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT ('') COMMENT 'moyens de contact',
   `registration` text COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT ('') COMMENT 'moyens d''inscription',
   `public` tinyint(1) NOT NULL DEFAULT 1,
-  `createdAt` datetime NULL 'date de création',
+  `createdAt` datetime NULL COMMENT 'date de création',
   `updatedAt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'date de mise à jour',
   `source` text COLLATE utf8mb4_unicode_ci NULL COMMENT 'source',
   `sourceUrl` text COLLATE utf8mb4_unicode_ci NULL COMMENT 'lien de la source'
