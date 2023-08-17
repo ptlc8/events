@@ -1,6 +1,7 @@
 def aggregationProviders = [
     [name: 'Datatourisme', envVars: ['DATATOURISME_GET_URL'], command: 'datatourisme'],
-    [name: 'Openagenda', envVars: ['OPENAGENDA_KEY'], command: 'openagenda']
+    [name: 'Openagenda', envVars: ['OPENAGENDA_KEY'], command: 'openagenda'],
+    [name: 'Eventbrite', envVars: ['EVENTBRITE_TOKEN'], command: 'eventbrite']
 ]
 
 def cronExpression = (0 ..< aggregationProviders.size()).collect { "${it} H * * *" }.join("\n")
@@ -15,6 +16,7 @@ pipeline {
         string(name: 'AGGREGATION_WEBHOOK_URL', defaultValue: params.AGGREGATION_WEBHOOK_URL ?: null, description: 'Aggregation webhook URL')
         string(name: 'DATATOURISME_GET_URL', defaultValue: params.DATATOURISME_GET_URL ?: null, description: 'Datatourisme get URL')
         string(name: 'OPENAGENDA_KEY', defaultValue: params.OPENAGENDA_KEY ?: null, description: 'Openagenda API key')
+        string(name: 'EVENTBRITE_TOKEN', defaultValue: params.EVENTBRITE_TOKEN ?: null, description: 'Eventbrite API token')
     }
 
     triggers {

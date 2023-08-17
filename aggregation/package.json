@@ -4,7 +4,8 @@
   "scripts": {
     "update": "node .",
     "datatourisme": "node . DT",
-    "openagenda": "node . OA"
+    "openagenda": "node . OA",
+    "eventbrite": "node . EB"
   },
   "author": "Ambi",
   "dependencies": {
