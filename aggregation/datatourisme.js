@@ -103,7 +103,7 @@ function parseEvent(dtEvent) {
     var address = dtEvent.isLocatedAt[0]["schema:address"][0];
     var title = dtEvent["rdfs:label"].fr[0];
     var description = (dtEvent.hasDescription?.[0]?.["dc:description"] || dtEvent["rdfs:comment"])?.fr?.[0] ?? "";
-    var takesPlaceAt = dtEvent.takesPlaceAt.filter(t => new Date(t.endDate || t.startDate) >= new Date()).sort((a, b) => new Date(a) - new Date(b))[0];
+    var takesPlaceAt = dtEvent.takesPlaceAt ? dtEvent.takesPlaceAt.filter(t => new Date(t.endDate || t.startDate) >= new Date()).sort((a, b) => new Date(a) - new Date(b))[0] : {}; // TODO: fix that
     if (!takesPlaceAt) takesPlaceAt = dtEvent.takesPlaceAt.sort((a, b) => new Date(b) - new Date(a))[0];
     return {
         id: "DT" + id,
