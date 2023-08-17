@@ -1,5 +1,6 @@
 import datatourisme from "./datatourisme.js";
 import openagenda from "./openagenda.js";
+import eventbrite from "./eventbrite.js";
 import Database from "./database.js";
 
 import credentials from "./credentials.json" assert {type: "json"};
@@ -39,7 +40,8 @@ db.on("error", error => onError(error, "db."));
 
 var providers = [
     { name: "DT", fetchAll: () => datatourisme.fetchAll(credentials.DATATOURISME_GET_URL) },
-    { name: "OA", fetchAll: () => openagenda.fetchAll(credentials.OPENAGENDA_KEY) }
+    { name: "OA", fetchAll: () => openagenda.fetchAll(credentials.OPENAGENDA_KEY) },
+    { name: "EB", fetchAll: () => eventbrite.fetchAll(credentials.EVENTBRITE_TOKEN) }
 ];
 
 // Filter providers if command line arguments, e.g. node update.js OA
