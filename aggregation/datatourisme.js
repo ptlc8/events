@@ -110,8 +110,8 @@ function parseEvent(dtEvent) {
         title,
         author: dtEvent.hasBeenCreatedBy["schema:legalName"],
         description,
-        start: takesPlaceAt.startDate + " " + (takesPlaceAt.startTime || ""),
-        end: (takesPlaceAt.endDate || takesPlaceAt.startDate) + " " + (takesPlaceAt.endTime || ""),
+        start: formatDate(takesPlaceAt.startDate + " " + (takesPlaceAt.startTime || "")),
+        end: formatDate((takesPlaceAt.endDate || takesPlaceAt.startDate) + " " + (takesPlaceAt.endTime || "")),
         lng: dtEvent.isLocatedAt[0]["schema:geo"]["schema:longitude"],
         lat: dtEvent.isLocatedAt[0]["schema:geo"]["schema:latitude"],
         placename: [address["schema:addressLocality"], address["schema:postalCode"], address["schema:streetAddress"]].join(", "),
@@ -130,8 +130,8 @@ function parseEvent(dtEvent) {
         contact: dtEvent.hasContact.map(c => [c["schema:email"] ?? [], c["schema:telephone"] ?? [], c["foaf:homepage"] ?? []].flat()).flat(),
         registration: dtEvent.hasBookingContact ? dtEvent.hasBookingContact.map(c => [c["schema:email"] ?? [], c["schema:telephone"] ?? [], c["foaf:homepage"] ?? []].flat()).flat() : [],
         public: true,
-        createdAt: dtEvent.creationDate,
-        updatedAt: dtEvent.lastUpdateDatatourisme.replace("Z", "+00:00"),
+        createdAt: formatDate(dtEvent.creationDate),
+        updatedAt: formatDate(dtEvent.lastUpdateDatatourisme),
         source: "datatourisme",
         sourceUrl: dtEvent["@id"]
     };
@@ -228,6 +228,10 @@ function findCategories(dtCategories, title, description) {
         }
     }
     return result;
+}
+
+function formatDate(datetime) {
+    return new Date(datetime || 0).toISOString().replace("T", " ").replace("Z", "");
 }
 
 export default { fetchAll, fetchLastUpdated, loadZipFromFile, loadZipFromUrl, loadZip };

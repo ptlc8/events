@@ -114,8 +114,8 @@ function parseEvent(oaEvent) {
         title: oaEvent.title.fr ?? oaEvent.title.en ?? "",
         author: "OpenAgenda", // TODO: find a way to get the author
         description: oaEvent.longDescription?.fr ?? oaEvent.longDescription?.en ?? oaEvent.description.fr ?? oaEvent.description.en ?? "",
-        start: oaEvent.nextTiming.begin.replace("Z", "+00:00"),
-        end: oaEvent.nextTiming.end.replace("Z", "+00:00"),
+        start: formatDate(oaEvent.nextTiming.begin),
+        end: formatDate(oaEvent.nextTiming.end),
         lng: oaEvent.location?.longitude ?? 0,
         lat: oaEvent.location?.latitude ?? 0,
         placename: oaEvent.location?.address ?? "",
@@ -126,13 +126,16 @@ function parseEvent(oaEvent) {
         contact: [],
         registration: oaEvent.registration?.map(r => r.value) ?? [],
         public: true,
-        createdAt: oaEvent.createdAt.replace("Z", "+00:00"),
-        updatedAt: oaEvent.updatedAt.replace("Z", "+00:00"),
+        createdAt: formatDate(oaEvent.createdAt),
+        updatedAt: formatDate(oaEvent.updatedAt),
         source: "openagenda",
         sourceUrl: `https://openagenda.com/agendas/${oaEvent.originAgenda.uid}/events/${oaEvent.uid}`
     };
     return event;
 }
 
+function formatDate(datetime) {
+    return new Date(datetime).toISOString().replace("T", " ").replace("Z", "");
+}
 
 export default { fetchAll };
