@@ -1,13 +1,17 @@
 <template>
   <Modal v-bind="$attrs" ref="modal" class="login-modal">
-    <form @submit.prevent="submit">
-      <span class="title">Connexion</span>
+    <span class="title">{{ $text.get('login') }}</span>
+    <!--<form @submit.prevent="login">
       <input v-model="username" placeholder="Nom d'utilisateur" autofocus="true" autocomplete="username">
       <input v-model="password" placeholder="Mot de passe" type="password" autocomplete="current-password">
       <button>{{ $text.get("login") }}</button>
-      <span class="info">{{ info }}</span>
       <a v-if="info" href="/forgotten-password" target="_blank">J'ai oublié mon mot de passe</a>
-    </form>
+    </form>-->
+    <button class="login-with-link" @click="loginWith">
+      <img src="https://ambi.dev/favicon.ico" />
+      {{ $text.get('loginwith') }} Ambi.dev
+    </button>
+    <span class="info">{{ info }}</span>
   </Modal>
 </template>
 
@@ -29,17 +33,39 @@ export default {
       info: ""
     };
   },
+  mounted() {
+    window.addEventListener("message", this.receiveMessage);
+  },
+  beforeUnmount() {
+    window.removeEventListener("message", this.receiveMessage);
+  },
   methods: {
-    submit() {
+    login() {
       EventsApi.login(this.username, this.password)
-        .then(() => {
+        .then(user => {
           this.password = "";
-          this.$store.setLoggedUser(this.username);
+          this.$store.setLoggedUser(user);
           this.$refs.modal.close();
         })
         .catch(err => {
           this.info = this.$text.get(err);
         });
+    },
+    loginWith() {
+      EventsApi.getLoginWithUrl().then(url => {
+        window.open(url, "_blank");
+      });
+    },
+    receiveMessage(event) {
+      if (typeof event.data === "object" && event.data.target === "events") {
+        if (event.data.loggedin) {
+          this.$store.setLoggedUser(event.data.user);
+          this.$refs.modal.close();
+        } else {
+          this.info = this.$text.get("logginginfailed");
+        }
+        event.source.close();
+      }
     }
   }
 };
@@ -47,12 +73,19 @@ export default {
 
 <style lang="scss" scoped>
 .login-modal {
-  .modal {
 
+  .login-with-link {
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: .5em;
+    color: #fff;
+    font-size: 1.5em;
+    background-color: #82b;
+
+    img {
+      height: 2em;
+    }
   }
 
   .title {

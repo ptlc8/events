@@ -3,7 +3,7 @@
 include('../init.php');
 
 session_start();
-session_destroy();
+unset($_SESSION['events_token']);
 
 exitSuccess();
 

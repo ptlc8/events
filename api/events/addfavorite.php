@@ -7,7 +7,7 @@ initDatabase();
 if (!isset($_REQUEST['id'])) exitError('need id');
 
 $user = getLoggedUser();
-if (!$user) exitError("not logged");
+if ($user == null) exitError("not logged");
 
 $event = queryDatabase("SELECT id FROM events WHERE id = '".$_REQUEST['id']."'")->fetch_assoc();
 

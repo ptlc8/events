@@ -63,16 +63,26 @@ function escapeDatabaseValue($value) {
 	return $mysqli->real_escape_string($value);
 }
 
+// récupérer les infos externes d'un utilisateur avec un token
+function getUser($token) {
+	if (!isset($token)) return null;
+    $response = file_get_contents(EVENTS_TESTUSER_URL.$token);
+    if ($response === false) return null;
+    return json_decode($response, true);
+}
+
+// récupérer les infos externes de l'utilisateur connecté
 function getLoggedUser() {
 	session_start();
-    // connecté à un compte ? // TODO : sessionToken ?
-    if (!isset($_SESSION['username'], $_SESSION['password'])) return false;
-	$userRequest = queryDatabase("SELECT * FROM USERS WHERE `name` = '", $_SESSION['username'], "' and `password` = '", $_SESSION['password'], "'");
-	if ($userRequest->num_rows === 0) {
-		return false;
-	}
-	return $userRequest->fetch_assoc();
+    if (!isset($_SESSION['events_token'])) return null;
+	$user = getUser($_SESSION['events_token']);
+	return $user;
 }
+
+function setLoggedUser($token) {
+	session_start();
+	$_SESSION['events_token'] = $token;
+} 
 
 function getLocation() { // TODO: put result in session
 	$ip = $_SERVER['REMOTE_ADDR'];

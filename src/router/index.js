@@ -60,6 +60,14 @@ const createMainRouter = async () => {
         meta: {
           title: Texts.get('categories')
         }
+      },
+      {
+        path: "/login",
+        name: "login",
+        component: () => import("../views/LoginView.vue"),
+        meta: {
+          title: Texts.get('login')
+        }
       }
     ]
   });

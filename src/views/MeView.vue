@@ -5,7 +5,7 @@
       @click="$store.login" />
     <article v-else>
       <img class="avatar" width="200" height="200" src="https://source.unsplash.com/200x200/?user" />
-      <h2>{{ $store.username }}</h2>
+      <h2>{{ $store.user.name }}</h2>
       <button class="logout" @click="logout">{{ $text.get('logout') }}</button>
     </article>
     <article class="button" @click="$router.push({name:'fav'})">

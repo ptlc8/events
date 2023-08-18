@@ -33,7 +33,7 @@ if ($sort == 'popularity') {
 
 // Add fav if logged
 $user = getLoggedUser();
-if (!$user) {
+if ($user == null) {
     $request .= " FROM `events` WHERE 1 = 1";
 } else {
     $request .= ", T.fav FROM `events` LEFT JOIN (SELECT *, TRUE AS fav FROM favorites WHERE user = '".$user['id']."') AS T ON event = events.id WHERE 1 = 1";

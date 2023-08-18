@@ -3,17 +3,17 @@ import { watch } from 'vue';
 
 export const useMainStore = defineStore('main', {
   state: () => ({
-    username: null,
+    user: null,
     loggingIn: false,
     event: null,
     events: []
   }),
   getters: {
-    logged: state => state.username != null
+    logged: state => state.user != null
   },
   actions: {
-    setLoggedUser(username) {
-      this.username = username;
+    setLoggedUser(user) {
+      this.user = user;
     },
     login() {
       return new Promise((resolve, reject) => {

@@ -113,5 +113,11 @@
     "sortbydate":"Trier par date",
     "sortbyrelevance":"Trier par pertinence",
     "sortbypopularity":"Trier par popularité",
-    "sortbydistance":"Trier par distance"
+    "sortbydistance":"Trier par distance",
+    "loginwith": "Se connecter avec",
+    "loggingin": "Connexion...",
+    "loggedin": "Connecté !",
+    "logginginfailed": "Échec de la connexion",
+    "retry": "Réessayer",
+    "ok": "OK"
 }

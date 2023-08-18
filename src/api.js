@@ -12,8 +12,14 @@ const EventsApi = {
         return new Promise(r => r(["party", "arts", "theater", "music", "online", "children", "shopping", "cinema", "food", "wellbeing", "show", "sport", "literature", "drink", "gardening", "cause", "craft", "exhibition", "dance", "festival", "videogame", "market", "outdoor", "museum", "tour", "workshop", "garden", "holiday", "free", "parade", "fair", "religion", "science", "seminar", "boardgame"]));
         //return sendApiRequest("/categories/get.php", {}, "Getting categories");
     },
+    getLoginWithUrl() {
+        return sendApiRequest("users/getloginwithurl.php", {}, "Getting 'login with' url");
+    },
+    loginWith: function (token) {
+        return sendApiRequest("users/login.php", { token }, "Logging in a token");
+    },
     login: function (username, password) {
-        return sendApiRequest("users/login.php", { username, password }, "Logging in as " + username);
+        throw new Error("Not implemented");
     },
     getSelfUser: function () {
         return sendApiRequest("users/get.php", { this: true }, "Getting self user");

@@ -18,6 +18,9 @@ define('EVENTS_DB_USER', 'user');
 define('EVENTS_DB_PASSWORD', 'password123');
 define('EVENTS_DB_NAME', 'events');
 
+define('EVENTS_CONNECT_URL', 'http://localhost/connect.php?app=events&params=');
+define('EVENTS_TESTUSER_URL', 'http://localhost/api/user.php?token=');
+
 define("SEATGEEK_CLIENT_ID", "PutY0urCl1eNtIdH3r3xxxxxxx");
 define("SEATGEEK_CLIENT_SECRET", "puty0urcli3nt1dh3r3xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
 

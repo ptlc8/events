@@ -112,5 +112,11 @@
     "sortbydate":"Sort by date",
     "sortbyrelevance":"Sort by relevance",
     "sortbypopularity":"Sort by popularity",
-    "sortbydistance":"Sort by distance"
+    "sortbydistance":"Sort by distance",
+    "loginwith": "Log in with",
+    "loggingin": "Logging in...",
+    "loggedin": "Logged in !",
+    "logginginfailed": "Connection failed",
+    "retry": "Retry",
+    "ok": "OK"
 }

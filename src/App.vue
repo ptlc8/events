@@ -44,7 +44,7 @@ export default {
     });
 
     EventsApi.getSelfUser().then(user => {
-      this.$store.setLoggedUser(user?.username);
+      this.$store.setLoggedUser(user);
     });
   }
 }

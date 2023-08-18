@@ -6,15 +6,11 @@ if (!isset($_REQUEST['this']) && !isset($_REQUEST['username']))
     exitError('need username or this');
 
 if (isset($_REQUEST['this'])) {
-    session_start();
-    if (!isset($_SESSION['username']))
-        exitSuccess(NULL);
-    $username = $_SESSION['username'];
+    $user = getLoggedUser();
 } else {
     $username = $_REQUEST['username'];
+    $user = array('name' => $username);
 }
-
-$user = array('username' => $username);
 
 exitSuccess($user);
 
