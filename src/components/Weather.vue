@@ -70,6 +70,10 @@ export default {
   },
   methods: {
     async fetchWeather() {
+      var limitDate = new Date();
+      limitDate.setDate(limitDate.getDate() + 16);
+      if (limitDate < new Date(this.datetime))
+        return;
       const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${this.lat}&longitude=${this.lng}&daily=weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset&timezone=auto&forecast_days=1&start_date=${this.date}&end_date=${this.date}`);
       this.weather = await response.json();
       if (this.weather.error) {

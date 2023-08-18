@@ -56,9 +56,12 @@ export default {
     this.search.text = this.$route.query.q ?? '';
     this.search.cats = this.$route.query.c?.split(',') ?? [];
     this.search.sort = this.$route.query.s ?? 'relevance';
-    [this.search.date.min, this.search.date.max] = this.$route.query.d?.split(',') ?? [];
+    [this.search.date.min, this.search.date.max] = this.$route.query.d?.split(',').map(d => d ? d : null) ?? [];
     [this.search.time.min, this.search.time.max] = this.$route.query.t?.split(',') ?? [];
-    // gloc
+    if (this.$route.query.g) {
+      let [lon, lat] = this.$route.query.g.split(',');
+      this.search.gloc = { lon: parseFloat(lon), lat: parseFloat(lat) };
+    }
     this.search.dist = isNaN(parseInt(this.$route.query.r)) ? undefined : parseInt(this.$route.query.r);
 
     this.launchSearch();
@@ -104,7 +107,7 @@ export default {
           c: this.search.cats.length > 0 ? this.search.cats.join(',') : undefined,
           s: this.search.sort == 'relevance' ? undefined : this.search.sort,
           d: (this.search.date.min || this.search.date.max) ? (this.search.date.min ?? '') + ',' + (this.search.date.max ?? '') : undefined,
-          t: (this.search.time.min || this.search.date.max) ? (this.search.time.min ?? '') + ',' + (this.search.time.max ?? '') : undefined,
+          t: (this.search.time.min || this.search.time.max) ? (this.search.time.min ?? '') + ',' + (this.search.time.max ?? '') : undefined,
           g: this.search.gloc ? this.search.gloc.lon + "," + this.search.gloc.lat : undefined,
           r: this.search.dist // r like radius
         }

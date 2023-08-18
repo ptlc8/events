@@ -35,11 +35,16 @@ export default {
   },
   watch: {
     modelValue(value) {
-      this.query = value?.name ?? '';
+      this.query = value?.name ?? value.lon + ', ' + value.lat;
+      if (!value.name) {
+        this.mapboxQuery(value.lon + ', ' + value.lat)
+          .then(results => {
+            this.query = results.features[0].place_name;
+          });
+      }
     },
     query(query) {
-      fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?language=${this.$text.getShortLang()}&access_token=${import.meta.env.VITE_MAPBOX_ACCESS_TOKEN}`)
-        .then(res => res.json())
+      this.mapboxQuery(query)
         .then(results => {
           this.results = results.features.map(f => ({
             name: f.place_name,
@@ -60,6 +65,10 @@ export default {
       this.$emit('update:modelValue', value);
       this.$emit('change');
       this.mouseover = false;
+    },
+    async mapboxQuery(query) {
+      let results = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?language=${this.$text.getShortLang()}&access_token=${import.meta.env.VITE_MAPBOX_ACCESS_TOKEN}`);
+      return await results.json();
     }
   }
 }

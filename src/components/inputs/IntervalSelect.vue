@@ -2,18 +2,18 @@
   <div :class="{ 'interval-select': true, opened }" tabindex="0" @mouseleave="close" @mouseover="open" @keydown.up.prevent="previous" @keydown.down.prevent="next">
     <span class="value">{{ getLabel() }}</span>
     <div class="dropdown" v-if="opened">
-      <div class="option" v-for="option in options" @click="void (_min = option.min) || (_max = option.max)">
+      <div class="option" v-for="option in options" @click="void (value.min = option.min) || (value.max = option.max)">
         {{ option.label }}
       </div>
       <label>minimum</label>
       <div class="inputs-wrapper">
-        <input :type="type" v-model="_min" />
-        <button class="reset" @click="_min=undefined">✖</button>
+        <input :type="type" v-model="value.min" />
+        <button class="reset" @click="value.min=undefined">✖</button>
       </div>
       <label>maximum</label>
       <div class="inputs-wrapper">
-        <input :type="type" v-model="_max" />
-        <button class="reset" @click="_max=undefined">✖</button>
+        <input :type="type" v-model="value.max" />
+        <button class="reset" @click="value.max=undefined">✖</button>
       </div>
       <button @click="close">OK</button>
     </div>
@@ -42,26 +42,22 @@ export default {
   emits: ['change', 'update:modelValue'],
   data: () => ({
     opened: false,
-    _min: null,
-    _max: null
+    value: { min: null, max: null },
   }),
   watch: {
     modelValue(value) {
-      this._min = value.min;
-      this._max = value.max;
+      this.value = value;
     },
-    _min(min) {
-      this.$emit('update:modelValue', { min, max: this._max });
-      this.$emit('change');
-    },
-    _max(max) {
-      this.$emit('update:modelValue', { min: this._min, max });
-      this.$emit('change');
+    value: {
+      handler(value) {
+        this.$emit('update:modelValue', value);
+        this.$emit('change');
+      },
+      deep: true
     }
   },
   mounted() {
-    this._min = this.modelValue.min;
-    this._max = this.modelValue.max;
+    this.value = this.modelValue;
   },
   methods: {
     open() {
@@ -73,29 +69,27 @@ export default {
     previous() {
       let i = this.options.indexOf(this.getOption());
       if (i > 0) {
-        this._min = this.options[i - 1].min;
-        this._max = this.options[i - 1].max;
+        this.value = { min: this.options[i - 1].min, max: this.options[i - 1].max };
       }
     },
     next() {
       let i = this.options.indexOf(this.getOption());
       if (i >= 0 && i < this.options.length - 1) {
-        this._min = this.options[i + 1].min;
-        this._max = this.options[i + 1].max;
+        this.value = { min: this.options[i + 1].min, max: this.options[i + 1].max};
       }
     },
     getOption() {
-      return this.options.find(o => o.min === this._min && o.max === this._max);
+      return this.options.find(o => o.min == this.value.min && o.max == this.value.max);
     },
     getLabel() {
       if (this.getOption())
         return this.getOption().label;
-      if (this._max && this._min)
-        return "Entre " + this._min.split("-").reverse().join("/") + " et " + this._max.split("-").reverse().join("/");
-      if (this._max)
+      if (this.value.max && this.value.min)
+        return "Entre " + this.value.min.split("-").reverse().join("/") + " et " + this.value.max.split("-").reverse().join("/");
+      if (this.value.max)
         return "Avant " + this._max.split("-").reverse().join("/");
-      if (this._min)
-        return "Après " + this._min.split("-").reverse().join("/");
+      if (this.value.min)
+        return "Après " + this.value.min.split("-").reverse().join("/");
       return "Peu importe";
     }
   }
