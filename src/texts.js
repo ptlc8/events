@@ -8,7 +8,7 @@ const Texts = function () {
         async init(langs) {
             if (!langs || !langs.length) throw new Error("No languages provided to Texts.init()");
             availableLangs = langs;
-            await this.setLang(window.localStorage.getItem("lang") ?? this.getNavigatorLang(), false);
+            await this.setLang(this.getSavedLang() ?? this.getNavigatorLang(), false);
         },
         get(id) {
             return texts[shortLang]?.[id] ?? "[" + id + "]";
@@ -20,12 +20,14 @@ const Texts = function () {
             return shortLang;
         },
         async setLang(newLang, save=false) {
-            if (!availableLangs.includes(newLang)) {
+            if (newLang && !availableLangs.includes(newLang)) {
                 console.error(newLang + " is not an available language");
-                newLang = availableLangs[0];
-            } else if (save) {
+                newLang = null;
+            }
+            if (save) {
                 window.localStorage.setItem("lang", newLang);
             }
+            if (!newLang) newLang = this.getNavigatorLang();
             lang = newLang;
             shortLang = newLang.match("[^\-]*")[0];
             if (!texts[shortLang]) {
@@ -37,6 +39,9 @@ const Texts = function () {
         },
         getAvailableLangs() {
             return availableLangs;
+        },
+        getSavedLang() {
+            return window.localStorage.getItem("lang");
         },
         getNavigatorLang() {
             return navigator.language ?? navigator.userLanguage ?? "";

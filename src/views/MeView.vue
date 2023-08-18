@@ -17,8 +17,9 @@
     <article>
       <h2>{{ $text.get('language') }}</h2>
       <select @change="$text.setLang($event.target.value, true).then($forceUpdate)">
-        <option v-for="lang in $text.getAvailableLangs()" :value="lang" :selected="lang === $text.getLang()">{{
+        <option v-for="lang in $text.getAvailableLangs()" :value="lang" :selected="lang === $text.getSavedLang()">{{
           getLangName(lang) }}</option>
+        <option value="" :selected="!$text.getSavedLang()">🌐 {{ $text.get('navigatorlanguage') }}</option>
       </select>
     </article>
   </section>
