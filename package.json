@@ -4,8 +4,8 @@
   "description": "Ceci est un site web permettant aux utilisateurs de rechercher des événements autour d'eux ou d'en ajouter.",
   "private": true,
   "scripts": {
-    "dev": "vite && cp -r api dist/",
-    "dev:host": "vite --host && cp -r api dist/",
+    "dev": "cp -r api dist/ && vite",
+    "dev:host": "cp -r api dist/ && vite --host",
     "build": "vite build && cp -r api dist/",
     "preview": "vite preview && cp -r api dist/"
   },
