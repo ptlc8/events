@@ -3,12 +3,15 @@
 
 Ceci est un site web permettant aux utilisateurs de rechercher des événements autour d'eux ou d'en ajouter.
 
-Une version est actuellement à cette URL : [ambi.dev/events](https://ambi.dev/events). (BDD 10.5.12-MariaDB-cll-lve, PHP 7.2.34) La branche master y est auto-déployer à chaque push.
+![Capture d'écran de la carte](screenshots/map.jpg)
+![Capture d'écran de la recherche](screenshots/search.jpg)
+
+Une version est actuellement à cette URL : [ambi.dev/events](https://ambi.dev/events). (BDD MariaDB, PHP 8) La branche master y est auto-déployer à chaque push.
 
 ## Lancer en local
 
 Il est possible de lancer le projet en local.
-Pour cela il faut faudra PHP, mysql et nodeJS.
+Pour cela il faut faudra PHP, MySQL (ou MariaDB) et nodeJS.
  - cloner le projet
  - créer un fichier `api/credentials.php` contenant identifiants de la base de données, sous cette forme :
 ```php
