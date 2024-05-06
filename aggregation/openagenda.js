@@ -4,59 +4,69 @@
  * @see https://developers.openagenda.com
  */
 
-import https from "https";
-import event, { Event, EventsFetch } from "./event.js";
+import axios from "axios";
+import { Event, EventsFetch } from "./event.js";
 
 /**
- * Get the events from OpenAgenda
+ * Get all events from OpenAgenda
  * @param {string} key
- * @param {boolean} [official=false]
- * @param {EventsFetch} [emitter=new EventsFetch()]
- * @param {number[]} [after=[]]
+ * @param {boolean} [official = false]
  * @returns {EventsFetch}
  */
-function fetchAll(key, official = false, emitter=new EventsFetch(), after = []) {
-    https.request(`https://api.openagenda.com/v2/agendas?key=${key}&size=100&sort=createdAt.desc&official=${official ? 1 : 0}&` + after.map(v => "after[]=" + v).join("&"))
-        .on("response", res => {
-            emitter.emit("progress", { fetchingAgendas: true });
-            var data = "";
-            res.on("data", chunk => data += chunk);
-            res.on("end", () => {
-                data = JSON.parse(data);
-                if (data.success) {
-                    emitter.emit("progress", { agendas: data.agendas.length });
-                    var agendas = data.agendas.length;
-                    var agendasEventsFetched = 0;
-                    var end = 0;
-                    var events = [];
-                    for (let agenda of data.agendas) {
-                        fetchAgendaEvents(key, agenda.uid)
-                            .on("events", e => emitter.emit("events", e) && events.push(...e))
-                            .on("progress", progress => emitter.emit("progress", progress))
-                            .on("error", err => emitter.emit("error", err))
-                            .on("end", e => ++agendasEventsFetched == agendas && ++end == 2 && emitter.emit("end", events));
-                    }
-                    if (data.after != null) {
-                        fetchAll(key, official, undefined, data.after)
-                            .on("events", e => emitter.emit("events", e) && events.push(...e))
-                            .on("progress", progress => emitter.emit("progress", progress))
-                            .on("error", err => emitter.emit("error", err))
-                            .on("end", e => ++end == 2 && emitter.emit("end", events));
-                    } else {
-                        emitter.emit("progress", { fetchingAgendas: false });
-                        if (++end == 2) emitter.emit("end", events);
-                    }
-                } else {
-                    emitter.emit("error", data);
-                    setTimeout(() => fetchAll(key, official, emitter, after), 1000);
-                }
-            });
+function fetchAll(key, official = false) {
+    var emitter = new EventsFetch();
+    var events = [];
+    var agendasCount = Infinity;
+    var agendasFetchedCount = 0;
+    fetchAgendas(key, official)
+        .on("agendas", agendas => {
+            for (let agenda of agendas) {
+                fetchAgendaEvents(key, agenda.uid)
+                    .on("events", e => emitter.emit("events", e))
+                    .on("progress", progress => emitter.emit("progress", progress))
+                    .on("error", err => emitter.emit("error", err))
+                    .on("end", e => events.push(...e))
+                    .on("end", () => {
+                        agendasFetchedCount++;
+                        if (agendasFetchedCount == agendasCount)
+                            emitter.emit("end", events);
+                    });
+            }
         })
-        .on("error", err => {
-            emitter.emit("error", err);
-            setTimeout(() => fetchAll(key, official, emitter, after), 1000);
-        })
-        .end();
+        .on("progress", progress => emitter.emit("progress", progress))
+        .on("error", err => emitter.emit("error", err))
+        .on("end", a => agendasCount = a.length);
+    return emitter;
+}
+
+/**
+ * Get all agendas from OpenAgenda
+ * @param {string} key
+ * @param {boolean} [official = false]
+ * @returns {EventsFetch}
+ */
+function fetchAgendas(key, official = false) {
+    var emitter = new EventsFetch();
+    (async function() {
+        var after = []
+        var agendas = [];
+        emitter.emit("progress", { fetchingAgendas: true });
+        while (after != null) {
+            var url = `https://api.openagenda.com/v2/agendas?key=${key}&size=100&sort=createdAt.desc&official=${official ? 1 : 0}&` + after.map(v => "after[]=" + v).join("&");
+            let response = await axios.get(url);
+            let data = response.data;
+            if (!data.success) {
+                emitter.emit("error", data);
+                break;
+            }
+            emitter.emit("progress", { agendas: data.agendas.length });
+            emitter.emit("agendas", data.agendas);
+            agendas.push(...data.agendas);
+            after = data.after;
+        }
+        emitter.emit("progress", { fetchingAgendas: false });
+        emitter.emit("end", agendas);
+    })().catch(err => emitter.emit("error", err));
     return emitter;
 }
 
@@ -64,40 +74,31 @@ function fetchAll(key, official = false, emitter=new EventsFetch(), after = []) 
  * Get the events from an OpenAgenda agenda
  * @param {string} key
  * @param {number} agendaId
- * @param {number[]} [after=[]]
  * @returns {EventsFetch}
  */
-function fetchAgendaEvents(key, agendaId, emitter = new EventsFetch(), after = []) {
-    var events = [];
-    https.request(`https://api.openagenda.com/v2/agendas/${agendaId}/events?key=${key}&size=300&detailed=1&` + after.map(v => "after[]=" + v).join("&"))
-        .on("response", res => {
-            var data = "";
-            res.on("data", chunk => data += chunk);
-            res.on("end", () => {
-                data = JSON.parse(data);
-                if (data.success) {
-                    var results = data.events.map(parseEvent);
-                    var ignored = results.filter(e => e == null).length;
-                    results = results.filter(e => e != null);
-                    emitter.emit("progress", { events: results.length, ignored });
-                    emitter.emit("events", results);
-                    events.push(...results);
-                    if (data.after != null) {
-                        fetchAgendaEvents(key, agendaId, emitter, data.after);
-                    } else {
-                        emitter.emit("end", events);
-                    }
-                } else {
-                    emitter.emit("error", data);
-                    setTimeout(() => fetchAgendaEvents(key, agendaId, emitter, after), 1000);
-                }
-            });
-        })
-        .on("error", err => {
-            emitter.emit("error", err);
-            setTimeout(() => fetchAgendaEvents(key, agendaId, emitter, after), 1000);
-        })
-        .end();
+function fetchAgendaEvents(key, agendaId) {
+    var emitter = new EventsFetch();
+    (async function() {
+        var after = [];
+        var events = [];
+        while (after != null) {
+            var url = `https://api.openagenda.com/v2/agendas/${agendaId}/events?key=${key}&size=300&detailed=1&` + after.map(v => "after[]=" + v).join("&");
+            var response = await axios.get(url);
+            var data = response.data;
+            if (!data.success) {
+                emitter.emit("error", data);
+                break;
+            }
+            var results = data.events.map(parseEvent);
+            var ignored = results.filter(e => e == null).length;
+            results = results.filter(e => e != null);
+            emitter.emit("progress", { events: results.length, ignored });
+            emitter.emit("events", results);
+            events.push(...results);
+            after = data.after;
+        }
+        emitter.emit("end", events);
+    })().catch(err => emitter.emit("error", err));
     return emitter;
 }
 

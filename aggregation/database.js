@@ -41,7 +41,7 @@ export default class Database extends EventEmitter {
                 var values = Object.keys(event)
                     .filter(k => eventsColumns.includes(k))
                     .reduce((obj, k) => {
-                        obj[k] = event[k] instanceof Array ? event[k].map(v => v.replace("\\", "\\\\").replace(",", "\\,")).join(",") : event[k];
+                        obj[k] = event[k] instanceof Array ? event[k].filter(v => v).map(v => v.replace("\\", "\\\\").replace(",", "\\,")).join(",") : event[k];
                         return obj;
                     }, {});
                 this.pool.query(

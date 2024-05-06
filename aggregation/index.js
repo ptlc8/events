@@ -5,6 +5,8 @@ import Database from "./database.js";
 import credentials from "./credentials.json" assert {type: "json"};
 
 
+const isInteractive = process.argv.slice(2).includes("-i");
+
 const db = new Database({
     host: credentials.EVENTS_DB_HOSTNAME,
     user: credentials.EVENTS_DB_USER,
@@ -25,7 +27,8 @@ function updateProgress(p, prefix = "") {
         else
             progress[prefix + k] = p[k];
     }
-    process.stdout.write(Object.keys(progress).map(k => progress[k] === true ? k : `${k}: ${progress[k]}`).join(" | ") + "\r");
+    if (isInteractive)
+        process.stdout.write(Object.keys(progress).map(k => progress[k] === true ? k : `${k}: ${progress[k]}`).join(" | ") + "\r");
 }
 
 function onError(error, prefix = "") {
@@ -44,7 +47,7 @@ var providers = [
 
 // Filter providers if command line arguments, e.g. node update.js OA
 var args = process.argv.slice(2);
-if (args.length > 0) {
+if (args.filter(a => !a.startsWith("-")).length > 0) {
     providers = providers.filter(p => args.includes(p.name))
 }
 
@@ -59,4 +62,5 @@ await Promise.all(providers.map(provider =>
 ));
 
 console.log("\nDone!");
+console.log(JSON.stringify(progress, null, 2));
 db.end();
