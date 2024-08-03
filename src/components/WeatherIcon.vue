@@ -13,6 +13,11 @@ export default {
       default: 0,
       validator: value => value >= 0 && value <= 3
     },
+    sky: {
+      type: Boolean,
+      required: false,
+      default: false
+    },
     rain: {
       type: Number,
       required: false,
@@ -681,7 +686,7 @@ export default {
           ]]>
       </component>
     </defs>
-    <g id="big-sun" v-if="clouds == 0 && !night">
+    <g id="big-sun" v-if="sky && !night">
       <g transform="translate(28,28)">
         <g class="am-weather-sun am-weather-sun-shiny am-weather-easing-ease-in-out">
           <g>
@@ -720,7 +725,7 @@ export default {
         <circle cx="0" cy="0" fill="orange" r="5" stroke="orange" stroke-width="2" />
       </g>
     </g>
-    <g id="big-moon" v-else-if="clouds == 0">
+    <g id="big-moon" v-else-if="sky">
       <g transform="translate(16,16)">
         <g class="am-weather-moon-star-1">
           <polygon fill="orange" points="3.3,1.5 4,2.7 5.2,3.3 4,4 3.3,5.2 2.7,4 1.5,3.3 2.7,2.7" stroke="none"

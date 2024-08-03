@@ -213,8 +213,6 @@ export default {
       flex-direction: column;
 
       >* {
-        display: block;
-        border-radius: .5em;
         margin: 5px 0;
       }
 
