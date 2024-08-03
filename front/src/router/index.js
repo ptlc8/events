@@ -12,10 +12,10 @@ const createMainRouter = async () => {
     routes: [
       {
         path: '/',
-        name: 'map',
-        component: () => import('../views/MapView.vue'),
+        name: 'home',
+        component: () => import('../views/HomeView.vue'),
         meta: {
-          title: T.map
+          title: T.home
         }
       },
       {
@@ -36,7 +36,11 @@ const createMainRouter = async () => {
       },
       {
         path: "/map",
-        redirect: "/"
+        name: 'map',
+        component: () => import('../views/MapView.vue'),
+        meta: {
+          title: T.map
+        }
       },
       {
         path: "/me",
