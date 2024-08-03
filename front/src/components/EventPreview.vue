@@ -1,5 +1,5 @@
 <template>
-    <article v-if="event" class="event-preview">
+    <article v-if="event" class="event-preview" @click="$emit('click')" :class="{ vertical }">
         <span class="title">{{ event.title }}</span>
         <div class="wrapper">
             <div class="picture" :style="'background-image: url(\'' + banner.url + '\');'" :title="banner.credits">
@@ -14,7 +14,7 @@
                     <b>{{ $texts.getDisplayDateTime(event.start) }}</b>
                     à <b>{{ event.placename }}</b>
                 </span>
-                <button class="infos-button" @click="$emit('click')">{{ $t.more_info }}</button>
+                <!--<button @click="$emit('click')">{{ $t.more_info }}</button>-->
                 <slot></slot>
             </div>
         </div>
@@ -30,6 +30,10 @@ export default {
     props: {
         event: {
             type: Object
+        },
+        vertical: {
+            type: Boolean,
+            default: false
         }
     },
     emits: ["click"],
@@ -59,28 +63,41 @@ export default {
 
 <style lang="scss">
 .event-preview {
-    min-height: 16em;
+    display: flex;
+    flex-direction: column;
     justify-content: space-between;
+    min-height: 16em;
 
     .wrapper {
         display: flex;
         gap: 8px;
         flex-grow: 1;
+        justify-content: space-between;
+    }
+
+    &.vertical .wrapper {
+        flex-direction: column;
     }
 
     .picture {
-        display: inline-block;
         flex: 3;
         background: center center / cover var(--color-background-mute);
         border-radius: 4px;
     }
 
+    &.vertical .picture {
+        min-height: 10em;
+    }
+
     .infos {
         flex: 3;
-        position: relative;
         display: flex;
         flex-direction: column;
         justify-content: space-between
+    }
+
+    &.vertical .infos {
+        flex: unset;
     }
 
     .title {

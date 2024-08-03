@@ -59,21 +59,22 @@ function getFromDefault() {
     return defaultLocation;
 }
 
+function get() {
+    return getFromNavigator()
+        .catch(e => getFromAPI())
+        .catch(e => getFromDefault());
+}
+
 export const useGeolocationStore = defineStore('geo', {
     state: () => ({
-        location: null
+        promise: get()
     }),
     actions: {
         get() {
-            if (this.location)
-                return Promise.resolve(this.location);
-            return this.refresh();
+            return this.promise;
         },
         refresh() {
-            return getFromNavigator()
-                .catch(e => getFromAPI())
-                .catch(e => getFromDefault())
-                .then(l => this.location = l);
+            return this.promise = get();
         },
         getFromPos
     }

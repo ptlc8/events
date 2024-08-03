@@ -8,6 +8,13 @@
     "fav": "Favorites",
     "me": "Me",
 
+    "home": "Home",
+    "popular": "Popular",
+    "relevant": "Relevant",
+    "soon": "Soon",
+    "nearby": "Nearby",
+    "view_more": "View more",
+
     "categories": "Categories",
     "party": "Party",
     "arts": "Arts",
