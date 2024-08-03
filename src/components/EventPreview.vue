@@ -1,9 +1,9 @@
 <template>
-    <article class="event-preview">
+    <div class="event-preview" @click="$emit('click')" :class="{ vertical }">
         <span class="title">{{ event.title }}</span>
         <div class="wrapper">
             <div class="picture" :style="'background-image: url(\'' + banner + '\');'" :title="event.imagesCredits[0]">
-                <span v-if="event.images.length == 0" title="Image non représentative">❗</span>
+                <span v-if="!event.images?.[0]" title="Image non représentative">❗</span>
             </div>
             <div class="infos">
                 <span class="description">{{ event.description }}</span>
@@ -14,11 +14,11 @@
                     <b>{{ $text.getDisplayDateTime(event.start) }}</b>
                     à <b>{{ event.placename }}</b>
                 </span>
-                <button class="infos-button" @click="$emit('click')">{{ $text.get('moreinfo') }}</button>
+                <!--<button @click="$emit('click')">{{ $text.get('moreinfo') }}</button>-->
                 <slot></slot>
             </div>
         </div>
-    </article>
+    </div>
 </template>
 
 <script>
@@ -28,14 +28,18 @@ export default {
         event: {
             type: Object,
             required: true
+        },
+        vertical: {
+            type: Boolean,
+            default: false
         }
     },
     emits: ["click"],
     computed: {
         banner() {
-            if (this.event.images[0])
+            if (this.event.images?.[0])
                 return this.event.images[0]
-            if (this.event.categories.length > 0)
+            if (this.event.categories?.length > 0)
                 return "https://source.unsplash.com/600x300/?+" + this.event.categories.join(",");
             return "https://source.unsplash.com/600x300/?event";
         }
@@ -51,27 +55,37 @@ export default {
     min-height: 120px;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
 
     .wrapper {
         display: flex;
         gap: 8px;
         flex-grow: 1;
+        justify-content: space-between;
+    }
+
+    &.vertical .wrapper {
+        flex-direction: column;
     }
 
     .picture {
-        display: inline-block;
         flex: 3;
         background: center center / cover #f4f4f4;
         border-radius: 4px;
     }
 
+    &.vertical .picture {
+        min-height: 10em;
+    }
+
     .infos {
         flex: 3;
-        position: relative;
         display: flex;
         flex-direction: column;
         justify-content: space-between
+    }
+
+    &.vertical .infos {
+        flex: unset;
     }
 
     .title {

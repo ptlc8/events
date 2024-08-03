@@ -29,17 +29,6 @@ export default {
 </script>
 
 <style scoped lang="scss">
-article {
-  max-width: 1000px;
-  margin: 10px auto 0;
-  box-shadow: 0 0 10px 2px rgba(0, 0, 0, 0.1);
-  border-radius: 4px;
-  padding: 8px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
 section.categories {
   display: flex;
   flex-direction: row;

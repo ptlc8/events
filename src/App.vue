@@ -7,6 +7,7 @@ import EventsApi from '@/api';
 
 import searchIcon from '@/assets/icons/search.svg';
 import categoriesIcon from '@/assets/icons/categories.svg';
+import homeIcon from '@/assets/icons/home.svg';
 import mapIcon from '@/assets/icons/map.svg';
 import meIcon from '@/assets/icons/me.svg';
 
@@ -23,6 +24,7 @@ export default {
       tabs: [
         { name: 'search', icon: searchIcon },
         { name: 'categories', icon: categoriesIcon },
+        { name: 'home', icon: homeIcon },
         { name: 'map', icon: mapIcon },
         { name: 'me', icon: meIcon }
       ]

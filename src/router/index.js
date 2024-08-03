@@ -11,10 +11,10 @@ const createMainRouter = async () => {
     routes: [
       {
         path: '/',
-        name: 'map',
-        component: () => import('../views/MapView.vue'),
+        name: 'home',
+        component: () => import('../views/HomeView.vue'),
         meta: {
-          title: Texts.get('map')
+          title: Texts.get('home')
         }
       },
       {
@@ -35,7 +35,11 @@ const createMainRouter = async () => {
       },
       {
         path: "/map",
-        redirect: "/"
+        name: 'map',
+        component: () => import('../views/MapView.vue'),
+        meta: {
+          title: Texts.get('map')
+        }
       },
       {
         path: "/me",
@@ -73,7 +77,7 @@ const createMainRouter = async () => {
   });
 
   router.beforeEach((to, from, next) => {
-    document.title = to.meta.title + ' - Events';
+    document.title = to.meta.title + ' - Évents';
     next();
   });
 

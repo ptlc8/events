@@ -50,32 +50,21 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-article {
-  max-width: 1000px;
-  margin: 10px auto 0;
-  box-shadow: 0 0 10px 2px rgba(0, 0, 0, 0.1);
-  border-radius: 4px;
-  padding: 8px;
+article.button {
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  flex-direction: row;
+  cursor: pointer;
 
-  &.button {
-    display: flex;
-    flex-direction: row;
-    cursor: pointer;
+  >* {
+    flex: 1;
+    text-align: center;
+  }
 
-    >* {
-      flex: 1;
-      text-align: center;
-    }
-
-    &::after {
-      content: '🞂';
-      content: 'ᐳ';
-      justify-self: flex-end;
-      margin-right: 8px;
-    }
+  &::after {
+    content: '🞂';
+    content: 'ᐳ';
+    justify-self: flex-end;
+    margin-right: 8px;
   }
 
   .avatar {

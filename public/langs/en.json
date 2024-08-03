@@ -119,5 +119,6 @@
     "loggedin": "Logged in !",
     "logginginfailed": "Connection failed",
     "retry": "Retry",
-    "ok": "OK"
+    "ok": "OK",
+    "home": "Home"
 }
