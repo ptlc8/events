@@ -7,7 +7,7 @@ import AboutModal from '@/components/modals/AboutModal.vue';
 
 const tabs = ref({});
 
-for (const tab of ['search', 'categories', 'map', 'me']) {
+for (const tab of ['search', 'categories', 'home', 'map', 'me']) {
   tabs.value[tab] = { name: tab };
   import(`@/assets/icons/${tab}.svg?no-inline`)
     .then(icon => tabs.value[tab].icon = icon.default);
