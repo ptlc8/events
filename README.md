@@ -3,8 +3,8 @@
 
 Ceci est un site web permettant aux utilisateurs de rechercher des événements autour d'eux ou d'en ajouter.
 
-![Capture d'écran de la carte](screenshots/map.jpg)
-![Capture d'écran de la recherche](screenshots/search.jpg)
+![Capture d'écran de la carte](front/public/screenshots/map.jpg)
+![Capture d'écran de la recherche](front/public/screenshots/search.jpg)
 
 Une version est actuellement à cette URL : [ambi.dev/events](https://ambi.dev/events). (BDD MariaDB, PHP 8) La branche master y est auto-déployer à chaque push.
 
@@ -30,9 +30,11 @@ define("SEATGEEK_CLIENT_SECRET", "puty0urcli3nt1dh3r3xxxxxxxxxxxxxxxxxxxxxxxxxxx
 define("TICKETMASTER_API_KEY", "PutYourApiKeyHerexxxxxxxxxxxxxxx");
 ?>
 ```
- -
-       npm install
-       npm run build
-
+ - installer les dépendances et compiler le front-end :
+```bash
+cd front
+npm install
+npm run build
+```
  - exécuter dans la base de données le script SQL [init.sql](init.sql)
  - lancer le serveur php dans le dossier `dist`

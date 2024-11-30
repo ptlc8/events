@@ -5,10 +5,12 @@
   "type": "module",
   "private": false,
   "scripts": {
-    "dev": "cp -r api dist/ && vite",
-    "dev:host": "cp -r api dist/ && vite --host",
-    "build": "vite build && cp -r api dist/",
-    "preview": "vite preview && cp -r api dist/"
+    "dev": "vite",
+    "dev:host": "vite --host",
+    "build:back": "mkdir -p ../dist && ln -sf ../api ../dist/",
+    "build:front": "vite build",
+    "build": "vite build --outDir ../dist && npm run build:back",
+    "preview": "vite preview && npm run build:back"
   },
   "repository": {
     "type": "git",
