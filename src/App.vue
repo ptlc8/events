@@ -1,14 +1,17 @@
 <script>
 import { RouterLink, RouterView } from 'vue-router';
-import { watch } from 'vue';
+import { watch, ref } from 'vue';
 import LoginModal from '@/components/modals/LoginModal.vue';
 import EventModal from '@/components/modals/EventModal.vue';
 import EventsApi from '@/api';
 
-import searchIcon from '@/assets/icons/search.svg';
-import categoriesIcon from '@/assets/icons/categories.svg';
-import mapIcon from '@/assets/icons/map.svg';
-import meIcon from '@/assets/icons/me.svg';
+const tabs = ref({});
+
+for (const tab of ['search', 'categories', 'map', 'me']) {
+  tabs.value[tab] = { name: tab };
+  import(`@/assets/icons/${tab}.svg?no-inline`)
+    .then(icon => tabs.value[tab].icon = icon.default);
+}
 
 export default {
   components: {
@@ -16,17 +19,7 @@ export default {
     EventModal
   },
   setup() {
-    return { RouterLink, RouterView, EventsApi };
-  },
-  data() {
-    return {
-      tabs: [
-        { name: 'search', icon: searchIcon },
-        { name: 'categories', icon: categoriesIcon },
-        { name: 'map', icon: mapIcon },
-        { name: 'me', icon: meIcon }
-      ]
-    };
+    return { RouterLink, RouterView, EventsApi, tabs };
   },
   mounted() {
     // on router init

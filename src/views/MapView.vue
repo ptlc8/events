@@ -10,8 +10,8 @@ import mapboxgl from 'mapbox-gl/dist/mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
-import { StylesControl } from 'mapbox-gl-controls';
-import 'mapbox-gl-controls/lib/controls.css';
+import StylesControl from '@mapbox-controls/styles';
+import '@mapbox-controls/styles/src/index.css';
 
 import markerIcon from '@/assets/icons/marker.png';
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
