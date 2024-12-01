@@ -1,6 +1,5 @@
 # Secret files
 /api/src/credentials.php
-/aggregation/credentials.json
 /.env
 
 # Build

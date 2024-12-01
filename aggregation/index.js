@@ -2,16 +2,16 @@ import datatourisme from "./datatourisme.js";
 import openagenda from "./openagenda.js";
 import Database from "./database.js";
 
-import credentials from "./credentials.json" assert {type: "json"};
+import "dotenv/config.js";
 
 
 const isInteractive = process.argv.slice(2).includes("-i");
 
 const db = new Database({
-    host: credentials.DB_HOST,
-    user: credentials.DB_USER,
-    password: credentials.DB_PASS,
-    database: credentials.DB_NAME
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASS,
+    database: process.env.DB_NAME
 });
 
 var progress = {};
@@ -41,8 +41,8 @@ db.on("progress", p => updateProgress(p, "db."));
 db.on("error", error => onError(error, "db."));
 
 var providers = [
-    { name: "DT", fetchAll: () => datatourisme.fetchAll(credentials.DATATOURISME_GET_URL) },
-    { name: "OA", fetchAll: () => openagenda.fetchAll(credentials.OPENAGENDA_KEY) }
+    { name: "DT", fetchAll: () => datatourisme.fetchAll(process.env.DATATOURISME_GET_URL) },
+    { name: "OA", fetchAll: () => openagenda.fetchAll(process.env.OPENAGENDA_KEY) }
 ];
 
 // Filter providers if command line arguments, e.g. node update.js OA
