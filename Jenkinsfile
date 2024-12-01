@@ -3,6 +3,8 @@ def aggregationProviders = [
     [name: 'Openagenda', envVars: ['OPENAGENDA_KEY'], command: 'openagenda']
 ]
 
+def cronExpression = (0 ..< aggregationProviders.size()).collect { "${it} H * * *" }.join("\n")
+
 pipeline {
     agent any
 
@@ -16,7 +18,7 @@ pipeline {
     }
 
     triggers {
-        cron((0 ..< aggregationProviders.size()).join(',') + ' H * * *')
+        cron(cronExpression)
     }
 
     stages {
@@ -51,18 +53,18 @@ pipeline {
                     def index = new Date().getMinutes()
                     def provider = aggregationProviders[index]
                     echo "Creating aggregation stage for ${provider.name}"
-                    if (provider.envVars.every { env[it] }) {
+                    if (provider.envVars.every { env.getProperty(it) }) {
+                        echo "All required environment variables are set for ${provider.name}"
                         stage(provider.name + ' aggregation') {
-                            steps {
-                                echo "Aggregating data from ${provider.name}"
-                                status = getStatus(sh(
-                                    script: "docker compose run aggregator ${provider.command}",
-                                    returnStatus: true
-                                ))
-                                sh 'docker compose rm -f'
-                                if (env.AGGREGATION_WEBHOOK_URL) {
-                                    sh "curl -X POST -H 'Content-Type: application/json' -d '{\"content\": \"${provider.name} aggregation ${status}\"}' ${params.AGGREGATION_WEBHOOK_URL}"
-                                }
+                            echo "Aggregating data from ${provider.name}"
+                            status_code = sh(
+                                script: "docker compose run --rm aggregator ${provider.command}",
+                                returnStatus: true
+                            )
+                            echo "Status code: ${status_code}"
+                            status = getStatus(status_code == 0)
+                            if (env.AGGREGATION_WEBHOOK_URL) {
+                                sh "curl -X POST -H 'Content-Type: application/json' -d '{\"content\": \"${provider.name} aggregation ${status}\"}' ${params.AGGREGATION_WEBHOOK_URL}"
                             }
                         }
                     }
@@ -72,8 +74,11 @@ pipeline {
     }
 }
 
+
 def getStatus(success) {
+    green_emojis = ['🍏', '🥬', '💚', '📗', '🍀', '🌱']
+    red_emojis = ['🍎', '❤', '📕', '🍅', '🍒', '🍓']
     return success
-        ? 'SUCCESS ' + ['🍏', '🥬', '💚', '📗'].shuffle().first() 
-        : 'FAILURE ' + ['🍎', '❤', '📕', '🍅'].shuffle().first()
+        ? 'SUCCESS ' + green_emojis[new Random().nextInt(green_emojis.size())]
+        : 'FAILURE ' + red_emojis[new Random().nextInt(red_emojis.size())]
 }
