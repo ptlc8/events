@@ -2,6 +2,6 @@
 
 include('../init.php');
 
-exitSuccess(EVENTS_CONNECT_URL);
+exitSuccess(PORTAL_CONNECT_URL);
 
 ?>

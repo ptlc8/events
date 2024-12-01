@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "vite",
     "dev:host": "vite --host",
-    "build:back": "mkdir -p ../dist && ln -sf ../api ../dist/",
+    "build:back": "mkdir -p ../dist && ln -sf ../api/src ../dist/",
     "build:front": "vite build",
     "build": "vite build --outDir ../dist && npm run build:back",
     "preview": "vite preview && npm run build:back"

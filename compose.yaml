@@ -1,0 +1,61 @@
+services:
+  web-server:
+    build:
+      context: .
+      args:
+        VITE_MAPBOX_ACCESS_TOKEN: ${VITE_MAPBOX_ACCESS_TOKEN?}
+        VITE_BASE_URL: /${BASE_URL:-events}/
+    ports:
+      - 80
+    depends_on:
+      - api
+    restart: always
+    labels:
+      - webproxy.path=${BASE_URL:-events}
+  api:
+    build: api
+    expose:
+      - 9000
+    environment:
+      DB_HOST: database
+      DB_USER: user
+      DB_PASS: secret
+      DB_NAME: events
+      PORTAL_CONNECT_URL: ${PORTAL_CONNECT_URL?}
+      PORTAL_USER_URL: ${PORTAL_USER_URL?}
+      PORTAL_OVERRIDE_HOST: ${PORTAL_OVERRIDE_HOST:-}
+      SEATGEEK_CLIENT_ID: ${SEATGEEK_CLIENT_ID:-}
+      SEATGEEK_CLIENT_SECRET: ${SEATGEEK_CLIENT_SECRET:-}
+      TICKETMASTER_API_KEY: ${TICKETMASTER_API_KEY:-}
+    depends_on:
+      - database
+    restart: always
+  aggregator:
+    build: aggregation
+    environment:
+      DB_HOST: database
+      DB_USER: user
+      DB_PASS: secret
+      DB_NAME: events
+      DATATOURISME_GET_URL: ${DATATOURISME_GET_URL:-}
+      OPENAGENDA_KEY: ${OPENAGENDA_KEY:-}
+      EVENTBRITE_TOKEN: ${EVENTBRITE_TOKEN:-}
+    depends_on:
+      - database
+  database:
+    image: mariadb:${MARIADB_VERSION:-10.11}
+    expose:
+      - 3306
+    volumes:
+      - ./mariadb.cnf:/etc/mysql/conf.d/mariadb.cnf:ro
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - database-data:/var/lib/mysql
+    environment:
+      MARIADB_ROOT_PASSWORD: super_secret
+      MARIADB_USER: user
+      MARIADB_PASSWORD: secret
+      MARIADB_DATABASE: events
+    restart: always
+volumes:
+  database-data:
+    driver: local

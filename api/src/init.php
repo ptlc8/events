@@ -9,7 +9,7 @@ if ($_SERVER['SERVER_NAME'] == 'localhost') {
 // initialisation session + BDD
 function initDatabase() {
 	global $mysqli;
-	$mysqli = new mysqli(EVENTS_DB_HOSTNAME, EVENTS_DB_USER, EVENTS_DB_PASSWORD, EVENTS_DB_NAME);
+	$mysqli = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 	if ($mysqli->connect_errno) {
 		echo 'Erreur de connexion côté serveur, veuillez réessayer plus tard';
 		exit;
@@ -66,7 +66,7 @@ function escapeDatabaseValue($value) {
 // récupérer les infos externes d'un utilisateur avec un token
 function getUser($token) {
 	if (!isset($token)) return null;
-    $response = file_get_contents(EVENTS_TESTUSER_URL.$token);
+    $response = file_get_contents(PORTAL_USER_URL.$token);
     if ($response === false) return null;
     return json_decode($response, true);
 }

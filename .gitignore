@@ -1,7 +1,7 @@
 # Secret files
-/api/credentials.php
+/api/src/credentials.php
 /aggregation/credentials.json
-/front/.env
+/.env
 
 # Build
 /dist

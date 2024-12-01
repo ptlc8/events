@@ -8,10 +8,10 @@ import credentials from "./credentials.json" assert {type: "json"};
 const isInteractive = process.argv.slice(2).includes("-i");
 
 const db = new Database({
-    host: credentials.EVENTS_DB_HOSTNAME,
-    user: credentials.EVENTS_DB_USER,
-    password: credentials.EVENTS_DB_PASSWORD,
-    database: credentials.EVENTS_DB_NAME
+    host: credentials.DB_HOST,
+    user: credentials.DB_USER,
+    password: credentials.DB_PASS,
+    database: credentials.DB_NAME
 });
 
 var progress = {};
