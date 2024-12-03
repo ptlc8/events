@@ -1,3 +1,6 @@
+export const baseUrl = import.meta.env.VITE_BASE_URL ?? "";
+const categories = ["party", "arts", "theater", "music", "online", "children", "shopping", "cinema", "food", "wellbeing", "show", "sport", "literature", "drink", "gardening", "cause", "craft", "exhibition", "dance", "festival", "videogame", "market", "outdoor", "museum", "tour", "workshop", "garden", "holiday", "free", "parade", "fair", "religion", "science", "seminar", "boardgame"];
+
 const EventsApi = {
     getEvents: function (parameters = {}) {
         return sendApiRequest("events/get.php", parameters, "Getting events");
@@ -9,8 +12,10 @@ const EventsApi = {
         return sendApiRequest("events/create.php", event, "Creating event " + event.name);
     },
     getCategories: function () {
-        return new Promise(r => r(["party", "arts", "theater", "music", "online", "children", "shopping", "cinema", "food", "wellbeing", "show", "sport", "literature", "drink", "gardening", "cause", "craft", "exhibition", "dance", "festival", "videogame", "market", "outdoor", "museum", "tour", "workshop", "garden", "holiday", "free", "parade", "fair", "religion", "science", "seminar", "boardgame"]));
-        //return sendApiRequest("/categories/get.php", {}, "Getting categories");
+        return new Promise(r => r(categories.map(c => ({
+            id: c,
+            image: baseUrl + "/api/images/get.php?query=" + encodeURIComponent(c)
+        }))));
     },
     getLoginWithUrl() {
         return sendApiRequest("users/getloginwithurl.php", {}, "Getting 'login with' url");
@@ -38,7 +43,7 @@ const EventsApi = {
     },
     removeFavorite: function (id) {
         return sendApiRequest("events/removefavorite.php", { id }, "Removing favorite " + id);
-    }
+    },
 };
 
 function sendApiRequest(endpoint, parameters, message) {
@@ -49,7 +54,7 @@ function sendApiRequest(endpoint, parameters, message) {
             .map(([k, v]) =>
                 v instanceof Array ? v.map(i => k + "[]=" + encodeURIComponent(i)).join("&") : k + "=" + encodeURIComponent(v)
             ).join("&");
-        fetch(import.meta.env.VITE_BASE_URL + "/api/" + endpoint + "?" + urlParameters)
+        fetch(baseUrl + "/api/" + endpoint + "?" + urlParameters)
             .then(res => res.json())
             .then(function (response) {
                 if (!response.success) {

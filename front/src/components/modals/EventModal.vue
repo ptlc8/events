@@ -1,6 +1,6 @@
 <template>
   <Modal v-bind="$attrs" ref="modal" class="event-modal">
-    <div class="banner" :style="'background-image: url(\'' + banner + '\');'"></div>
+    <div class="banner" :style="'background-image: url(\'' + banner.url + '\');'" :title="banner.credits"></div>
     <div class="body">
       <span class="title">{{ event.title }}</span>
       <span class="author">{{ $text.get("by") }} {{ event.author }}</span>
@@ -70,7 +70,7 @@
 import AgendaPage from "@/components/AgendaPage.vue";
 import Weather from "@/components/Weather.vue";
 import Contacts from "@/components/Contacts.vue";
-import EventsApi from "@/api";
+import { default as EventsApi, baseUrl } from "@/api";
 import Modal from "./Modal.vue";
 export default {
   name: "EventModal",
@@ -122,14 +122,13 @@ export default {
   },
   computed: {
     url() {
-      return document.location.origin + import.meta.env.VITE_BASE_URL + '?e=' + this.event.id;
+      return document.location.origin + baseUrl + '?e=' + this.event.id;
     },
     banner() {
-      if (this.event.images[0])
-        return this.event.images[0]
-      if (this.event.categories.length > 0)
-        return "https://source.unsplash.com/600x300/?+" + this.event.categories.join(",");
-      return "https://source.unsplash.com/600x300/?event";
+      return {
+        url: this.event.nonRepresentativeImage ?? this.event.images[0],
+        credits: this.event.nonRepresentativeImage ? this.$text.get('non representative') : this.event.imagesCredits[0]
+      };
     }
   }
 };

@@ -2,6 +2,6 @@
 
 include('../init.php');
 
-exitSuccess(PORTAL_CONNECT_URL);
+exitSuccess(get_config('PORTAL_CONNECT_URL'));
 
 ?>

@@ -120,5 +120,6 @@
     "loggedin": "Connecté !",
     "logginginfailed": "Échec de la connexion",
     "retry": "Réessayer",
-    "ok": "OK"
+    "ok": "OK",
+    "non representative": "Image non représentative"
 }
