@@ -38,4 +38,13 @@ ALTER TABLE `favorites`
   /*ADD CONSTRAINT `favorites_user` FOREIGN KEY (`user`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,*/
   ADD UNIQUE `favorites_unique` (`user`, `event`);
 
+CREATE TABLE `images` (
+  `query` VARCHAR(64) NOT NULL,
+  `url` TEXT NOT NULL,
+  `createdAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE = InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+ALTER TABLE `images`
+  ADD PRIMARY KEY (`query`);
+
 COMMIT;

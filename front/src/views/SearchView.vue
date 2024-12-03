@@ -20,7 +20,7 @@
         @change="prelaunchSearch" />
       <DistanceInput class="distance-input" v-model="search.dist" @change="prelaunchSearch" />
       <MultiSelect class="catselect" :title="$text.get('categories')" v-model="search.cats" @change="prelaunchSearch"
-        :options="categories.reduce((acc, c) => (acc[c] = $text.get(c)) && acc, {})" />
+        :options="categories.reduce((acc, c) => (acc[c.id] = $text.get(c.id)) && acc, {})" />
     </div>
     <div id="results">
       <EventPreview class="event" v-for="event in events" :event="event" @click="$store.event = event"></EventPreview>

@@ -2,8 +2,8 @@
     <article class="event-preview">
         <span class="title">{{ event.title }}</span>
         <div class="wrapper">
-            <div class="picture" :style="'background-image: url(\'' + banner + '\');'" :title="event.imagesCredits[0]">
-                <span v-if="event.images.length == 0" title="Image non représentative">❗</span>
+            <div class="picture" :style="'background-image: url(\'' + banner.url + '\');'" :title="banner.credits">
+                <span v-if="banner.nonRepresentative" :title="$text.get('non representative')">❗</span>
             </div>
             <div class="infos">
                 <span class="description">{{ event.description }}</span>
@@ -33,11 +33,11 @@ export default {
     emits: ["click"],
     computed: {
         banner() {
-            if (this.event.images[0])
-                return this.event.images[0]
-            if (this.event.categories.length > 0)
-                return "https://source.unsplash.com/600x300/?+" + this.event.categories.join(",");
-            return "https://source.unsplash.com/600x300/?event";
+            return {
+                url: this.event.images[0] ?? this.event.nonRepresentativeImage,
+                credits: this.event.nonRepresentativeImage ? this.$text.get('non representative') : this.event.imagesCredits[0],
+                nonRepresentative: this.event.nonRepresentativeImage
+            }
         }
     }
 }

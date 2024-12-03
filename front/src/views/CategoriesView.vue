@@ -1,9 +1,9 @@
 <template>
   <section class="categories">
     <h1>🗂 Categories</h1>
-    <article v-for="categorie in categories" class="categorie" @click="$router.push({name:'search',query:{c:categorie}})">
-      <div class="banner" :style="`background-image:url('https://source.unsplash.com/featured/400x200?${categorie}')`"></div>
-      <h2>{{ $text.get(categorie) }}</h2>
+    <article v-for="categorie in categories" class="categorie" @click="$router.push({name:'search',query:{c:categorie.id}})">
+      <div class="banner" :style="`background-image:url('${categorie.image}')`"></div>
+      <h2>{{ $text.get(categorie.id) }}</h2>
     </article>
   </section>
 </template>
@@ -12,9 +12,6 @@
 import EventsApi from '@/api';
 export default {
   name: 'CategoriesView',
-  setup() {
-    return { EventsApi };
-  },
   data() {
     return {
       categories: []

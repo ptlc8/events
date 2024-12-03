@@ -36,10 +36,12 @@ define('DB_PASS', 'password123');
 define('DB_NAME', 'events');
 define('PORTAL_CONNECT_URL', 'http://localhost/connect.php?app=events&params=');
 define('PORTAL_USER_URL', 'http://localhost/api/user.php?token=');
+define('PORTAL_AVATAR_URL', 'http://localhost/api/avatar.php?user=');
 // les lignes suivantes sont optionnelles
-define("SEATGEEK_CLIENT_ID", "PutY0urCl1eNtIdH3r3xxxxxxx");
-define("SEATGEEK_CLIENT_SECRET", "puty0urcli3nt1dh3r3xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
-define("TICKETMASTER_API_KEY", "PutYourApiKeyHerexxxxxxxxxxxxxxx");
+define('BASE_URL', '/events');
+define('SEATGEEK_CLIENT_ID', 'PutY0urCl1eNtIdH3r3xxxxxxx');
+define('SEATGEEK_CLIENT_SECRET', 'puty0urcli3nt1dh3r3xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx');
+define('TICKETMASTER_API_KEY', 'PutYourApiKeyHerexxxxxxxxxxxxxxx');
 ?>
 ```
  - installer les dépendances et compiler le front-end :

@@ -157,6 +157,9 @@ while (($event = $result->fetch_assoc()) != null) {
         $event['public'] = boolval($event['public']);
         unset($event['source']);
         unset($event['sourceUrl']);
+        if (count($event['images']) == 0) {
+            $event['nonRepresentativeImage'] = [getBaseURL().'/api/images/get.php?query='.urlencode(implode(' ', $event['categories']))];
+        }
         array_push($events, $event);
     } else {
         array_push($events, array($event['id'], floatval($event['lng']), floatval($event['lat']), $event['title']));

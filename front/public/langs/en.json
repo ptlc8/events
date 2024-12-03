@@ -52,6 +52,7 @@
     "notloggedin":"You are not logged in",
     "login":"Log in",
     "logintofav":"Log in to save your favorites events",
+    "invalid":"Invalid username or password",
     "logout":"Log out",
     "nofavorites":"You don't have any favorite events yet",
     "searchthem":"Search for them",
@@ -63,7 +64,7 @@
     "week":"This week",
     "month":"This month",
     "alltime":"Any time",
-    "now":"Maintenant",
+    "now":"Now",
     "morning":"The morning",
     "afternoon":"The afternoon",
     "evening":"The evening",
@@ -119,5 +120,6 @@
     "loggedin": "Logged in !",
     "logginginfailed": "Connection failed",
     "retry": "Retry",
-    "ok": "OK"
+    "ok": "OK",
+    "non representative": "Non representative image"
 }
