@@ -20,7 +20,7 @@ Il est possible de lancer le projet en local.
 ### Soit avec Docker (recommandé) 🐳
 > Pour cela il faudra Docker et Docker Compose.
 
- - définir les variables d'environnement `PORTAL_CONNECT_URL`, `PORTAL_USER_URL` et éventuellement `SEATGEEK_CLIENT_ID`, `SEATGEEK_CLIENT_SECRET` et `TICKETMASTER_API_KEY`. Cela peut se faire dans un fichier `.env` à la racine du projet.
+ - définir les variables d'environnement `PORTAL_CONNECT_URL`, `PORTAL_USER_URL`, `MAPBOX_ACCESS_TOKEN` et éventuellement `SEATGEEK_CLIENT_ID`, `SEATGEEK_CLIENT_SECRET` et `TICKETMASTER_API_KEY`. Cela peut se faire dans un fichier `.env` à la racine du projet.
  - lancer le projet avec docker-compose : `docker-compose up -d`
 
 ### Soit sans Docker 🐢
@@ -43,6 +43,10 @@ define('SEATGEEK_CLIENT_ID', 'PutY0urCl1eNtIdH3r3xxxxxxx');
 define('SEATGEEK_CLIENT_SECRET', 'puty0urcli3nt1dh3r3xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx');
 define('TICKETMASTER_API_KEY', 'PutYourApiKeyHerexxxxxxxxxxxxxxx');
 ?>
+```
+ - créer un fichier `front/.env` sous cette forme :
+```bash
+VITE_MAPBOX_ACCESS_TOKEN=pk.abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ
 ```
  - installer les dépendances et compiler le front-end :
 ```bash
