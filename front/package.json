@@ -7,10 +7,11 @@
   "scripts": {
     "dev": "vite",
     "dev:host": "vite --host",
-    "build:back": "mkdir -p ../dist && ln -sf ../api/src ../dist/",
+    "build:back": "mkdir -p ../dist && ln -sf ../api/src ../dist/api",
     "build:front": "vite build",
-    "build": "vite build --outDir ../dist && npm run build:back",
-    "preview": "vite preview && npm run build:back"
+    "build": "vite build --outDir ../dist --emptyOutDir && npm run build:back",
+    "preview": "vite preview && npm run build:back",
+    "generate-pwa-assets": "pwa-assets-generator"
   },
   "repository": {
     "type": "git",
@@ -28,9 +29,14 @@
     "@vitejs/plugin-vue": "^5.2.1",
     "mapbox-gl": "^3.8.0",
     "pinia": "^2.2.8",
+    "register-service-worker": "^1.7.2",
     "sass": "^1.81.0",
     "vite": "^6.0.1",
+    "vite-plugin-pwa": "^0.21.1",
     "vue": "^3.5.13",
     "vue-router": "^4.5.0"
+  },
+  "devDependencies": {
+    "@vite-pwa/assets-generator": "^0.2.6"
   }
 }

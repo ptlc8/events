@@ -4,6 +4,7 @@ import App from './App.vue';
 import createRouter from './router';
 import { useMainStore } from './stores/main';
 import Texts from './texts';
+import './pwa';
 
 import './assets/main.scss';
 

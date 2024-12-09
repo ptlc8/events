@@ -8,6 +8,9 @@
       <h2>{{ $store.user.name }}</h2>
       <button class="logout" @click="logout">{{ $text.get('logout') }}</button>
     </article>
+    <article class="button" v-if="canInstallWebApp" @click="promptInstallWebApp()">
+      <h2>📱 {{ $text.get('install app') }}</h2>
+    </article>
     <article class="button" @click="$router.push({name:'fav'})">
       <h2>⭐ {{ $text.get('fav') }}</h2>
     </article>
@@ -28,12 +31,17 @@
 <script>
 import EventsApi from '../api';
 import MessageBox from '../components/MessageBox.vue';
+import { canInstallWebApp, promptInstallWebApp } from '../pwa';
 
 export default {
   name: 'MeView',
   components: { MessageBox },
   setup() {
-    return { EventsApi };
+    return {
+      EventsApi,
+      canInstallWebApp,
+      promptInstallWebApp
+    };
   },
   methods: {
     logout() {

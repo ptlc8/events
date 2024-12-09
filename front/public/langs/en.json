@@ -121,5 +121,6 @@
     "logginginfailed": "Connection failed",
     "retry": "Retry",
     "ok": "OK",
-    "non representative": "Non representative image"
+    "non representative": "Non representative image",
+    "install app": "Install the app"
 }
