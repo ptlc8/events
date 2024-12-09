@@ -2,6 +2,11 @@
 
 include('credentials.php');
 
+// CORS headers
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, POST, OPTIONS, DELETE, PUT, PATCH');
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
+
 // obtenir une variable de configuration
 function get_config($name) {
 	return defined($name) && !empty(constant($name)) ? constant($name) : null;
