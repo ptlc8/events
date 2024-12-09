@@ -10,6 +10,7 @@
 </template>
 
 <script>
+import { mapboxAccessToken } from '@/config';
 export default {
   name: 'GeolocationInput',
   props: {
@@ -66,9 +67,13 @@ export default {
       this.$emit('change');
       this.mouseover = false;
     },
-    async mapboxQuery(query) {
-      let results = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?language=${this.$text.getShortLang()}&access_token=${import.meta.env.VITE_MAPBOX_ACCESS_TOKEN}`);
-      return await results.json();
+    mapboxQuery(query) {
+      return fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?language=${this.$text.getShortLang()}&access_token=${mapboxAccessToken}`)
+        .then(res => res.json())
+        .catch(err => {
+          console.error('[GeolocationInput] ' + err);
+          return null;
+        });
     }
   }
 }

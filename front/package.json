@@ -9,6 +9,7 @@
     "dev:host": "vite --host",
     "build:back": "mkdir -p ../dist && ln -sf ../api/src ../dist/api",
     "build:front": "vite build",
+    "build:app": "vite build --mode app --outDir ../app/dist",
     "build": "vite build --outDir ../dist --emptyOutDir && npm run build:back",
     "preview": "vite preview && npm run build:back",
     "generate-pwa-assets": "pwa-assets-generator"

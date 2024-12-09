@@ -1,11 +1,13 @@
 import { register } from 'register-service-worker'
 import { ref } from 'vue';
 
+import { isProd, mode, baseUrl } from './config';
+
 var deferredPrompt = null;
 export const canInstallWebApp = ref(false);
 
-if (import.meta.env.PROD) {
-    register(`${import.meta.env.VITE_BASE_URL}/sw.js`, {
+if (isProd && mode != 'app') {
+    register(baseUrl + 'sw.js', {
         ready() {
             console.info('[SW] App is being served from cache by a service worker.')
         },

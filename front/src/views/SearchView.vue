@@ -39,6 +39,7 @@ import EventsApi from '../api';
 import MessageBox from '../components/MessageBox.vue';
 import GeolocationInput from '../components/inputs/GeolocationInput.vue';
 import DistanceInput from '../components/inputs/DistanceInput.vue';
+import { mapboxAccessToken } from '../config';
 export default {
   name: 'SearchView',
   components: {
@@ -67,10 +68,14 @@ export default {
     this.launchSearch();
     EventsApi.getCategories().then(cats => this.categories = cats);
     EventsApi.getLocation().then(loc => {
-      fetch(`https://api.mapbox.com/search/searchbox/v1/reverse?longitude=${loc[0]}&latitude=${loc[1]}&access_token=${import.meta.env.VITE_MAPBOX_ACCESS_TOKEN}`)
+      fetch(`https://api.mapbox.com/search/searchbox/v1/reverse?longitude=${loc[0]}&latitude=${loc[1]}&access_token=${mapboxAccessToken}`)
         .then(res => res.json())
         .then(res => {
           this.defaultLocationName = res.features[0].properties.place_formatted;
+        })
+        .catch(err => {
+          console.error('[SearchView] ' + err);
+          this.defaultLocationName = 'Unknown location';
         });
     });
   },

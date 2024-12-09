@@ -25,16 +25,7 @@ export default defineConfig(({ command, mode, ssrBuild }) => {
         '@': fileURLToPath(new URL('./src', import.meta.url))
       }
     },
-    base: env.VITE_BASE_URL,
-    server: {}
+    base: env.VITE_BASE_URL
   };
-  if (env.VITE_API_URL)
-    config.server.proxy = {
-      [(env.VITE_BASE_URL ?? '') + '/api']: {
-        target: env.VITE_API_URL,
-        changeOrigin: true,
-        rewrite: (path) => path.replace((env.VITE_BASE_URL ?? '') + '/api', '')
-      }
-    };
   return config;
 })

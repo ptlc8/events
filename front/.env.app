@@ -1,0 +1,1 @@
+VITE_BACKEND_URL=https://ambi.dev/events/

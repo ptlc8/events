@@ -70,7 +70,8 @@
 import AgendaPage from "@/components/AgendaPage.vue";
 import Weather from "@/components/Weather.vue";
 import Contacts from "@/components/Contacts.vue";
-import { default as EventsApi, baseUrl } from "@/api";
+import EventsApi from "@/api";
+import { origin } from "@/config";
 import Modal from "./Modal.vue";
 export default {
   name: "EventModal",
@@ -122,7 +123,7 @@ export default {
   },
   computed: {
     url() {
-      return document.location.origin + baseUrl + '?e=' + this.event.id;
+      return origin + '?e=' + this.event.id;
     },
     banner() {
       return {

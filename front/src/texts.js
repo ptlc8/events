@@ -1,3 +1,5 @@
+import { baseUrl } from "./config";
+
 // Objet pour retourner les textes en fonction de la langue
 const Texts = function () {
     var availableLangs = [];
@@ -21,7 +23,7 @@ const Texts = function () {
         },
         async setLang(newLang, save=false) {
             if (newLang && !availableLangs.includes(newLang)) {
-                console.error(newLang + " is not an available language");
+                console.error("[Texts] " + newLang + " is not an available language");
                 newLang = null;
             }
             if (save) {
@@ -32,9 +34,16 @@ const Texts = function () {
             shortLang = newLang.match("[^\-]*")[0];
             if (!texts[shortLang]) {
                 texts[shortLang] = {};
-                return fetch(import.meta.env.VITE_BASE_URL + "/langs/" + shortLang + ".json").then(res => res.text()).then(function (response) {
-                    texts[shortLang] = JSON.parse(response);
-                }).then(() => console.info("[Texts] Lang loaded: " + shortLang));
+                console.debug("[Texts] Fetching lang: " + shortLang);
+                return fetch(baseUrl + "langs/" + shortLang + ".json")
+                    .then(res => res.text())
+                    .then(res => {
+                        texts[shortLang] = JSON.parse(res);
+                        console.info("[Texts] Lang loaded: " + shortLang)
+                    })
+                    .catch(err => {
+                        console.error("[Texts] " + err);
+                    });
             }
         },
         getAvailableLangs() {

@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Texts from '@/texts';
+import { baseUrl } from '@/config';
 
 const createMainRouter = async () => {
   
@@ -7,7 +8,7 @@ const createMainRouter = async () => {
 
   var router = createRouter({
     base: "./",
-    history: createWebHistory(import.meta.env.BASE_URL),
+    history: createWebHistory(baseUrl),
     routes: [
       {
         path: '/',

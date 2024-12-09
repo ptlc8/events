@@ -5,6 +5,7 @@
 <script>
 import EventsApi from '@/api';
 import { watch } from 'vue';
+import { mapboxAccessToken } from '@/config';
 
 import mapboxgl from 'mapbox-gl/dist/mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
@@ -14,7 +15,7 @@ import StylesControl from '@mapbox-controls/styles';
 import '@mapbox-controls/styles/src/index.css';
 
 import markerIcon from '@/assets/icons/marker.png';
-mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
+mapboxgl.accessToken = mapboxAccessToken;
 
 export default {
     name: 'MapView',

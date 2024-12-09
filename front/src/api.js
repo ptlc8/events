@@ -1,4 +1,5 @@
-export const baseUrl = import.meta.env.VITE_BASE_URL ?? "";
+import { backendUrl } from "./config";
+
 const categories = ["party", "arts", "theater", "music", "online", "children", "shopping", "cinema", "food", "wellbeing", "show", "sport", "literature", "drink", "gardening", "cause", "craft", "exhibition", "dance", "festival", "videogame", "market", "outdoor", "museum", "tour", "workshop", "garden", "holiday", "free", "parade", "fair", "religion", "science", "seminar", "boardgame"];
 
 const EventsApi = {
@@ -14,7 +15,7 @@ const EventsApi = {
     getCategories: function () {
         return new Promise(r => r(categories.map(c => ({
             id: c,
-            image: baseUrl + "/api/images/get.php?query=" + encodeURIComponent(c)
+            image: backendUrl + "api/images/get.php?query=" + encodeURIComponent(c)
         }))));
     },
     getLoginWithUrl() {
@@ -48,17 +49,18 @@ const EventsApi = {
 
 function sendApiRequest(endpoint, parameters, message) {
     return new Promise(function (resolve, reject) {
-        console.info("[Events] " + message);
+        console.info("[API] " + message);
         var urlParameters = Object.entries(parameters)
             .filter(([_, v]) => v !== null && v !== undefined)
             .map(([k, v]) =>
                 v instanceof Array ? v.map(i => k + "[]=" + encodeURIComponent(i)).join("&") : k + "=" + encodeURIComponent(v)
             ).join("&");
-        fetch(baseUrl + "/api/" + endpoint + "?" + urlParameters)
+        console.debug("[API] Fetching " + backendUrl + "api/" + endpoint + "?" + urlParameters);
+        fetch(backendUrl + "api/" + endpoint + "?" + urlParameters)
             .then(res => res.json())
             .then(function (response) {
                 if (!response.success) {
-                    console.error("[Events] " + response.error);
+                    console.error("[API] " + response.error);
                     reject(response.error);
                 } else {
                     resolve(response.data);
