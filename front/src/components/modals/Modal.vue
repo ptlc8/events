@@ -1,7 +1,7 @@
 <template>
   <Transition name="modal">
     <div class="modal-container" v-if="show" @click.self="close">
-      <div class="modal">
+      <div class="modal" :class="{ big }">
         <img class="close" src="@/assets/icons/cross.svg" @click="close">
         <slot></slot>
       </div>
@@ -16,6 +16,10 @@ export default {
     show: {
       type: Boolean,
       required: true
+    },
+    big: {
+      type: Boolean,
+      default: false
     }
   },
   emits: ['close'],
@@ -56,6 +60,25 @@ export default {
     height: 1.5em;
     cursor: pointer;
     z-index: 100;
+  }
+
+  &.big {
+    padding: 0;
+    width: 48em;
+    height: 48em;
+    max-height: 100%;
+    overflow: auto;
+  }
+}
+
+@media (max-width: 800px) {
+  .modal.big {
+    height: 100%;
+    width: 100%;
+
+    .close {
+      position: fixed;
+    }
   }
 }
 </style>

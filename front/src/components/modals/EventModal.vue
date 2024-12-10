@@ -1,5 +1,5 @@
 <template>
-  <Modal v-bind="$attrs" ref="modal" class="event-modal">
+  <Modal big v-bind="$attrs" ref="modal">
     <div class="banner" :style="'background-image: url(\'' + banner.url + '\');'" :title="banner.credits"></div>
     <div class="body">
       <span class="title">{{ event.title }}</span>
@@ -135,201 +135,183 @@ export default {
 };
 </script>
 
-<style lang="scss">
-.event-modal {
-  .modal {
-    padding: 0;
-    width: 48em;
-    height: 48em;
-    max-height: 100%;
-    overflow: auto;
+<style lang="scss" scoped>
+.banner {
+  width: 100%;
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  height: 18em;
+  background: center / cover;
+}
+
+.body {
+  position: absolute;
+  top: 16em;
+  width: 100%;
+  background-color: white;
+  border-radius: 0.5em;
+  padding: 1em 4em;
+  margin: auto;
+
+  @media (max-width: 800px) {
+    padding: 1em;
   }
 
-  .banner {
-    width: 100%;
-    position: -webkit-sticky;
-    position: sticky;
-    top: 0;
-    height: 18em;
-    background: center / cover;
+  .title {
+    font-size: 1.8em;
+    font-weight: bold;
+    display: block;
+    margin-left: 1em;
+    line-height: 1;
+    margin-bottom: .2em;
   }
 
+  .author {
+    display: block;
+    margin-left: .5em;
+    margin-bottom: .5em;
+  }
+
+  .categories span {
+    border: 1px solid var(--color-border);
+    border-radius: .25em;
+    margin-right: .25em;
+    padding: 0 .25em;
+  }
+
+  .description {
+    font-size: 1.2em;
+    line-height: 1.5;
+    width: calc(100% - 8em);
+    text-align: justify;
+    border-top: 1px solid var(--color-border);
+    padding-top: .5em;
+    margin-top: .5em;
+    float: left;
+    white-space: pre-wrap;
+  }
+
+  .datetimes>* {
+    display: inline-block;
+    font-size: .5em;
+  }
+
+  .sidebar {
+    float: right;
+    width: 8em;
+    display: flex;
+    flex-direction: column;
+
+    >* {
+      margin: 5px 0;
+    }
+
+    button {
+      color: black;
+      height: auto;
+      width: 100%;
+
+      &.add-fav {
+        background-color: #ffff88;
+      }
+
+      &.show-on-map {
+        background-color: #88ff88;
+      }
+
+      &.large-share-button {
+        background-color: #88bbff;
+      }
+    }
+
+    .share-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: .2em;
+
+      a {
+        background: no-repeat center/cover;
+        width: 100%;
+        padding-top: 100%;
+        border-radius: .2em;
+
+        @each $social in facebook twitter whatsapp email tumblr messenger telegram
+
+        /*reddit linkedin line viber skype wechat*/
+          {
+          &.#{$social} {
+            background-image: url("@/assets/icons/socials/#{$social}.svg");
+          }
+        }
+      }
+
+      .copy-button {
+        grid-column: 1 / -1;
+        width: 100%;
+        height: 2.5em;
+        margin: 0;
+        padding: 0;
+        background: no-repeat center/contain skyblue url(@/assets/icons/copy.svg);
+        //background-color: transparent;
+        text-align: center;
+        font-weight: bold;
+        color: black;
+      }
+    }
+  }
+
+  .images {
+    float: left;
+    width: calc(100% - 8em);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+
+    figure {
+      flex: 1;
+
+      img {
+        display: block;
+        width: 14em;
+        min-width: calc(100% - 1em);
+        margin: .5em .5em 0 .5em;
+      }
+
+      figcaption {
+        font-size: .8em;
+        text-align: center;
+        color: gray;
+        font-style: italic;
+      }
+    }
+  }
+
+  .footer {
+    clear: both;
+    text-align: center;
+    border-top: 1px solid var(--color-border);
+    padding-top: .5em;
+    margin-top: .5em;
+  }
+}
+
+
+
+@media (max-width: 800px) {
   .body {
-    position: absolute;
-    top: 16em;
-    width: 100%;
-    background-color: white;
-    border-radius: 0.5em;
-    padding: 1em 4em;
-    margin: auto;
 
-    @media (max-width: 800px) {
-      padding: 1em;
-    }
-
-    .title {
-      font-size: 1.8em;
-      font-weight: bold;
-      display: block;
-      margin-left: 1em;
-      line-height: 1;
-      margin-bottom: .2em;
-    }
-
-    .author {
-      display: block;
-      margin-left: .5em;
-      margin-bottom: .5em;
-    }
-
-    .categories span {
-      border: 1px solid var(--color-border);
-      border-radius: .25em;
-      margin-right: .25em;
-      padding: 0 .25em;
-    }
-
-    .description {
-      font-size: 1.2em;
-      line-height: 1.5;
-      width: calc(100% - 8em);
-      text-align: justify;
-      border-top: 1px solid var(--color-border);
-      padding-top: .5em;
-      margin-top: .5em;
-      float: left;
-      white-space: pre-wrap;
-    }
-
-    .datetimes>* {
-      display: inline-block;
-      font-size: .5em;
+    .description,
+    .images {
+      width: 100%
     }
 
     .sidebar {
-      float: right;
-      width: 8em;
-      display: flex;
-      flex-direction: column;
-
-      >* {
-        margin: 5px 0;
-      }
-
-      button {
-        color: black;
-        height: auto;
-        width: 100%;
-
-        &.add-fav {
-          background-color: #ffff88;
-        }
-
-        &.show-on-map {
-          background-color: #88ff88;
-        }
-
-        &.large-share-button {
-          background-color: #88bbff;
-        }
-      }
+      float: unset;
+      width: 100%;
 
       .share-buttons {
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
-        gap: .2em;
-
-        a {
-          background: no-repeat center/cover;
-          width: 100%;
-          padding-top: 100%;
-          border-radius: .2em;
-
-          @each $social in facebook twitter whatsapp email tumblr messenger telegram
-
-          /*reddit linkedin line viber skype wechat*/
-            {
-            &.#{$social} {
-              background-image: url("@/assets/icons/socials/#{$social}.svg");
-            }
-          }
-        }
-
-        .copy-button {
-          grid-column: 1 / -1;
-          width: 100%;
-          height: 2.5em;
-          margin: 0;
-          padding: 0;
-          background: no-repeat center/contain skyblue url(@/assets/icons/copy.svg);
-          //background-color: transparent;
-          text-align: center;
-          font-weight: bold;
-          color: black;
-        }
-      }
-    }
-
-    .images {
-      float: left;
-      width: calc(100% - 8em);
-      display: flex;
-      flex-wrap: wrap;
-      align-items: flex-start;
-
-      figure {
-        flex: 1;
-
-        img {
-          display: block;
-          width: 14em;
-          min-width: calc(100% - 1em);
-          margin: .5em .5em 0 .5em;
-        }
-
-        figcaption {
-          font-size: .8em;
-          text-align: center;
-          color: gray;
-          font-style: italic;
-        }
-      }
-    }
-
-    .footer {
-      clear: both;
-      text-align: center;
-      border-top: 1px solid var(--color-border);
-      padding-top: .5em;
-      margin-top: .5em;
-    }
-  }
-
-
-
-  @media (max-width: 800px) {
-    .modal {
-      height: 100%;
-
-      .close {
-        position: fixed;
-      }
-    }
-
-    .body {
-
-      .description,
-      .images {
-        width: 100%
-      }
-
-      .sidebar {
-        float: unset;
-        width: 100%;
-
-        .share-buttons {
-          grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
-        }
+        grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
       }
     }
   }

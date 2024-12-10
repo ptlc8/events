@@ -1,5 +1,5 @@
 <template>
-  <Modal v-bind="$attrs" ref="modal" class="login-modal">
+  <Modal v-bind="$attrs" ref="modal">
     <span class="title">{{ $text.get('login') }}</span>
     <!--<form @submit.prevent="login">
       <input v-model="username" placeholder="Nom d'utilisateur" autofocus="true" autocomplete="username">
@@ -72,42 +72,39 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.login-modal {
+.login-with-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5em;
+  color: #fff;
+  font-size: 1.5em;
+  background-color: #82b;
 
-  .login-with-link {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: .5em;
-    color: #fff;
-    font-size: 1.5em;
-    background-color: #82b;
-
-    img {
-      height: 2em;
-    }
+  img {
+    height: 2em;
   }
+}
 
-  .title {
-    font-size: 1.5em;
-    font-weight: bold;
-    display: block;
-    text-align: center;
-  }
+.title {
+  font-size: 1.5em;
+  font-weight: bold;
+  display: block;
+  text-align: center;
+}
 
-  input {
-    width: 100%;
-  }
+input {
+  width: 100%;
+}
 
-  button {
-    width: 100%;
-    margin-bottom: 0.5em;
-  }
+button {
+  width: 100%;
+  margin-bottom: 0.5em;
+}
 
-  .info {
-    display: block;
-    color: red;
-    text-align: center;
-  }
+.info {
+  display: block;
+  color: red;
+  text-align: center;
 }
 </style>
