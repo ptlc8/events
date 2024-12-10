@@ -1,6 +1,7 @@
 {
   "scripts": {
     "build:front": "cd ../front && npm run build:app && cd ../app && cap sync",
+    "sync": "cap sync",
     "run:android": "cap run android",
     "open:android-studio": "cap open android",
     "build:android": "cap build android"
