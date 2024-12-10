@@ -1,0 +1,5 @@
+{
+  "appId": "dev.ambi.events",
+  "appName": "Évents",
+  "webDir": "./dist"
+}

@@ -1,0 +1,16 @@
+{
+  "scripts": {
+    "build:front": "cd ../front && npm run build:app && cd ../app && cap sync",
+    "run:android": "cap run android",
+    "open:android-studio": "cap open android",
+    "build:android": "cap build android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.2.0",
+    "@capacitor/core": "^6.2.0",
+    "@capacitor/splash-screen": "^6.0.3"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.2.0"
+  }
+}
