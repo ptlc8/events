@@ -118,7 +118,7 @@ export default {
                 accessToken: mapboxgl.accessToken,
                 localGeocoder: this.forwardGeocoder,
                 zoom: 14,
-                placeholder: 'Enter search' + (this.$store.events.length ? ' e.g. ' + this.$store.events[parseInt(Math.random() * this.$store.events.length)][0] : ''),
+                placeholder: this.$text.get('search') + (this.$store.events.length ? ' (' + this.$text.get('eg') + ' ' + this.$store.events[parseInt(Math.random() * this.$store.events.length)][3] + ')' : ''),
                 mapboxgl: mapboxgl
             })
         );
