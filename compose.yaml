@@ -4,7 +4,7 @@ services:
       context: .
       args:
         VITE_MAPBOX_ACCESS_TOKEN: ${MAPBOX_ACCESS_TOKEN?}
-        VITE_BASE_URL: /${BASE_URL:-events}
+        VITE_BASE_URL: /${BASE_URL:-events/}
     ports:
       - 80
     depends_on:
@@ -24,7 +24,7 @@ services:
       DB_USER: user
       DB_PASS: secret
       DB_NAME: events
-      BASE_URL: /${BASE_URL:-events}
+      BASE_URL: /${BASE_URL:-events/}
       PORTAL_CONNECT_URL: ${PORTAL_CONNECT_URL?}
       PORTAL_USER_URL: ${PORTAL_USER_URL?}
       PORTAL_AVATAR_URL: ${PORTAL_AVATAR_URL?}
