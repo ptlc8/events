@@ -6,6 +6,8 @@
 
 import axios from "axios";
 import { Event, EventsFetch } from "./event.js";
+import { findCategories } from "./categories.js";
+import { isSafe } from "./filter.js";
 
 /**
  * Get all events from OpenAgenda
@@ -21,7 +23,7 @@ function fetchAll(key, official = false) {
     fetchAgendas(key, official)
         .on("agendas", agendas => {
             for (let agenda of agendas) {
-                fetchAgendaEvents(key, agenda.uid)
+                fetchAgendaEvents(key, agenda)
                     .on("events", e => emitter.emit("events", e))
                     .on("progress", progress => emitter.emit("progress", progress))
                     .on("error", err => emitter.emit("error", err))
@@ -59,6 +61,7 @@ function fetchAgendas(key, official = false) {
                 emitter.emit("error", data);
                 break;
             }
+            data.agendas = data.agendas.filter(a => a.official || isSafe(a.title, a.description));
             emitter.emit("progress", { agendas: data.agendas.length });
             emitter.emit("agendas", data.agendas);
             agendas.push(...data.agendas);
@@ -73,23 +76,23 @@ function fetchAgendas(key, official = false) {
 /**
  * Get the events from an OpenAgenda agenda
  * @param {string} key
- * @param {number} agendaId
+ * @param {Object} agenda OpenAgenda agenda
  * @returns {EventsFetch}
  */
-function fetchAgendaEvents(key, agendaId) {
+function fetchAgendaEvents(key, agenda) {
     var emitter = new EventsFetch();
     (async function() {
         var after = [];
         var events = [];
         while (after != null) {
-            var url = `https://api.openagenda.com/v2/agendas/${agendaId}/events?key=${key}&size=300&detailed=1&` + after.map(v => "after[]=" + v).join("&");
+            var url = `https://api.openagenda.com/v2/agendas/${agenda.uid}/events?key=${key}&size=300&detailed=1&` + after.map(v => "after[]=" + v).join("&");
             var response = await axios.get(url);
             var data = response.data;
             if (!data.success) {
                 emitter.emit("error", data);
                 break;
             }
-            var results = data.events.map(parseEvent);
+            var results = data.events.map(e => parseEvent(e, agenda));
             var ignored = results.filter(e => e == null).length;
             results = results.filter(e => e != null);
             emitter.emit("progress", { events: results.length, ignored });
@@ -104,33 +107,37 @@ function fetchAgendaEvents(key, agendaId) {
 
 /**
  * Parse an OpenAgenda event to an Event
- * @param {Object} openagendaEvent 
+ * @param {Object} oaEvent OpenAgenda event
+ * @param {Object} agenda OpenAgenda agenda
  * @returns {Event?}
  */
-function parseEvent(oaEvent) {
+function parseEvent(oaEvent, agenda) {
     if (oaEvent.nextTiming == null) // event has no future timing
         return null;
+    if (!agenda.official && !isSafe(oaEvent.title.fr, oaEvent.title.en, oaEvent.description.fr, oaEvent.description.en))
+        return null;
+    var url = `https://openagenda.com/agendas/${agenda.slug}/events/${oaEvent.slug}`;
     var event = {
-        id: "OA" + oaEvent.originAgenda.uid + "-" + oaEvent.uid,
+        id: "OA" + agenda.uid + "-" + oaEvent.uid,
         title: oaEvent.title.fr ?? oaEvent.title.en ?? "",
-        author: "OpenAgenda", // TODO: find a way to get the author
+        author: agenda.title,
         description: oaEvent.longDescription?.fr ?? oaEvent.longDescription?.en ?? oaEvent.description.fr ?? oaEvent.description.en ?? "",
         start: formatDate(oaEvent.nextTiming.begin),
         end: formatDate(oaEvent.nextTiming.end),
         lng: oaEvent.location?.longitude ?? 0,
         lat: oaEvent.location?.latitude ?? 0,
         placename: oaEvent.location?.address ?? "",
-        categories: oaEvent.keywords?.fr ?? oaEvent.keywords?.en ?? [], // TODO
+        categories: findCategories(oaEvent.title.fr ?? oaEvent.title.en ?? "", ...(oaEvent.keywords?.fr ?? oaEvent.keywords?.en ?? [])),
         images: oaEvent.image ? [oaEvent.image.base + oaEvent.image.filename] : [],
         imagesCredits: oaEvent.imageCredits ? [oaEvent.imageCredits] : [],
         status: oaEvent.status,
-        contact: [],
+        contact: [url],
         registration: oaEvent.registration?.map(r => r.value) ?? [],
         public: true,
         createdAt: formatDate(oaEvent.createdAt),
         updatedAt: formatDate(oaEvent.updatedAt),
         source: "openagenda",
-        sourceUrl: `https://openagenda.com/agendas/${oaEvent.originAgenda.uid}/events/${oaEvent.uid}`
+        sourceUrl: url
     };
     return event;
 }

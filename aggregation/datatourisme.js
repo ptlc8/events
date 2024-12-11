@@ -10,6 +10,7 @@ import fs from "fs";
 import stream from "stream";
 import axios from "axios";
 import { Event, Status, EventsFetch } from "./event.js";
+import { findCategories } from "./categories.js";
 
 /**
  * Get the index and events from a Datatourisme zip from url
@@ -105,6 +106,7 @@ function parseEvent(dtEvent) {
     var description = (dtEvent.hasDescription?.[0]?.["dc:description"] || dtEvent["rdfs:comment"])?.fr?.[0] ?? "";
     var takesPlaceAt = dtEvent.takesPlaceAt ? dtEvent.takesPlaceAt.filter(t => new Date(t.endDate || t.startDate) >= new Date()).sort((a, b) => new Date(a) - new Date(b))[0] : {}; // TODO: fix that
     if (!takesPlaceAt) takesPlaceAt = dtEvent.takesPlaceAt.sort((a, b) => new Date(b) - new Date(a))[0];
+    var dtCategories = dtEvent["@type"].concat(dtEvent.hasTheme?.map(theme => theme["@id"]) ?? [])
     return {
         id: "DT" + id,
         title,
@@ -115,7 +117,7 @@ function parseEvent(dtEvent) {
         lng: dtEvent.isLocatedAt[0]["schema:geo"]["schema:longitude"],
         lat: dtEvent.isLocatedAt[0]["schema:geo"]["schema:latitude"],
         placename: [address["schema:addressLocality"], address["schema:postalCode"], address["schema:streetAddress"]].join(", "),
-        categories: findCategories(dtEvent["@type"].concat(dtEvent.hasTheme?.map(theme => theme["@id"]) ?? []), title, description),
+        categories: findCategories(...dtCategories, title, description),
         images: (dtEvent.hasMainRepresentation || []).concat(dtEvent.hasRepresentation || []).map(rep =>
             rep["ebucore:hasRelatedResource"]?.map(res =>
                 res["ebucore:locator"] ?? []
@@ -159,75 +161,6 @@ function fetchLastUpdated(datatourismeUrl, date = Date.now()) {
         .on("error", error => emitter.emit("error", error))
         .on("end", events => emitter.emit("end", events.filter(e => new Date(e.updatedAt) > date)));
     return emitter;
-}
-
-// https://gitlab.adullact.net/adntourisme/datatourisme/ontology/-/blob/master/thesaurus/thesaurus.ttl
-/**
- * @type {Map<string, Array<string>>}
- */
-var CATEGORIES = {
-    "party": ["party", "fête"],
-    "arts": [" arts", "artist", " art ", "artsandcraft", "visualart"],
-    "theater": ["théâtr", "theater", "théatr", "comédien"],
-    "music": ["musique", "music", "concert"],
-    //"online": ["en ligne","online"],
-    "children": ["enfants", "tout public", "en famille", "children", "in family", "all age", "accessible à tous"],
-    "exhibition": ["exposition", "expo"],
-    "shopping": ["shopping"],
-    "cinema": ["cinéma", "cinema", "film"],
-    "food": ["nourriture", "alimentair", "food", "restauration", "restaurant", "gastronomie", "gastronomy", "cuisine", "food", "eat", "manger", "déguster", "dégustation", "restaur"],
-    "wellbeing": ["bien-être", "wellbeing", "well-being", "well being", "relaxation", "yoga", "méditation"],
-    "show": ["show", "spectacle", "scène"],
-    "sport": ["sport", "athléti", "athleti", "basketball", "baseball", "football", "soccer", "rugby", "tennis", "volleyball", "handball", "golf", "gym", "hockey", "judo", "karate", "karaté", "natation", "swim", "ski"],
-    "literature": ["literature", "littérature", " livre", " book", "lecture", " read", "écrire", "écrivain", " bd "],
-    "drink": ["boire", "boisson", "drink", "alcool", "alcohol", "bière", "beer", " vin ", " vins ", "wine", "cocktail", "aperitif", "apéritif", "buvette", "café"],
-    "gardening": ["jardine", "jardino", "jardinage", "gardenning", "plant", "flower", "fleur"],
-    "cause": ["cause", "bénévolat", "bénévole", "volontariat", "volontaire", "volunteer", "charité", "charity", " don", "donation", "solidarité", "solidarity", "ngo", "non-profit"],
-    "craft": ["craft", "artisan", "handmade", "hand-made", "hand made", "manufacturé"],
-    "dance": [" dance", "danse", "dancing", "danceevent"],
-    "festival": ["festival"],
-    "garden": ["jardin ", "jardins ", "parc ", "parcs ", "parks ", "garden", "park "],
-    "holiday": ["holiday", "vacance", "vacation"],
-    "market": ["market", "marché", "marchand"],
-    "museum": ["museum", "musée"],
-    "outdoor": ["outdoor", "extérieur", "exterieur", "dehors"],
-    "parade": ["parade", "défilé", "defile"],
-    "religion": ["religious", "religieu", "religion", "spiritual", "catholique", "catholic", "musulman", "muslim", "juif", "jewish", "chrétien", "christian", "église", "church", "mosquée", "mosque", "synagogue", "temple"],
-    "science": ["science", "scientifique", "scientist", "physique", "physic", "math", "informatique", "computer", "technologie", "technology", "astronomie", "astronomy", "biologie", "biology", "chimie", "chemistry", "économie", "economy", "géologie", "geology", "médecine", "medicine", "psychologie", "psychology", "santé", "health", "sociologie", "sociology", "zoologie", "zoology"],
-    "seminar": ["seminar", "séminaire", " conférence", "conference"],
-    "tour": ["tour", "visite", "visite"],
-    "workshop": ["workshop", "atelier", "atelier"],
-    "free": ["free entrance", "gratuit"],
-    "fashion": ["fashion", "la mode", "vêtement"],
-    "fair": ["fair", "foire"],
-    "videogame": ["gaming", "jeu vid", "jeux vid", "game", "games", "video game", "playstation", "xbox", "nintendo"],
-    "boardgame": ["boardgame", "jeu de société", "jeux de société", "jeu de plateau", "jeux de plateau", "jeu de cartes", "jeux de cartes", "jeu de rôle", "tarot", "belote"],
-};
-
-/**
- * Find corresponding categories for a given Datatourisme event
- * @param {Array<string>} dtCategories 
- * @param {string} title 
- * @param {string} description 
- * @returns {Array<string>}
- */
-function findCategories(dtCategories, title, description) {
-    var result = [];
-    for (let cat in CATEGORIES) {
-        loop: for (let c of CATEGORIES[cat]) {
-            if (title.toLowerCase().includes(c) || description.toLowerCase().includes(c)) {
-                result.push(cat);
-                break loop;
-            }
-            for (let dtCat of dtCategories) {
-                if (dtCat.toLowerCase().includes(c)) {
-                    result.push(cat);
-                    break loop;
-                }
-            }
-        }
-    }
-    return result;
 }
 
 function formatDate(datetime) {
