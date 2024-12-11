@@ -87,7 +87,7 @@ export default {
       if (this.value.max && this.value.min)
         return "Entre " + this.value.min.split("-").reverse().join("/") + " et " + this.value.max.split("-").reverse().join("/");
       if (this.value.max)
-        return "Avant " + this._max.split("-").reverse().join("/");
+        return "Avant " + this.value.max.split("-").reverse().join("/");
       if (this.value.min)
         return "Après " + this.value.min.split("-").reverse().join("/");
       return "Peu importe";

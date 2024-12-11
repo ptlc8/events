@@ -4,7 +4,8 @@
     "sync": "cap sync",
     "run:android": "cap run android",
     "open:android-studio": "cap open android",
-    "build:android": "cap build android"
+    "build:android": "cap build android",
+    "start": "npm run build:front && npm run run:android"
   },
   "dependencies": {
     "@capacitor/android": "^6.2.0",

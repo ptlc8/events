@@ -28,7 +28,7 @@ function queryDatabase(...$requestFrags) {
 	$request = '';
 	$var = false;
 	foreach ($requestFrags as $frag) {
-	    $request .= ($var ? $mysqli->real_escape_string($frag) : $frag);
+	    $request .= ($var ? escapeDatabaseValue($frag) : $frag);
 		$var = !$var;
 	}
 	if (!$result = $mysqli->query($request)) {
@@ -66,7 +66,9 @@ function parseDatabaseArray($stringArray) {
 
 function escapeDatabaseValue($value) {
 	global $mysqli;
-	return $mysqli->real_escape_string($value);
+	if ($value === NULL)
+		return 'NULL';
+	return "'".$mysqli->real_escape_string($value)."'";
 }
 
 function getBaseURL() {
@@ -104,13 +106,6 @@ function getAvatar($userId) {
 function setLoggedUser($token) {
 	session_start();
 	$_SESSION['events_token'] = $token;
-} 
-
-function getLocation() { // TODO: put result in session
-	$ip = $_SERVER['REMOTE_ADDR'];
-	$ipInfo = json_decode(file_get_contents("http://ipinfo.io/{$ip}/json"));
-	$ipLoc = isset($ipInfo->bogon) && $ipInfo->bogon ? "48.86,2.35" : $ipInfo->loc;
-	return array_reverse(array_map("floatval", explode(",", $ipLoc)));
 }
 
 function parseDate($date, $default=false) {
@@ -127,16 +122,18 @@ function parseTime($time, $default=false) {
 	return date("H:i:s", $timestamp);
 }
 
-function fixLongitude($lon) {
-    return fmod(fmod($lon, 360) + 540, 360) - 180;
+function fixLongitude($lng) {
+    return fmod(fmod($lng, 360) + 540, 360) - 180;
 }
 
 function exitError($error) {
+	header('Content-Type: application/json');
     echo json_encode(array('success' => false, 'error' => $error));
     exit;
 }
 
 function exitSuccess($data = NULL) {
+	header('Content-Type: application/json');
     echo json_encode($data === NULL ? array('success' => true) : array('success' => true, 'data' => $data));
     exit;
 }

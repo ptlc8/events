@@ -13,22 +13,21 @@ if ($min) {
 }
 
 // Geolocation for distance filter and/or pertinence or distance sort
-$lon = isset($_REQUEST['lon']) && is_numeric($_REQUEST['lon']) ? floatval($_REQUEST['lon']) : null;
+$lng = isset($_REQUEST['lng']) && is_numeric($_REQUEST['lng']) ? floatval($_REQUEST['lng']) : null;
 $lat = isset($_REQUEST['lat']) && is_numeric($_REQUEST['lat']) ? floatval($_REQUEST['lat']) : null;
-if (!isset($lon, $lat)) {
-    $location = getLocation();
-    $lon = $location[0];
-    $lat = $location[1];
-}
 
 // Sort (part 1)
 $sort = isset($_REQUEST['sort']) && in_array($_REQUEST['sort'], ['datetime', 'relevance', 'popularity', 'distance']) ? $_REQUEST['sort'] : 'datetime';
 if ($sort == 'popularity') {
     $request .= ", (SELECT COUNT(*) FROM favorites WHERE event = events.id) AS pop";
 } else if ($sort == 'relevance') {
-    $request .= ", SQRT(POW(lng - $lon, 2) + POW(lat - $lat, 2)) * 100 + ABS(start - NOW()) / 100000 AS relevance";
+    if (!isset($lng, $lat))
+        exitError('need location for relevance sort');
+    $request .= ", SQRT(POW(lng - $lng, 2) + POW(lat - $lat, 2)) * 100 + ABS(start - NOW()) / 100000 AS relevance";
 } else if ($sort == 'distance') {
-    $request .= ", 6371 * 2 * ASIN(SQRT(POW(SIN((RADIANS(lat) - RADIANS($lat)) / 2), 2) + COS(RADIANS(lat)) * COS(RADIANS($lat)) * POW(SIN((RADIANS(lng) - RADIANS($lon)) / 2), 2))) AS distance";
+    if (!isset($lng, $lat))
+        exitError('need location for distance sort');
+    $request .= ", 6371 * 2 * ASIN(SQRT(POW(SIN((RADIANS(lat) - RADIANS($lat)) / 2), 2) + COS(RADIANS(lat)) * COS(RADIANS($lat)) * POW(SIN((RADIANS(lng) - RADIANS($lng)) / 2), 2))) AS distance";
 }
 
 // Add fav if logged
@@ -121,8 +120,11 @@ if (isset($_REQUEST['id'])) {
     }
 
     // Distance filter
-    if (isset($_REQUEST['distance']) && is_numeric($_REQUEST['distance']))
-        $request .= " AND ".floatval($_REQUEST['distance'])." >= 6371 * 2 * ASIN(SQRT(POW(SIN((RADIANS(lat) - RADIANS($lat)) / 2), 2) + COS(RADIANS(lat)) * COS(RADIANS($lat)) * POW(SIN((RADIANS(lng) - RADIANS($lon)) / 2), 2)))";
+    if (isset($_REQUEST['distance']) && is_numeric($_REQUEST['distance'])) {
+        if (!isset($lng, $lat))
+            exitError('need location for distance filter');
+        $request .= " AND ".floatval($_REQUEST['distance'])." >= 6371 * 2 * ASIN(SQRT(POW(SIN((RADIANS(lat) - RADIANS($lat)) / 2), 2) + COS(RADIANS(lat)) * COS(RADIANS($lat)) * POW(SIN((RADIANS(lng) - RADIANS($lng)) / 2), 2)))";
+    }
 
 }
 
