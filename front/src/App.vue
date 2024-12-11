@@ -3,6 +3,7 @@ import { RouterLink, RouterView } from 'vue-router';
 import { watch, ref } from 'vue';
 import LoginModal from '@/components/modals/LoginModal.vue';
 import EventModal from '@/components/modals/EventModal.vue';
+import AboutModal from '@/components/modals/AboutModal.vue';
 import EventsApi from '@/api';
 
 const tabs = ref({});
@@ -16,7 +17,8 @@ for (const tab of ['search', 'categories', 'map', 'me']) {
 export default {
   components: {
     LoginModal,
-    EventModal
+    EventModal,
+    AboutModal
   },
   setup() {
     return { RouterLink, RouterView, EventsApi, tabs };
@@ -55,7 +57,8 @@ export default {
   </nav>
 
   <EventModal :show="$store.event != null" :event="$store.event" @close="$store.event = null" />
-  <LoginModal :show="$store.loggingIn" @close="$store.endLoggingIn" />
+  <LoginModal :show="$store.loggingIn" @close="$store.loggingIn = false" />
+  <AboutModal :show="$store.showAbout" @close="$store.showAbout = false" />
 </template>
 
 <style lang="scss" scoped>

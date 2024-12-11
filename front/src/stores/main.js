@@ -6,7 +6,8 @@ export const useMainStore = defineStore('main', {
     user: null,
     loggingIn: false,
     event: null,
-    events: []
+    events: [],
+    showAbout: false
   }),
   getters: {
     logged: state => state.user != null
@@ -24,9 +25,6 @@ export const useMainStore = defineStore('main', {
           else reject("aborted by user");
         });
       });
-    },
-    endLoggingIn() {
-      this.loggingIn = false;
     }
   }
 });

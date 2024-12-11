@@ -9,7 +9,7 @@
       <button class="logout" @click="logout">{{ $text.get('logout') }}</button>
     </article>
     <article class="button" v-if="canInstallWebApp" @click="promptInstallWebApp()">
-      <h2>📱 {{ $text.get('install app') }}</h2>
+      <h2>📱 {{ $text.get('install_app') }}</h2>
     </article>
     <article class="button" @click="$router.push({name:'fav'})">
       <h2>⭐ {{ $text.get('fav') }}</h2>
@@ -24,6 +24,9 @@
           getLangName(lang) }}</option>
         <option value="" :selected="!$text.getSavedLang()">🌐 {{ $text.get('navigatorlanguage') }}</option>
       </select>
+    </article>
+    <article class="button" @click="$store.showAbout = true">
+      <h2>📖 {{ $text.get('about') }}</h2>
     </article>
   </section>
 </template>
