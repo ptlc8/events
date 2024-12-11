@@ -1,6 +1,6 @@
 // Environment config
-export const mode = import.meta.env.MODE;
 export const isProd = import.meta.env.PROD;
+export const isApp = import.meta.env.MODE == "app";
 
 // App config
 export const baseUrl = import.meta.env.BASE_URL ?? "/";

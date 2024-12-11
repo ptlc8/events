@@ -17,7 +17,7 @@ export default {
     modelValue: {
       type: Object,
       required: false,
-      default: undefined
+      default: null
     },
     placeholder: {
       type: String,
@@ -36,12 +36,14 @@ export default {
   },
   watch: {
     modelValue(value) {
-      this.query = value?.name ?? value.lon + ', ' + value.lat;
+      if (!value) {
+        this.query = '';
+        return;
+      }
+      this.query = value?.name ?? value.lng + ', ' + value.lat;
       if (!value.name) {
-        this.mapboxQuery(value.lon + ', ' + value.lat)
-          .then(results => {
-            this.query = results.features[0].place_name;
-          });
+        this.$geolocation.getFromPos(value.lng, value.lat)
+          .then(loc => this.query = loc.name);
       }
     },
     query(query) {
@@ -49,7 +51,7 @@ export default {
         .then(results => {
           this.results = results.features.map(f => ({
             name: f.place_name,
-            lon: f.center[0],
+            lng: f.center[0],
             lat: f.center[1]
           }));
         });

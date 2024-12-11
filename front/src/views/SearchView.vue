@@ -12,13 +12,13 @@
         @change="prelaunchSearch" />
       <select class="sort-select" v-model="search.sort" @change="prelaunchSearch">
         <option value="datetime">{{ $text.get('sortbydate') }}</option>
-        <option value="relevance">{{ $text.get('sortbyrelevance') }}</option>
+        <option value="relevance" :disabled="!search.gloc">{{ $text.get('sortbyrelevance') }}</option>
         <option value="popularity">{{ $text.get('sortbypopularity') }}</option>
-        <option value="distance">{{ $text.get('sortbydistance') }}</option>
+        <option value="distance" :disabled="!search.gloc">{{ $text.get('sortbydistance') }}</option>
       </select>
-      <GeolocationInput class="geolocation-input" v-model="search.gloc" :placeholder="defaultLocationName"
+      <GeolocationInput class="geolocation-input" v-model="search.gloc" :placeholder="gloc?.name"
         @change="prelaunchSearch" />
-      <DistanceInput class="distance-input" v-model="search.dist" @change="prelaunchSearch" />
+      <DistanceInput v-if="search.gloc" class="distance-input" v-model="search.dist" @change="prelaunchSearch" />
       <MultiSelect class="catselect" :title="$text.get('categories')" v-model="search.cats" @change="prelaunchSearch"
         :options="categories.reduce((acc, c) => (acc[c.id] = $text.get(c.id)) && acc, {})" />
     </div>
@@ -60,24 +60,14 @@ export default {
     [this.search.date.min, this.search.date.max] = this.$route.query.d?.split(',').map(d => d ? d : null) ?? [];
     [this.search.time.min, this.search.time.max] = this.$route.query.t?.split(',') ?? [];
     if (this.$route.query.g) {
-      let [lon, lat] = this.$route.query.g.split(',');
-      this.search.gloc = { lon: parseFloat(lon), lat: parseFloat(lat) };
+      let [lng, lat] = this.$route.query.g.split(',');
+      this.search.gloc = { lng: parseFloat(lng), lat: parseFloat(lat) };
     }
-    this.search.dist = isNaN(parseInt(this.$route.query.r)) ? undefined : parseInt(this.$route.query.r);
+    this.search.dist = isNaN(parseInt(this.$route.query.r)) ? null : parseInt(this.$route.query.r);
 
     this.launchSearch();
     EventsApi.getCategories().then(cats => this.categories = cats);
-    EventsApi.getLocation().then(loc => {
-      fetch(`https://api.mapbox.com/search/searchbox/v1/reverse?longitude=${loc[0]}&latitude=${loc[1]}&access_token=${mapboxAccessToken}`)
-        .then(res => res.json())
-        .then(res => {
-          this.defaultLocationName = res.features[0].properties.place_formatted;
-        })
-        .catch(err => {
-          console.error('[SearchView] ' + err);
-          this.defaultLocationName = 'Unknown location';
-        });
-    });
+    this.$geolocation.get().then(gloc => this.gloc = gloc);
   },
   data() {
     return {
@@ -88,13 +78,13 @@ export default {
         date: { min: this.formatRelativeDate(0), max: undefined },
         time: { min: undefined, max: undefined },
         cats: [],
-        gloc: undefined,
-        dist: undefined,
+        gloc: null,
+        dist: null,
         sort: 'relevance',
       },
       searchId: 0,
       canSearchMore: false,
-      defaultLocationName: ''
+      gloc: null
     };
   },
   methods: {
@@ -108,12 +98,13 @@ export default {
     launchSearch(more = false) {
       this.$router.replace({
         query: {
+          ...this.$route.query,
           q: this.search.text ? this.search.text : undefined,
           c: this.search.cats.length > 0 ? this.search.cats.join(',') : undefined,
           s: this.search.sort == 'relevance' ? undefined : this.search.sort,
           d: (this.search.date.min || this.search.date.max) ? (this.search.date.min ?? '') + ',' + (this.search.date.max ?? '') : undefined,
           t: (this.search.time.min || this.search.time.max) ? (this.search.time.min ?? '') + ',' + (this.search.time.max ?? '') : undefined,
-          g: this.search.gloc ? this.search.gloc.lon + "," + this.search.gloc.lat : undefined,
+          g: this.search.gloc ? this.search.gloc.lng + "," + this.search.gloc.lat : undefined,
           r: this.search.dist // r like radius
         }
       });
@@ -124,10 +115,10 @@ export default {
         timemin: this.search.time.min,
         timemax: this.search.time.max,
         cats: this.search.cats,
-        lon: this.search.gloc?.lon,
-        lat: this.search.gloc?.lat,
-        distance: this.search.dist,
-        sort: this.search.sort,
+        lng: this.search.gloc?.lng ?? this.gloc?.lng,
+        lat: this.search.gloc?.lat ?? this.gloc?.lat,
+        distance: this.search.gloc || this.gloc ? this.search.dist : undefined,
+        sort: (!this.search.gloc || !this.gloc) && ['relevance', 'distance'].includes(this.search.sort) ? undefined : this.search.sort,
         timezoneoffset: new Date().getTimezoneOffset(),
         limit: 50,
         offset: more ? this.events.length : null

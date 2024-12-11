@@ -47,7 +47,7 @@ export default {
                 });
             });
         } else {
-            EventsApi.getLocation().then(loc => this.map.setCenter(loc));
+            this.$geolocation.get().then(loc => this.map.setCenter(loc));
         }
 
         this.map.on('load', () => {
