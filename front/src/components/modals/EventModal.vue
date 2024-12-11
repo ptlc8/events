@@ -71,7 +71,7 @@ import AgendaPage from "@/components/AgendaPage.vue";
 import Weather from "@/components/Weather.vue";
 import Contacts from "@/components/Contacts.vue";
 import EventsApi from "@/api";
-import { origin } from "@/config";
+import { origin, backendUrl } from "@/config";
 import Modal from "./Modal.vue";
 export default {
   name: "EventModal",
@@ -126,9 +126,11 @@ export default {
       return origin + '?e=' + this.event.id;
     },
     banner() {
+      let nonRepresentative = !!this.event.nonRepresentativeImage;
       return {
-        url: this.event.nonRepresentativeImage ?? this.event.images[0],
-        credits: this.event.nonRepresentativeImage ? this.$text.get('non representative') : this.event.imagesCredits[0]
+        url: nonRepresentative ? backendUrl + this.event.nonRepresentativeImage : this.event.images[0],
+        credits: nonRepresentative ? this.$text.get('non representative') : this.event.imagesCredits[0],
+        nonRepresentative
       };
     }
   }

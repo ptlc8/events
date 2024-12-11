@@ -22,6 +22,7 @@
 </template>
 
 <script>
+import { backendUrl } from '@/config.js';
 export default {
     name: "EventPreview",
     props: {
@@ -33,10 +34,11 @@ export default {
     emits: ["click"],
     computed: {
         banner() {
+            var nonRepresentative = !!this.event.nonRepresentativeImage;
             return {
-                url: this.event.images[0] ?? this.event.nonRepresentativeImage,
-                credits: this.event.nonRepresentativeImage ? this.$text.get('non representative') : this.event.imagesCredits[0],
-                nonRepresentative: this.event.nonRepresentativeImage
+                url: nonRepresentative ? backendUrl + this.event.nonRepresentativeImage : this.event.images[0],
+                credits: nonRepresentative ? this.$text.get('non representative') : this.event.imagesCredits[0],
+                nonRepresentative
             }
         }
     }

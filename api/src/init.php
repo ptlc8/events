@@ -1,21 +1,24 @@
 <?php
 
-include('credentials.php');
+// si le fichier credentials.php existe, on l'inclut
+@include 'credentials.php';
 
-// CORS headers
+// en-têtes CORS
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS, DELETE, PUT, PATCH');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
 
 // obtenir une variable de configuration
 function get_config($name) {
-	return defined($name) && !empty(constant($name)) ? constant($name) : null;
+	if (defined($name) && !empty(constant($name)))
+		return constant($name);
+	return getenv($name) ?? NULL;
 }
 
 // initialisation session + BDD
 function initDatabase() {
 	global $mysqli;
-	$mysqli = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+	$mysqli = new mysqli(get_config('DB_HOST'), get_config('DB_USER'), get_config('DB_PASS'), get_config('DB_NAME'));
 	if ($mysqli->connect_errno) {
 		echo 'Erreur de connexion côté serveur, veuillez réessayer plus tard';
 		exit;
@@ -69,10 +72,6 @@ function escapeDatabaseValue($value) {
 	if ($value === NULL)
 		return 'NULL';
 	return "'".$mysqli->real_escape_string($value)."'";
-}
-
-function getBaseURL() {
-	return get_config('BASE_URL') ?? '';
 }
 
 // récupérer les infos externes d'un utilisateur avec un token

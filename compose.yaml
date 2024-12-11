@@ -24,7 +24,6 @@ services:
       DB_USER: user
       DB_PASS: secret
       DB_NAME: events
-      BASE_URL: /${BASE_URL:-events/}
       PORTAL_CONNECT_URL: ${PORTAL_CONNECT_URL?}
       PORTAL_USER_URL: ${PORTAL_USER_URL?}
       PORTAL_AVATAR_URL: ${PORTAL_AVATAR_URL?}

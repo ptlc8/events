@@ -160,7 +160,7 @@ while (($event = $result->fetch_assoc()) != null) {
         unset($event['source']);
         unset($event['sourceUrl']);
         if (count($event['images']) == 0) {
-            $event['nonRepresentativeImage'] = [getBaseURL().'api/images/get.php?query='.urlencode(implode(' ', $event['categories']))];
+            $event['nonRepresentativeImage'] = ['api/images/get.php?query='.urlencode(implode(' ', $event['categories']))];
         }
         array_push($events, $event);
     } else {
