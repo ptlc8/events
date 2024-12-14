@@ -9,6 +9,10 @@ import { Event, Status, EventsFetch } from "./event.js";
 import { findCategories } from "./categories.js";
 import { isSafe } from "./filter.js";
 
+const FRANCE = "85633147";
+const BULGARIA = "85633001";
+const SOFIA = "101748887";
+
 /**
  * Fetch all events from Eventbrite
  * @param {string} token 
@@ -36,18 +40,22 @@ function fetchAll(token) {
  * @param {string} token
  * @param {number} page
  * @returns {Promise<Array<Event>>}
+ * @see 
  */
-function fetch(token, page = 1) {
-    return axios.post("https://www.eventbriteapi.com/v3/destination/search/?token=" + token, {
-        event_search: { page, page_size: 50, places: [/*"85633147",*/ "85633001"] }, // Sofia, Bulgaria
+async function fetch(token, page = 1) {
+    var res = await axios.post("https://www.eventbriteapi.com/v3/destination/search/?token=" + token, {
+        event_search: { page, page_size: 50, places: [FRANCE], bbox: "-4.8748385999999755,32.74163311065597,8.660317650000025,59.629211491216296" },
         "expand.destination_event": ["primary_venue", "image", "primary_organizer"]
-    })
-        .then(res => res.data.events.results)
-        /*.then(events => Promise.all(events.map(async event => {
-            event.description = await fetchDescription(token, event.id);
-            return event;
-        })))*/ // TODO: commented because hitting rate limit :!
-        .then(events => events.map(parseEvent).filter(e => e != null));
+    });
+    if (res.data.events.pagination.object_count > 1000) {
+        // we need to split bbox
+    }
+    var events = res.data.events.results;
+    /*.then(events => Promise.all(events.map(async event => {
+        event.description = await fetchDescription(token, event.id);
+        return event;
+    })))*/ // TODO: commented because hitting rate limit :!
+    return events.map(parseEvent).filter(e => e != null);
 }
 
 /**
@@ -95,8 +103,8 @@ function parseEvent(event) {
         ].flat(),
         registration: [event.tickets_url],
         public: true,
-        createdAt: event.published.replace("Z", "+00:00"),
-        updatedAt: event.changed ? event.changed.replace("Z", "+00:00") : event.published.replace("Z", "+00:00"),
+        createdAt: new Date(event.published).toISOString().slice(0, 19).replace('T', ' '),
+        updatedAt: event.changed ? new Date(event.changed).toISOString().slice(0, 19).replace('T', ' ') : new Date(event.published).toISOString().slice(0, 19).replace('T', ' '),
         source: "eventbrite",
         sourceUrl: event.url
     }
