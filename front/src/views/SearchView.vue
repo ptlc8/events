@@ -105,7 +105,7 @@ export default {
           d: (this.search.date.min || this.search.date.max) ? (this.search.date.min ?? '') + ',' + (this.search.date.max ?? '') : undefined,
           t: (this.search.time.min || this.search.time.max) ? (this.search.time.min ?? '') + ',' + (this.search.time.max ?? '') : undefined,
           g: this.search.gloc ? this.search.gloc.lng + "," + this.search.gloc.lat : undefined,
-          r: this.search.dist // r like radius
+          r: this.search.dist ?? undefined // r like radius
         }
       });
       EventsApi.getEvents({
@@ -118,7 +118,7 @@ export default {
         lng: this.search.gloc?.lng ?? this.gloc?.lng,
         lat: this.search.gloc?.lat ?? this.gloc?.lat,
         distance: this.search.gloc || this.gloc ? this.search.dist : undefined,
-        sort: (!this.search.gloc || !this.gloc) && ['relevance', 'distance'].includes(this.search.sort) ? undefined : this.search.sort,
+        sort: !this.search.gloc && !this.gloc && ['relevance', 'distance'].includes(this.search.sort) ? undefined : this.search.sort,
         timezoneoffset: new Date().getTimezoneOffset(),
         limit: 50,
         offset: more ? this.events.length : null
