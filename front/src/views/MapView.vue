@@ -28,11 +28,14 @@ export default {
         };
     },
     mounted() {
+        var language = this.$text.getLang() == 'zh' ? 'zh-Hans' : this.$text.getLang();
+
         this.map = new mapboxgl.Map({
             container: 'map-container',
             style: 'mapbox://styles/mapbox/streets-v11',
             center: [2.35, 48.86],
-            zoom: 5
+            zoom: 5,
+            language
         });
 
         var eventId = this.$route.query.show || this.$route.query.e;
@@ -47,16 +50,15 @@ export default {
                 });
             });
         } else {
-            this.$geolocation.get().then(loc => this.map.setCenter(loc));
+            this.$geolocation.get().then(loc =>
+                this.map.flyTo({
+                    center: loc,
+                    zoom: loc.zoom
+                })
+            );
         }
 
         this.map.on('load', () => {
-
-            if (this.$text.getLang() == 'zh') {
-                this.map.setLanguage('zh-Hans');
-            } else {
-                this.map.setLanguage(this.$text.getLang());
-            }
 
             this.map.loadImage(this.markerIcon, (error, image) => {
                 if (error) throw error;
