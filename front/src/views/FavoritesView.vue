@@ -6,7 +6,7 @@
         <MessageBox v-else-if="!events.length" :message="$text.get('nofavorites')" :button="$text.get('searchthem')" @click="$router.push('/search')"></MessageBox>
         <div class="favorites">
             <EventPreview v-for="event in events" :event="event" @click="$store.event = event">
-                <button class="delete-event" @click="remove(event.id)">{{ $text.get('removefromfav') }}</button>
+                <button class="delete-event" @click="remove(event.id)">{{ $text.get('remove_fav') }}</button>
             </EventPreview>
         </div>
     </section>

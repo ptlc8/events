@@ -33,8 +33,9 @@
           <h3>📝 {{ $text.get('registration') }}</h3>
           <Contacts :contacts="event.registration"></Contacts>
         </div>
-        <button class="show-on-map" @click="showOnMap">📍 {{ $text.get('showonmap') }}</button>
-        <button class="add-fav" @click="switchFavorite">⭐ {{ $text.get(event.fav ? 'removefromfav' : 'addtofav')
+        <button class="show-on-map" @click="showOnMap">📍 {{ $text.get('show_on_map') }}</button>
+        <button v-if="isApp" class="open-map" @click="openMapApp">🗺️ {{ $text.get('open_map_app') }}</button>
+        <button class="add-fav" @click="switchFavorite">⭐ {{ $text.get(event.fav ? 'remove_fav' : 'add_fav')
         }}</button>
         <button v-if="canShare()" class="large-share-button" @click="share()">🚀 Partager</button>
         <div v-else class="share-buttons">
@@ -71,8 +72,9 @@ import AgendaPage from "@/components/AgendaPage.vue";
 import Weather from "@/components/Weather.vue";
 import Contacts from "@/components/Contacts.vue";
 import EventsApi from "@/api";
-import { origin, backendUrl } from "@/config";
+import { origin, backendUrl, isApp } from "@/config";
 import Modal from "./Modal.vue";
+
 export default {
   name: "EventModal",
   props: {
@@ -82,6 +84,9 @@ export default {
     }
   },
   components: { AgendaPage, Weather, Contacts, Modal },
+  setup() {
+    return { isApp };
+  },
   methods: {
     share() {
       navigator.share({
@@ -116,6 +121,9 @@ export default {
     showOnMap() {
       //this.$refs.modal.close();
       this.$router.push({ name: "map", query: { show: this.event.id } });
+    },
+    openMapApp() {
+      window.open(`geo:${this.event.lat},${this.event.lng}?q=${this.event.placename}`);
     },
     getImageCredits(i) {
       return this.event.imagesCredits.length > 0 ? this.event.imagesCredits[i % this.event.imagesCredits.length] : "";
@@ -220,6 +228,10 @@ export default {
 
       &.show-on-map {
         background-color: #88ff88;
+      }
+
+      &.open-map {
+        background-color: #fbbf88
       }
 
       &.large-share-button {
