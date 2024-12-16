@@ -1,10 +1,12 @@
 <template>
-    <div class="results">
-        <EventPreview class="event" v-for="event in events" :event="event" @click="$store.event = event"></EventPreview>
+    <div class="list">
+        <div class="results">
+            <EventPreview class="event" v-for="event in events" :event="event" @click="$store.event = event" />
+        </div>
+        <MessageBox v-if="!events.length" :message="$text.get('noresults')" :button="$text.get('organizeit')"
+            @click="$router.push('/orga')" />
+        <button v-else-if="canSearchMore" class="more-button" @click="launchSearch(true)">Afficher plus d'évents</button>
     </div>
-    <MessageBox v-if="!events.length" :message="$text.get('noresults')" :button="$text.get('organizeit')"
-        @click="$router.push('/orga')" />
-    <button v-else-if="canSearchMore" class="more-button" @click="launchSearch(true)">Afficher plus d'évents</button>
 </template>
 
 <script>
@@ -72,21 +74,26 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.results {
+.list {
+    flex: 1;
     width: 90%;
-    margin: 2em auto;
-    display: flex;
-    flex-wrap: wrap;
-    gap: .5em;
+    margin: 0 auto;
 
-    >* {
-        width: 32em;
-        flex-grow: 1;
+    .results {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .5em;
+        margin: 1em 0;
+
+        .event {
+            width: 32em;
+            flex-grow: 1;
+        }
     }
-}
 
-.more-button {
-    display: block;
-    margin: 1em auto;
+    .more-button {
+        display: block;
+        margin: 1em auto;
+    }
 }
 </style>

@@ -62,11 +62,6 @@ export default {
 </template>
 
 <style lang="scss" scoped>
-main {
-  flex: 10;
-  overflow: auto;
-}
-
 nav {
   flex: 1;
   display: flex;

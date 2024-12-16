@@ -1,5 +1,8 @@
 <template>
     <section>
+        <h1>🔍 {{ $text.get('search') }}</h1>
+    </section>
+    <section>
         <SearchInputs v-model="search" />
         <EventsList :search="search" />
     </section>
@@ -55,10 +58,3 @@ export default {
     }
 }
 </script>
-
-<style lang="scss" scoped>
-section {
-    overflow: auto;
-    min-height: 100%;
-}
-</style>

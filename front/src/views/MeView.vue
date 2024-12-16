@@ -1,6 +1,8 @@
 <template>
   <section>
     <h1>👤 {{ $text.get('me') }}</h1>
+  </section>
+  <section>
     <MessageBox v-if="!$store.logged" :message="$text.get('notloggedin')" :button="$text.get('login')"
       @click="$store.login" />
     <article v-else>
@@ -8,13 +10,15 @@
       <h2>{{ $store.user.name }}</h2>
       <button class="logout" @click="logout">{{ $text.get('logout') }}</button>
     </article>
+  </section>
+  <section>
     <article class="button" v-if="canInstallWebApp" @click="promptInstallWebApp()">
       <h2>📱 {{ $text.get('install_app') }}</h2>
     </article>
-    <article class="button" @click="$router.push({name:'fav'})">
+    <article class="button" @click="$router.push({ name: 'fav' })">
       <h2>⭐ {{ $text.get('fav') }}</h2>
     </article>
-    <article class="button" @click="$router.push({name:'orga'})">
+    <article class="button" @click="$router.push({ name: 'orga' })">
       <h2>📝 {{ $text.get('orga') }}</h2>
     </article>
     <article>
@@ -62,17 +66,11 @@ export default {
 
 <style lang="scss" scoped>
 article {
+  width: 100%;
   max-width: 1000px;
-  margin: 10px auto 0;
-  box-shadow: 0 0 10px 2px rgba(0, 0, 0, 0.1);
-  border-radius: 4px;
-  padding: 8px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  margin-top: 10px;
 
   &.button {
-    display: flex;
     flex-direction: row;
     cursor: pointer;
 

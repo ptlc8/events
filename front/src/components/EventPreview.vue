@@ -47,12 +47,7 @@ export default {
 
 <style lang="scss">
 .event-preview {
-    box-shadow: 0 0 10px 2px rgba(0, 0, 0, .1);
-    border-radius: 4px;
-    padding: 8px;
     min-height: 120px;
-    display: flex;
-    flex-direction: column;
     justify-content: space-between;
 
     .wrapper {

@@ -5,12 +5,35 @@
   --color-primary: mediumseagreen;
 }
 
+main {
+  flex: 10;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+}
+
 section {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
-
   font-weight: normal;
+}
+
+section:last-child {
+  flex: 1;
+}
+
+article {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px;
+  border-radius: 4px;
+  box-shadow: 0 0 10px 2px rgba(0, 0, 0, 0.1);
 }
 
 a,

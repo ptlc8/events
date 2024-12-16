@@ -1,6 +1,6 @@
 <template>
   <section class="categories">
-    <h1>🗂 Categories</h1>
+    <h1>🗂 {{ $text.get('categories') }}</h1>
     <article v-for="categorie in categories" class="categorie" @click="$router.push({name:'search',query:{c:categorie.id}})">
       <div class="banner" :style="`background-image:url('${categorie.image}')`"></div>
       <h2>{{ $text.get(categorie.id) }}</h2>
@@ -26,19 +26,7 @@ export default {
 </script>
 
 <style scoped lang="scss">
-article {
-  max-width: 1000px;
-  margin: 10px auto 0;
-  box-shadow: 0 0 10px 2px rgba(0, 0, 0, 0.1);
-  border-radius: 4px;
-  padding: 8px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
 section.categories {
-  display: flex;
   flex-direction: row;
   flex-wrap: wrap;
   gap: 1em;
@@ -50,6 +38,7 @@ section.categories {
 
   .categorie {
     flex: 1 0 20em;
+    max-width: 1000px;
     cursor: pointer;
 
     h2 {
