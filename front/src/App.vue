@@ -1,13 +1,13 @@
 <script>
 import { RouterLink, RouterView } from 'vue-router';
-import { watch, ref } from 'vue';
+import { ref } from 'vue';
 import LoginModal from '@/components/modals/LoginModal.vue';
 import EventModal from '@/components/modals/EventModal.vue';
 import AboutModal from '@/components/modals/AboutModal.vue';
 
 const tabs = ref({});
 
-for (const tab of ['home', 'map', 'search', 'me']) {
+for (const tab of ['home', 'search', 'me']) {
   tabs.value[tab] = { name: tab };
   import(`@/assets/icons/${tab}.svg?no-inline`)
     .then(icon => tabs.value[tab].icon = icon.default);
@@ -24,24 +24,25 @@ export default {
   setup: () => ({
     tabs
   }),
-  mounted(a) {
-    // on router init
-    var unwatchRoute = watch(() => this.$route, () => {
-      if (this.$route.query.e) {
-        this.$api.getEvent(this.$route.query.e).then(event => {
-          this.$store.event = event;
-        });
-      }
-      unwatchRoute();
-    });
-
-    watch(() => this.$store.event, () => {
-      this.$router.replace({ name: this.$route.name, query: { ...this.$route.query, e: this.$store.event?.id } });
-    });
-
+  mounted() {
     this.$api.getSelfUser().then(user => {
       this.$store.setLoggedUser(user);
     });
+  },
+  watch: {
+    $route(to) {
+      if (to.query.e) {
+        this.$api.getEvent(to.query.e).then(event => {
+          this.$store.event = event;
+        });
+      } else {
+        this.$store.event = null;
+      }
+    },
+    '$store.event'(event) {
+      console.log("Setting route event to ", event);
+      this.$router.replace({ name: this.$route.name, query: { ...this.$route.query, e: event?.id } });
+    }
   }
 }
 </script>

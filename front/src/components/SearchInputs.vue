@@ -1,17 +1,20 @@
 <template>
     <div class="fields">
         <SearchBar v-model="search.text" :placeholder="$t.search_events" />
-        <IntervalSelect class="dateselect" type="date" v-model="search.date" :options="defaultDateOptions" />
-        <IntervalSelect class="timeselect" type="time" v-model="search.time" :options="defaultTimeOptions" />
-        <select class="sort-select" v-model="search.sort">
+        <IntervalSelect class="dateselect" type="date" v-model="search.date" :options="defaultDateOptions"
+            @change="onChange" />
+        <IntervalSelect class="timeselect" type="time" v-model="search.time" :options="defaultTimeOptions"
+            @change="onChange" />
+        <select class="sort-select" v-if="!forMap" v-model="search.sort" @change="onChange">
             <option value="datetime">{{ $t.sort_by_date }}</option>
             <option value="relevance" :disabled="!geolocation">{{ $t.sort_by_relevance }}</option>
             <option value="popularity">{{ $t.sort_by_popularity }}</option>
             <option value="distance" :disabled="!geolocation">{{ $t.sort_by_distance }}</option>
         </select>
-        <GeolocationInput class="geolocation-input" v-model="search.gloc" :placeholder="gloc?.name" />
-        <DistanceInput v-if="geolocation" class="distance-input" v-model="search.dist" />
-        <MultiSelect class="catselect" :title="$t.categories" v-model="search.cats"
+        <GeolocationInput v-if="!forMap" class="geolocation-input" v-model="search.gloc" :placeholder="gloc?.name"
+            @change="onChange" />
+        <DistanceInput v-if="geolocation && !forMap" class="distance-input" v-model="search.dist" @change="onChange" />
+        <MultiSelect class="catselect" :title="$t.categories" v-model="search.cats" @change="onChange"
             :options="categories.reduce((acc, c) => (acc[c.id] = c.emoji + ' ' + $t[c.id]) && acc, {})" />
     </div>
 </template>
@@ -42,7 +45,8 @@ export default {
         DistanceInput
     },
     props: {
-        modelValue: Object
+        modelValue: Object,
+        forMap: Boolean
     },
     emits: ['update:modelValue'],
     data() {
@@ -88,6 +92,11 @@ export default {
         },
         geolocation() {
             return this.gloc || this.search.gloc;
+        }
+    },
+    methods: {
+        onChange() {
+            this.$emit('update:modelValue', this.search);
         }
     }
 }

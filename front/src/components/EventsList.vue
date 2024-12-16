@@ -83,7 +83,7 @@ export default {
         display: flex;
         flex-wrap: wrap;
         gap: .5em;
-        margin: 1em 0;
+        margin: 0 0 1em 0;
 
         >* {
             width: 32em;

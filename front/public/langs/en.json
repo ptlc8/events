@@ -76,6 +76,8 @@
     "open_map_app": "Open in map app",
     "more_info": "More info",
 
+    "show_map": "🗺 Map",
+    "show_list": "🧾 List",
     "search_events": "Search events...",
     "search_more_events": "Show more events",
     "eg": "e.g.",

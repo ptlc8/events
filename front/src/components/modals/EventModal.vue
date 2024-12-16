@@ -1,5 +1,5 @@
 <template>
-  <Modal big v-bind="$attrs" ref="modal">
+  <Modal big v-bind="$attrs">
     <div v-if="banner" class="banner" :style="'background-image: url(\'' + banner.url + '\');'" :title="banner.credits"></div>
     <div v-else class="banner loading"></div>
     <div class="body">
@@ -16,23 +16,23 @@
           <AgendaPage :datetime="event.start" />
           <AgendaPage :datetime="event.end" />
         </div>
-        <AgendaPage v-else :datetime="event?.start"></AgendaPage>
+        <AgendaPage v-else :datetime="event?.start" />
         <span v-if="event">
           {{ $t.from }} {{ $texts.getDisplayTime(event.start) }}
           {{ $t.to }} {{ $texts.getDisplayTime(event.end) }}
         </span>
         <hr />
         <h3>🌡️ {{ $t.weather }}</h3>
-        <Weather :datetime="event?.start" :lat="event?.lat" :lng="event?.lng"></Weather>
+        <Weather :datetime="event?.start" :lat="event?.lat" :lng="event?.lng" />
         <hr />
         <div v-if="event?.contact?.length > 0">
           <h3>📞 {{ $t.contact }}</h3>
-          <Contacts :contacts="event.contact"></Contacts>
+          <Contacts :contacts="event.contact" />
           <hr />
         </div>
         <div v-if="event?.registration?.length > 0">
           <h3>📝 {{ $t.registration }}</h3>
-          <Contacts :contacts="event.registration"></Contacts>
+          <Contacts :contacts="event.registration" />
           <hr />
         </div>
         <button :disabled="!event" class="show-on-map" @click="showOnMap">📍 {{ $t.show_on_map }}</button>
@@ -128,8 +128,10 @@ export default {
       }
     },
     showOnMap() {
-      //this.$refs.modal.close();
-      this.$router.push({ name: "map", query: { show: this.event.id } });
+      if (this.$route.name == "search")
+        this.$router.replace({ name: "search", query: { ...this.$route.query, map: null, show: this.event.id, e: undefined } });
+      else
+        this.$router.push({ name: "search", query: { map: null, show: this.event.id } });
     },
     openMapApp() {
       window.open(`geo:${this.event.lat},${this.event.lng}?q=${this.event.placename}`);

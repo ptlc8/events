@@ -8,8 +8,6 @@ import { mapboxAccessToken } from '@/config';
 
 import mapboxgl from 'mapbox-gl/dist/mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
-import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import StylesControl from '@mapbox-controls/styles';
 import '@mapbox-controls/styles/src/index.css';
 
@@ -17,23 +15,23 @@ import markerIcon from '@/assets/icons/marker.png';
 mapboxgl.accessToken = mapboxAccessToken;
 
 export default {
-    name: 'MapView',
-    components: {
-        MapboxGeocoder,
+    name: 'EventsMap',
+    setup: () => ({
         StylesControl
+    }),
+    props: {
+        search: Object
     },
-    data() {
-        return {
-            map: null
-        };
-    },
+    data: () => ({
+        map: null
+    }),
     mounted() {
         var language = this.$texts.getLang() == 'zh' ? 'zh-Hans' : this.$texts.getLang();
         var dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
         this.map = new mapboxgl.Map({
             container: 'map-container',
-            style: dark ? 'mapbox://styles/mapbox/dark-v11' : 'mapbox://styles/mapbox/streets-v11',
+            style: dark ? 'mapbox://styles/mapbox/dark-v11' : 'mapbox://styles/mapbox/streets-v12',
             center: [2.35, 48.86],
             zoom: 5,
             language
@@ -41,7 +39,6 @@ export default {
 
         var eventId = this.$route.query.show || this.$route.query.e;
         if (eventId !== undefined) {
-            this.$store.event = null;
             this.$api.getEvent(eventId).then(event => {
                 if (!event) return;
                 this.map.flyTo({
@@ -118,16 +115,7 @@ export default {
             });
         });
 
-        this.map.addControl(
-            new MapboxGeocoder({
-                accessToken: mapboxgl.accessToken,
-                localGeocoder: this.forwardGeocoder,
-                zoom: 14,
-                placeholder: this.$t.search + (this.$store.events.length ? ' (' + this.$t.eg + ' ' + this.$store.events[parseInt(Math.random() * this.$store.events.length)][3] + ')' : ''),
-                mapboxgl: mapboxgl
-            })
-        );
-        this.map.addControl(new mapboxgl.NavigationControl());
+        this.map.addControl(new mapboxgl.NavigationControl(), "bottom-right");
         /*this.map.addControl(new StylesControl({
             onChange: () => {}
         }), "bottom-left");*/
@@ -147,6 +135,7 @@ export default {
                 coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
             }
             this.$api.getEvent(e.features[0].properties.eventId).then(event => {
+                this.$route.query.show = undefined;
                 this.$store.event = event;
             });
         });
@@ -170,6 +159,14 @@ export default {
 
         this.map.on('moveend', this.updateEvents);
     },
+    watch: {
+        search: {
+            handler() {
+                this.updateEvents();
+            },
+            deep: true
+        }
+    },
     methods: {
         getEventsAsGeoJson() {
             return {
@@ -183,27 +180,19 @@ export default {
         },
         updateEvents() {
             this.$api.getEvents({
+                min: true,
                 minlat: this.map.getBounds().getSouth(),
                 minlng: this.map.getBounds().getWest(),
                 maxlat: this.map.getBounds().getNorth(),
                 maxlng: this.map.getBounds().getEast(),
-                min: true
+                text: this.search.text,
+                datemin: this.search.date.min,
+                datemax: this.search.date.max,
+                timemin: this.search.time.min,
+                timemax: this.search.time.max,
+                cats: this.search.cats
             })
                 .then(events => this.$store.events = events);
-        },
-        forwardGeocoder(query) {
-            var matchingFeatures = [];
-            for (let event of this.$store.events) {
-                if (event[3].toLowerCase().search(query.toLowerCase()) !== -1) {
-                    // add a festive emoji as a prefix for custom data results
-                    var feature = {};
-                    feature.place_name = '✨ ' + event[3];
-                    feature.center = [event[1], event[2]];
-                    feature.place_type = ['park'];
-                    matchingFeatures.push(feature);
-                }
-            }
-            return matchingFeatures;
         }
     }
 };
@@ -219,13 +208,19 @@ export default {
     position: static
 }
 
-[class*=mapboxgl-ctrl-] {
-    margin: initial;
+.mapboxgl-ctrl-group {
+    background-color: var(--color-background);
+}
 
-    button {
-        color: #000;
-        margin: 0;
-        box-shadow: none;
+button[class*=mapboxgl-ctrl-] {
+    box-shadow: none;
+    margin: 0;
+    border-radius: 0;
+}
+
+@media (prefers-color-scheme: dark) {
+    .mapboxgl-ctrl-icon {
+        filter: invert(1);
     }
 }
 </style>

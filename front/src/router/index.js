@@ -35,14 +35,6 @@ const createMainRouter = async () => {
         }
       },
       {
-        path: "/map",
-        name: 'map',
-        component: () => import('../views/MapView.vue'),
-        meta: {
-          title: T.map
-        }
-      },
-      {
         path: "/me",
         name: "me",
         component: () => import("../views/MeView.vue"),
