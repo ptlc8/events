@@ -29,10 +29,11 @@ export default {
     },
     mounted() {
         var language = this.$text.getLang() == 'zh' ? 'zh-Hans' : this.$text.getLang();
+        var dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
         this.map = new mapboxgl.Map({
             container: 'map-container',
-            style: 'mapbox://styles/mapbox/streets-v11',
+            style: dark ? 'mapbox://styles/mapbox/dark-v11' : 'mapbox://styles/mapbox/streets-v11',
             center: [2.35, 48.86],
             zoom: 5,
             language
@@ -86,6 +87,9 @@ export default {
                         'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
                         'text-offset': [0, 1.25],
                         'text-anchor': 'top'
+                    },
+                    paint: {
+                        'text-color': dark ? '#fff' : '#000',
                     }
                 });
                 this.map.addLayer({

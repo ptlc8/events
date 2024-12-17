@@ -70,18 +70,19 @@ nav {
     flex: 3;
     display: flex;
     border: 1px solid var(--color-border);
-    background: white center .5em / auto calc(100% - 2em) no-repeat radial-gradient(#e6fbff, white);
+    background: var(--color-background) center .5em / auto calc(100% - 2em) no-repeat;
     align-items: end;
     justify-content: center;
     color: var(--color-text);
 
-
     &:hover:not(.router-link-exact-active) {
       background-size: auto calc(100% - 1.5em);
+      color: var(--color-heading);
     }
 
     &.router-link-exact-active {
       flex: 4;
+      color: var(--color-heading);
     }
   }
 }

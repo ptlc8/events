@@ -2,7 +2,7 @@
   <div class="geolocation-input" @mouseenter="mouseover = true" @mouseleave="mouseover = false">
     <input type="text" v-model="query" :placeholder="placeholder"
       @focusin="focus = true" @focusout="focus = false" />
-    <div v-if="opened" class="results">
+    <div v-if="opened" class="dropdown">
       <div v-for="result in results" class="result" @click="change(result)">{{ result.name }}</div>
       <button class="result reset" @click="change(null)" tabindex="-1">✖</button>
     </div>
@@ -84,26 +84,44 @@ export default {
 <style lang="scss">
 .geolocation-input {
   z-index: 50;
+  border-radius: 4px;
+  @include interactive;
+  @include shadow;
+
+  &:focus-within {
+    outline-style: solid;
+
+    .dropdown {
+      outline-style: solid;
+    }
+  }
 
   input {
     width: 100%;
     height: 100%;
     margin: 0;
+    border: 0;
+
+    &:focus {
+      outline-style: none;
+    }
   }
 
-  .results {
+  .dropdown {
     position: absolute;
     top: 100%;
     left: 0;
     width: 100%;
+    width: calc(100% + 4px);
     padding: 8px;
     display: flex;
     flex-direction: column;
-    background-color: #fff;
+    background-color: var(--color-background);
+    margin-left: -2px;
     border-radius: 0 0 4px 4px;
     border-top: solid 1px var(--color-border);
-    box-shadow: 0 5px 4px 2px rgba(0, 0, 0, .1);
     user-select: none;
+    @include shadow-bottom;
 
     .result {
       padding: 2px 1em;
@@ -118,11 +136,10 @@ export default {
     }
 
     .reset {
+      padding: 2px 1em;
+      margin: 2px 0;
       background-color: indianred;
-
-      &:hover {
-        background-color: indianred;
-      }
+      color: #f2f2f2;
     }
   }
 }

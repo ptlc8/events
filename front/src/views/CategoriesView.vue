@@ -40,6 +40,7 @@ section.categories {
     flex: 1 0 20em;
     max-width: 1000px;
     cursor: pointer;
+    @include interactive;
 
     h2 {
       font-variant: all-small-caps;
@@ -51,7 +52,7 @@ section.categories {
     margin: auto;
     width: 100%;
     height: 200px;
-    background: center center / cover #f4f4f4;
+    background: center center / cover var(--color-background-mute);
     border-radius: 4px;
   }
 }

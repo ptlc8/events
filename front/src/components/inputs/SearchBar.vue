@@ -36,7 +36,8 @@ export default {
 .search-bar {
     width: 100%;
     display: block;
-    background-color: #fff;
+    background-color: var(--color-background);
+    border-radius: 4px;
     position: relative;
 
     img {
@@ -48,11 +49,8 @@ export default {
 
     input {
         width: 100%;
-        border: 0;
         background-color: transparent;
         margin: 0;
-        color: #404040;
-        color: rgba(0, 0, 0, 0.75);
         text-overflow: ellipsis;
         white-space: nowrap;
         overflow: hidden;

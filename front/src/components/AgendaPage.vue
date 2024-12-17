@@ -32,18 +32,20 @@ export default {
 <style lang="scss" scoped>
 div {
   width: 8em;
+  background-color: #f2f2f2;
+  color: #181818;
   border-radius: .5em;
   text-align: center;
   overflow: hidden;
   border: solid 1px var(--color-border);
-  box-shadow: 0 0 10px 2px rgba(0, 0, 0, 0.1);
+  @include shadow;
 
   .month {
     display: block;
     background-color: #f02e2e;
     font-size: 1.6em;
     line-height: 1.4;
-    color: white;
+    color: #f2f2f2;
   }
 
   .day {

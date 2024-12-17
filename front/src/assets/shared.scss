@@ -1,0 +1,49 @@
+@mixin image {
+    @media (prefers-color-scheme: dark) {
+        opacity: .75;
+        transition: opacity .2s ease-in-out;
+
+        &:hover {
+            opacity: 1;
+        }
+    }
+}
+
+@mixin shadow {
+    box-shadow: 0 0 10px 2px rgba(0, 0, 0, 0.1);
+
+    @media (prefers-color-scheme: dark) {
+        box-shadow: none;
+        border: 2px solid var(--color-border);
+    }
+}
+
+@mixin shadow-bottom {
+    box-shadow: 0 5px 4px 2px rgba(0, 0, 0, .1);
+
+    @media (prefers-color-scheme: dark) {
+        box-shadow: none;
+        border-left: 2px solid var(--color-border);
+        border-right: 2px solid var(--color-border);
+        border-bottom: 2px solid var(--color-border);
+    }
+}
+
+@mixin interactive {
+    transition: border-color 0.3s;
+
+    .dropdown {
+        transition: 0.3s;
+    }
+
+
+    &:hover {
+        border-color: var(--color-text);
+
+        .dropdown {
+            border-left-color: var(--color-text);
+            border-bottom-color: var(--color-text);
+            border-right-color: var(--color-text);
+        }
+    }
+}

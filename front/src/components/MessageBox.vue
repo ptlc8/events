@@ -23,7 +23,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 div {
     display: flex;
     flex-direction: column;
@@ -31,8 +31,8 @@ div {
     width: fit-content;
     margin: auto;
     padding: 1em 2em;
-    box-shadow: 0 0 10px 2px rgba(0, 0, 0, .1);
     border-radius: 4px;
     text-align: center;
+    @include shadow;
 }
 </style>

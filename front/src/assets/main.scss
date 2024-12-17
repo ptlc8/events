@@ -1,4 +1,5 @@
-@import './base.css';
+@use './shared' as *;
+@use './base';
 
 :root {
   /* chill light green button color */
@@ -33,14 +34,17 @@ article {
   align-items: center;
   padding: 8px;
   border-radius: 4px;
-  box-shadow: 0 0 10px 2px rgba(0, 0, 0, 0.1);
+  @include shadow;
 }
 
-a,
-.green {
+a {
   text-decoration: none;
-  color: hsla(160, 100%, 37%, 1);
-  transition: 0.4s;
+  color: var(--color-primary);
+  transition: 0.3s;
+
+  &:hover {
+    color: var(--color-heading);
+  }
 }
 
 select,
@@ -48,23 +52,45 @@ input,
 button {
   border-radius: 4px;
   padding: 12px 8px;
-  box-shadow: 0 0 10px 2px rgba(0, 0, 0, .1);
   margin-top: 10px;
-  background-color: #fff;
+  background-color: var(--color-background);
   border: 0;
   font: 15px / 20px "Open Sans", "Helvetica Neue", Arial, Helvetica, sans-serif;
-  color: #404040;
-  color: rgba(0, 0, 0, 0.75);
+  color: var(--color-text);
+  @include interactive;
+  @include shadow;
 }
 
 button {
   background-color: var(--color-primary);
-  color: white;
+  color: var(--color-background);
   cursor: pointer;
+  @include interactive;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--color-heading);
 }
 
 h1 {
   text-align: center;
+}
+
+img {
+  @include image;
+}
+
+hr {
+  border-color: var(--color-border);
+}
+
+* {
+  outline-color: var(--color-primary);
 }
 
 #app {

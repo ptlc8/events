@@ -25,7 +25,14 @@ export default defineConfig(({ command, mode, ssrBuild }) => {
         '@': fileURLToPath(new URL('./src', import.meta.url))
       }
     },
-    base: env.VITE_BASE_URL
+    base: env.VITE_BASE_URL,
+    css: {
+      preprocessorOptions: {
+        scss: {
+          additionalData: '@use "@/assets/shared" as *;'
+        }
+      }
+    }
   };
   return config;
 })

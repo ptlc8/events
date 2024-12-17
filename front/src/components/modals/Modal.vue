@@ -46,11 +46,11 @@ export default {
 }
 
 .modal {
-  background: white;
+  background: var(--color-background);
   border-radius: 0.5em;
   width: 32em;
-  box-shadow: 0 0 0.5em rgba(0, 0, 0, 0.5);
   padding: 1em 2em;
+  @include shadow;
 
   .close {
     position: absolute;
@@ -60,6 +60,11 @@ export default {
     height: 1.5em;
     cursor: pointer;
     z-index: 100;
+    transition: 0.3s;
+
+    &:hover {
+      transform: scale(1.1);
+    }
   }
 
   &.big {

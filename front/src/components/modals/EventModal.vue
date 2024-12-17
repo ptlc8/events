@@ -2,7 +2,7 @@
   <Modal big v-bind="$attrs" ref="modal">
     <div class="banner" :style="'background-image: url(\'' + banner.url + '\');'" :title="banner.credits"></div>
     <div class="body">
-      <span class="title">{{ event.title }}</span>
+      <h2 class="title">{{ event.title }}</h2>
       <span class="author">{{ $text.get("by") }} {{ event.author }}</span>
       📍 {{ event.placename }}
       <div class="categories">
@@ -35,8 +35,7 @@
         </div>
         <button class="show-on-map" @click="showOnMap">📍 {{ $text.get('show_on_map') }}</button>
         <button v-if="isApp" class="open-map" @click="openMapApp">🗺️ {{ $text.get('open_map_app') }}</button>
-        <button class="add-fav" @click="switchFavorite">⭐ {{ $text.get(event.fav ? 'remove_fav' : 'add_fav')
-        }}</button>
+        <button class="add-fav" @click="switchFavorite">⭐ {{ $text.get(event.fav ? 'remove_fav' : 'add_fav') }}</button>
         <button v-if="canShare()" class="large-share-button" @click="share()">🚀 Partager</button>
         <div v-else class="share-buttons">
           <a class="tumblr" target="_blank" title="Partager sur Tumblr"
@@ -153,13 +152,14 @@ export default {
   top: 0;
   height: 18em;
   background: center / cover;
+  @include image;
 }
 
 .body {
   position: absolute;
   top: 16em;
   width: 100%;
-  background-color: white;
+  background-color: var(--color-background);
   border-radius: 0.5em;
   padding: 1em 4em;
   margin: auto;
@@ -169,12 +169,12 @@ export default {
   }
 
   .title {
-    font-size: 1.8em;
-    font-weight: bold;
     display: block;
     margin-left: 1em;
-    line-height: 1;
     margin-bottom: .2em;
+    font-size: 1.8em;
+    font-weight: bold;
+    line-height: 1;
   }
 
   .author {
@@ -221,6 +221,7 @@ export default {
       color: black;
       height: auto;
       width: 100%;
+      @include image;
 
       &.add-fav {
         background-color: #ffff88;
@@ -249,11 +250,9 @@ export default {
         width: 100%;
         padding-top: 100%;
         border-radius: .2em;
+        @include image;
 
-        @each $social in facebook twitter whatsapp email tumblr messenger telegram
-
-        /*reddit linkedin line viber skype wechat*/
-          {
+        @each $social in facebook twitter whatsapp email tumblr messenger telegram /*reddit linkedin line viber skype wechat*/ {
           &.#{$social} {
             background-image: url("@/assets/icons/socials/#{$social}.svg");
           }
@@ -271,6 +270,7 @@ export default {
         text-align: center;
         font-weight: bold;
         color: black;
+        @include image;
       }
     }
   }

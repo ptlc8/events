@@ -49,17 +49,19 @@ export default {
 .distance-input {
     display: flex;
     align-items: center;
-    background-color: white;
+    background-color: var(--color-background);
     border-radius: 4px;
-    box-shadow: 0 0 10px 2px rgba(0, 0, 0, .1);
+    @include interactive;
+    @include shadow;
 
     input,
     select {
         margin: 0;
         box-shadow: none;
+        border: 0;
 
         &:focus {
-            outline: none;
+            outline-style: none;
         }
     }
 
@@ -70,7 +72,7 @@ export default {
     }
 
     &:focus-within {
-        outline: solid 2px black;
+        outline-style: solid;
     }
 }
 </style>

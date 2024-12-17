@@ -59,7 +59,7 @@ export default {
     .picture {
         display: inline-block;
         flex: 3;
-        background: center center / cover #f4f4f4;
+        background: center center / cover var(--color-background-mute);
         border-radius: 4px;
     }
 

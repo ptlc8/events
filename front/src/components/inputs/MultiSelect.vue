@@ -2,7 +2,7 @@
     <div class="multiselect" tabindex="0" @mouseleave="close" @mouseover="open">
         <span class="add" @click="open">➕ {{ title }}</span>
         <option v-for="option in value" :value="option" @click="removeOption">{{ options[option] }}</option>
-        <div class="menu" v-if="opened">
+        <div class="dropdown" v-if="opened">
             <hr />
             <option v-for="option in Object.keys(options).filter(o => !value.includes(o))" :value="option"
                 @click="addOption">{{ options[option] }}</option>
@@ -65,35 +65,45 @@ export default {
     display: inline-block;
     border-radius: 4px;
     padding: 8px;
-    box-shadow: 0 0 10px 2px rgba(0, 0, 0, .1);
-    background-color: #fff;
+    background-color: var(--color-background);
     border: 0;
     font: 15px / 20px "Open Sans", "Helvetica Neue", Arial, Helvetica, sans-serif;
-    color: #404040;
-    color: rgba(0, 0, 0, 0.75);
+    color: var(--color-text);
     vertical-align: top;
     position: relative;
     z-index: 10;
+    @include interactive;
+    @include shadow;
 
     option,
     span {
-        padding: 4px;
-        border: 1px solid #606060;
+        padding: 2px;
+        border: 1px solid var(--color-border);
         border-radius: 2px;
         display: inline-block;
-        cursor: pointer;
         user-select: none;
-        margin-right: 2px;
+        margin: 1px;
+
+        &[value] {
+            cursor: pointer;
+
+            &:hover {
+                color: var(--color-heading);
+                border-color: var(--color-heading);
+            }
+        }
     }
 
-    .menu {
+    .dropdown {
         position: absolute;
         border-radius: 4px;
-        background-color: #fff;
+        background-color: var(--color-background);
         left: 0;
         width: 100%;
+        width: calc(100% + 4px);
         padding: 8px;
-        box-shadow: 0 5px 4px 2px rgba(0, 0, 0, .1);
+        margin-left: -2px;
+        @include shadow-bottom;
     }
 
     @media (orientation: portrait) {

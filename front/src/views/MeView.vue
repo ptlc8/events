@@ -73,6 +73,7 @@ article {
   &.button {
     flex-direction: row;
     cursor: pointer;
+    @include interactive;
 
     >* {
       flex: 1;

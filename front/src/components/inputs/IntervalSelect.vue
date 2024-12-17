@@ -100,14 +100,14 @@ export default {
 .interval-select {
   border-radius: 4px;
   padding: 12px 8px;
-  box-shadow: 0 0 10px 2px rgba(0, 0, 0, 0.1);
-  background-color: #fff;
+  background-color: var(--color-background);
   border: 0;
   font: 15px/20px "Open Sans", "Helvetica Neue", Arial, Helvetica, sans-serif;
-  color: #404040;
-  color: rgba(0, 0, 0, 0.75);
+  color: var(--color-text);
   z-index: 10;
   cursor: pointer;
+  @include interactive;
+  @include shadow;
 
   &::after {
     content: "▼";
@@ -132,17 +132,19 @@ export default {
   .dropdown {
     position: absolute;
     border-radius: 0 0 4px 4px;
-    background-color: #fff;
+    background-color: var(--color-background);
     top: 100%;
     left: 0;
     width: 100%;
+    width: calc(100% + 4px);
     padding: 8px;
     margin-top: -2px;
+    margin-left: -2px;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 5px 4px 2px rgba(0, 0, 0, .1);
     border-top: solid 1px var(--color-border);
     user-select: none;
+    @include shadow-bottom;
 
     .option,
     input,
@@ -157,6 +159,7 @@ export default {
       width: 2em;
       height: 2em;
       background-color: indianred;
+      color: #f2f2f2;
       padding: 0;
       margin: 2px 0 2px 4px;
     }
