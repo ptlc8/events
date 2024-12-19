@@ -4,6 +4,7 @@ import App from './App.vue';
 import createRouter from './router';
 import { useMainStore } from './stores/main';
 import { useGeolocationStore } from './stores/geolocation';
+import Api from './api';
 import Texts from './texts';
 import './pwa';
 
@@ -17,6 +18,7 @@ import './assets/main.scss';
   app.use(store);
   app.config.globalProperties.$store = useMainStore();
   app.config.globalProperties.$geolocation = useGeolocationStore();
+  app.config.globalProperties.$api = Api;
 
   await Texts.init(["fr-FR", "en-GB", "en-US"]);
   app.config.globalProperties.$text = Texts;

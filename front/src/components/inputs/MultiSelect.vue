@@ -29,7 +29,7 @@ export default {
             default: () => []
         }
     },
-    emits: ["update:modelValue", "change"],
+    emits: ["update:modelValue"],
     data: () => ({
         opened: false,
         value: []
@@ -43,12 +43,10 @@ export default {
         addOption(event) {
             this.value.push(event.target.value);
             this.$emit("update:modelValue", this.value);
-            this.$emit("change");
         },
         removeOption(event) {
             this.value.splice(this.value.indexOf(event.target.value), 1);
             this.$emit("update:modelValue", this.value);
-            this.$emit("change");
         },
         open() {
             this.opened = true;

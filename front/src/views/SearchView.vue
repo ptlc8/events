@@ -9,8 +9,8 @@
 </template>
 
 <script>
-import EventsList from '../components/EventsList.vue';
-import { default as SearchInputs, formatRelativeDate } from '../components/SearchInputs.vue';
+import EventsList from '@/components/EventsList.vue';
+import { default as SearchInputs, formatRelativeDate } from '@/components/SearchInputs.vue';
 
 export default {
     name: 'SearchView',
@@ -38,7 +38,7 @@ export default {
                 text: query.q ?? '',
                 cats: query.c?.split(',') ?? [],
                 sort: query.s ?? 'relevance',
-                date: { min: dmin, max: dmax },
+                date: { min: formatRelativeDate(0), max: dmax },
                 time: { min: tmin, max: tmax },
                 gloc: query.g ? { lng: parseFloat(lng), lat: parseFloat(lat) } : undefined,
                 dist: isNaN(parseInt(query.r)) ? undefined : parseInt(query.r)

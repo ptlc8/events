@@ -5,17 +5,12 @@
 </template>
 
 <script>
-import EventsApi from '@/api';
-import MessageBox from '../components/MessageBox.vue';
+import MessageBox from '@/components/MessageBox.vue';
+
 export default {
     name: 'ConnectView',
     components: {
         MessageBox
-    },
-    setup() {
-        return {
-            EventsApi
-        };
     },
     data() {
         return {
@@ -24,7 +19,7 @@ export default {
     },
     mounted() {
         var token = this.$route.query.token;
-        EventsApi.loginWith(token).then(user => {
+        this.$api.loginWith(token).then(user => {
             if (opener)
                 opener.postMessage({ target: 'events', loggedin: true, user });
             this.$store.setLoggedUser(user);

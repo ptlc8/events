@@ -3,7 +3,6 @@
 </template>
 
 <script>
-import EventsApi from '@/api';
 import { watch } from 'vue';
 import { mapboxAccessToken } from '@/config';
 
@@ -19,8 +18,9 @@ mapboxgl.accessToken = mapboxAccessToken;
 
 export default {
     name: 'MapView',
-    setup() {
-        return { mapboxgl, markerIcon, MapboxGeocoder, StylesControl };
+    components: {
+        MapboxGeocoder,
+        StylesControl
     },
     data() {
         return {
@@ -42,7 +42,7 @@ export default {
         var eventId = this.$route.query.show || this.$route.query.e;
         if (eventId !== undefined) {
             this.$store.event = null;
-            EventsApi.getEvent(eventId).then(event => {
+            this.$api.getEvent(eventId).then(event => {
                 if (!event) return;
                 this.map.flyTo({
                     center: [event.lng, event.lat],
@@ -60,10 +60,9 @@ export default {
         }
 
         this.map.on('load', () => {
-
-            this.map.loadImage(this.markerIcon, (error, image) => {
+            this.map.loadImage(markerIcon, (error, image) => {
                 if (error) throw error;
-                this.map.addImage('marker', image);
+                this.map.addImage('event-marker', image);
                 this.map.addSource('events', {
                     type: 'geojson',
                     data: this.getEventsAsGeoJson(),
@@ -81,7 +80,7 @@ export default {
                     source: 'events',
                     filter: ['!', ['has', 'point_count']],
                     layout: {
-                        'icon-image': 'marker',
+                        'icon-image': 'event-marker',
                         'icon-size': .5,
                         'text-field': ['get', 'eventTitle'],
                         'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
@@ -147,7 +146,7 @@ export default {
             while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
                 coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
             }
-            EventsApi.getEvent(e.features[0].properties.eventId).then(event => {
+            this.$api.getEvent(e.features[0].properties.eventId).then(event => {
                 this.$store.event = event;
             });
         });
@@ -183,7 +182,7 @@ export default {
             };
         },
         updateEvents() {
-            EventsApi.getEvents({
+            this.$api.getEvents({
                 minlat: this.map.getBounds().getSouth(),
                 minlng: this.map.getBounds().getWest(),
                 maxlat: this.map.getBounds().getNorth(),

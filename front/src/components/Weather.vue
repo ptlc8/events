@@ -63,6 +63,7 @@ export default {
       required: true
     }
   },
+  components: { WeatherIcon },
   data() {
     return {
       weather: null
@@ -117,8 +118,7 @@ export default {
       if (!this.weather) return "";
       return this.weather.daily.temperature_2m_max.reduce((a, b) => a + b, 0) / this.weather.daily.temperature_2m_max.length + this.weather.daily_units.temperature_2m_max;
     }
-  },
-  components: { WeatherIcon }
+  }
 };
 </script>
 

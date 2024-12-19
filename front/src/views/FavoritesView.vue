@@ -13,20 +13,15 @@
 </template>
 
 <script>
-import MessageBox from '../components/MessageBox.vue';
-import EventPreview from '../components/EventPreview.vue';
-import EventsApi from '../api';
+import MessageBox from '@/components/MessageBox.vue';
+import EventPreview from '@/components/EventPreview.vue';
 import { watch } from 'vue';
+
 export default {
     name: 'FavoritesView',
     components: {
         MessageBox,
         EventPreview
-    },
-    setup() {
-        return {
-            EventsApi
-        };
     },
     data() {
         return {
@@ -39,14 +34,14 @@ export default {
     },
     methods: {
         refresh() {
-            EventsApi.getEvents({
+            this.$api.getEvents({
                 favorite: true
             }).then(events => {
                 this.events = events;
             });
         },
         remove(id) {
-            EventsApi.removeFavorite(id).then(() => {
+            this.$api.removeFavorite(id).then(() => {
                 this.refresh();
             });
         }

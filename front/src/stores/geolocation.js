@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import EventsApi from '@/api';
+import Api from '@/api';
 import { mapboxAccessToken } from '@/config';
 
 async function getFromNavigator() {
@@ -26,7 +26,7 @@ function getPosFromNavigator() {
 
 async function getFromAPI() {
     try {
-        let loc = await EventsApi.getLocation();
+        let loc = await Api.getLocation();
         console.log('[Geo] Got location from API');
         return loc;
     } catch (err) {

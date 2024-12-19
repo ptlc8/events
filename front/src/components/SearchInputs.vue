@@ -1,26 +1,22 @@
 <template>
     <div class="fields">
         <SearchBar v-model="search.text" :placeholder="$text.get('searchevents')" />
-        <IntervalSelect class="dateselect" type="date" v-model="search.date" :options="defaultDateOptions"
-            @change="onChange" />
-        <IntervalSelect class="timeselect" type="time" v-model="search.time" :options="defaultTimeOptions"
-            @change="onChange" />
-        <select class="sort-select" v-model="search.sort" @change="onChange">
+        <IntervalSelect class="dateselect" type="date" v-model="search.date" :options="defaultDateOptions" />
+        <IntervalSelect class="timeselect" type="time" v-model="search.time" :options="defaultTimeOptions" />
+        <select class="sort-select" v-model="search.sort">
             <option value="datetime">{{ $text.get('sortbydate') }}</option>
             <option value="relevance" :disabled="!geolocation">{{ $text.get('sortbyrelevance') }}</option>
             <option value="popularity">{{ $text.get('sortbypopularity') }}</option>
             <option value="distance" :disabled="!geolocation">{{ $text.get('sortbydistance') }}</option>
         </select>
-        <GeolocationInput class="geolocation-input" v-model="search.gloc" :placeholder="gloc?.name"
-            @change="onChange" />
-        <DistanceInput v-if="geolocation" class="distance-input" v-model="search.dist" @change="onChange" />
-        <MultiSelect class="catselect" :title="$text.get('categories')" v-model="search.cats" @change="onChange"
-            :options="categories.reduce((acc, c) => (acc[c.id] = $text.get(c.id)) && acc, {})" />
+        <GeolocationInput class="geolocation-input" v-model="search.gloc" :placeholder="gloc?.name" />
+        <DistanceInput v-if="geolocation" class="distance-input" v-model="search.dist" />
+        <MultiSelect class="catselect" :title="$text.get('categories')" v-model="search.cats"
+            :options="categories.reduce((acc, c) => (acc[c.id] = c.emoji + ' ' + $text.get(c.id)) && acc, {})" />
     </div>
 </template>
 
 <script>
-import EventsApi from '@/api';
 import SearchBar from './inputs/SearchBar.vue';
 import MultiSelect from './inputs/MultiSelect.vue';
 import IntervalSelect from './inputs/IntervalSelect.vue';
@@ -48,6 +44,7 @@ export default {
     props: {
         modelValue: Object
     },
+    emits: ['update:modelValue'],
     data() {
         return {
             search: {},
@@ -57,17 +54,15 @@ export default {
     },
     mounted() {
         this.search = this.modelValue;
-        EventsApi.getCategories().then(cats => this.categories = cats);
+        this.$api.getCategories().then(cats => this.categories = cats);
         this.$geolocation.get().then(gloc => this.gloc = gloc);
     },
     watch: {
-        modelValue(value) {
-            this.search = value;
-        }
-    },
-    methods: {
-        onChange() {
-            this.$emit('update:modelValue', this.search);
+        modelValue: {
+            handler(value) {
+                this.search = value;
+            },
+            deep: true
         }
     },
     computed: {

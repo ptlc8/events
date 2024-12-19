@@ -18,7 +18,7 @@ export default {
             default: null
         }
     },
-    emits: ["update:modelValue", "change", "input"],
+    emits: ["update:modelValue"],
     data() {
         return {
             value: this.modelValue,
@@ -32,14 +32,12 @@ export default {
         value(value) {
             let d = value ? value * this.unit : null;
             this.$emit("update:modelValue", d);
-            this.$emit("change");
             if (!value)
                 this.value = "";
         },
         unit(unit) {
             let d = this.value ? this.value * unit : null;
             this.$emit("update:modelValue", d);
-            this.$emit("change");
         }
     }
 };

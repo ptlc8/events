@@ -1,8 +1,48 @@
 import { backendUrl } from "./config";
 
-const categories = ["party", "arts", "theater", "music", "online", "children", "shopping", "cinema", "food", "wellbeing", "show", "sport", "literature", "drink", "gardening", "cause", "craft", "exhibition", "dance", "festival", "videogame", "market", "outdoor", "museum", "tour", "workshop", "garden", "holiday", "free", "parade", "fair", "religion", "science", "seminar", "boardgame"];
+const categories = [
+    [ "party", "🎉"],
+    [ "arts", "🎨"],
+    [ "theater", "🎭"],
+    [ "music", "🎶"],
+    [ "online", "💻"],
+    [ "children", "👧"],
+    [ "shopping", "🛍️"],
+    [ "cinema", "🎬"],
+    [ "food", "🍽"],
+    [ "wellbeing", "😌"],
+    [ "show", "🎟"],
+    [ "sport", "🎾"],
+    [ "literature", "📚"],
+    [ "drink", "🍹"],
+    [ "gardening", "🌱"],
+    [ "cause", "🎗️"],
+    [ "craft", "📐"],
+    [ "exhibition", "🖼️"],
+    [ "dance", "💃"],
+    [ "festival", "🎪"],
+    [ "market", "🛒"],
+    [ "museum", "🏛️"],
+    [ "outdoor", "🏞"],
+    [ "tour", "🚶‍♀️"],
+    [ "workshop", "🛠️"],
+    [ "garden", "🌳"],
+    [ "holiday", "🏖️"],
+    [ "free", "🆓"],
+    [ "parade", "🎈"],
+    [ "fair", "🎇"],
+    [ "religion", "🙏"],
+    [ "science", "🔬"],
+    [ "seminar", "💼"],
+    [ "videogame", "🎮"],
+    [ "boardgame", "🎲"]
+].map(c => ({
+    id: c[0],
+    emoji: c[1],
+    image: backendUrl + "api/images/get.php?query=" + encodeURIComponent(c)
+}));
 
-const EventsApi = {
+const Api = {
     getEvents: function (parameters = {}) {
         return sendApiRequest("events/get.php", parameters, "Getting events");
     },
@@ -13,10 +53,7 @@ const EventsApi = {
         return sendApiRequest("events/create.php", event, "Creating event " + event.name);
     },
     getCategories: function () {
-        return new Promise(r => r(categories.map(c => ({
-            id: c,
-            image: backendUrl + "api/images/get.php?query=" + encodeURIComponent(c)
-        }))));
+        return Promise.resolve(categories);
     },
     getLoginWithUrl() {
         return sendApiRequest("users/getloginwithurl.php", {}, "Getting 'login with' url");
@@ -70,4 +107,4 @@ function sendApiRequest(endpoint, parameters, message) {
     });
 }
 
-export default EventsApi;
+export default Api;

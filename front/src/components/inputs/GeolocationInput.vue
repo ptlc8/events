@@ -11,6 +11,7 @@
 
 <script>
 import { mapboxAccessToken } from '@/config';
+
 export default {
   name: 'GeolocationInput',
   props: {
@@ -25,7 +26,7 @@ export default {
       default: ''
     }
   },
-  emits: ['update:modelValue', 'change'],
+  emits: ['update:modelValue'],
   data() {
     return {
       query: '',
@@ -66,7 +67,6 @@ export default {
     change(value) {
       this.query = value?.name ?? '';
       this.$emit('update:modelValue', value);
-      this.$emit('change');
       this.mouseover = false;
     },
     mapboxQuery(query) {

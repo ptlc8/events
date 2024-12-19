@@ -16,16 +16,11 @@
 </template>
 
 <script>
-import EventsApi from '@/api';
 import Modal from './Modal.vue';
+
 export default {
   name: "LoginModal",
   components: { Modal },
-  setup() {
-    return {
-      EventsApi
-    };
-  },
   data() {
     return {
       username: "",
@@ -41,7 +36,7 @@ export default {
   },
   methods: {
     login() {
-      EventsApi.login(this.username, this.password)
+      this.$api.login(this.username, this.password)
         .then(user => {
           this.password = "";
           this.$store.setLoggedUser(user);
@@ -52,7 +47,7 @@ export default {
         });
     },
     loginWith() {
-      EventsApi.getLoginWithUrl().then(url => {
+      this.$api.getLoginWithUrl().then(url => {
         window.open(url, "_blank");
       });
     },

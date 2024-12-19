@@ -6,7 +6,7 @@
       <span class="author">{{ $text.get("by") }} {{ event.author }}</span>
       📍 {{ event.placename }}
       <div class="categories">
-        <span v-for="cat in event.categories">{{ $text.get(cat) }}</span>
+        <span v-for="cat in categories">{{ cat.emoji }} {{ $text.get(cat.id) }}</span>
       </div>
       <div class="description">{{ event.description }}</div>
       <div class="sidebar">
@@ -70,7 +70,6 @@
 import AgendaPage from "@/components/AgendaPage.vue";
 import Weather from "@/components/Weather.vue";
 import Contacts from "@/components/Contacts.vue";
-import EventsApi from "@/api";
 import { origin, backendUrl, isApp } from "@/config";
 import Modal from "./Modal.vue";
 
@@ -83,8 +82,15 @@ export default {
     }
   },
   components: { AgendaPage, Weather, Contacts, Modal },
-  setup() {
-    return { isApp };
+  setup: () => ({
+    isApp
+  }),
+  data: () => ({
+    allCategories: []
+  }),
+  mounted() {
+    this.$api.getCategories()
+      .then(categories => this.allCategories = categories);
   },
   methods: {
     share() {
@@ -107,12 +113,12 @@ export default {
     },
     switchFavorite() {
       if (this.event.fav) {
-        EventsApi.removeFavorite(this.event.id)
+        this.$api.removeFavorite(this.event.id)
           .then(() => this.event.fav = false)
           .catch(() => { });
       } else {
         this.$store.login()
-          .then(() => EventsApi.addFavorite(this.event.id)
+          .then(() => this.$api.addFavorite(this.event.id)
             .then(() => this.event.fav = true)
           ).catch(() => { });
       }
@@ -139,6 +145,11 @@ export default {
         credits: nonRepresentative ? this.$text.get('non representative') : this.event.imagesCredits[0],
         nonRepresentative
       };
+    },
+    categories() {
+      if (!this.allCategories.length)
+        return [];
+      return this.event.categories.map(id => this.allCategories.find(c => c.id === id));
     }
   }
 };

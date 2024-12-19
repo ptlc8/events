@@ -4,7 +4,6 @@ import { watch, ref } from 'vue';
 import LoginModal from '@/components/modals/LoginModal.vue';
 import EventModal from '@/components/modals/EventModal.vue';
 import AboutModal from '@/components/modals/AboutModal.vue';
-import EventsApi from '@/api';
 
 const tabs = ref({});
 
@@ -18,16 +17,18 @@ export default {
   components: {
     LoginModal,
     EventModal,
-    AboutModal
+    AboutModal,
+    RouterLink,
+    RouterView
   },
-  setup() {
-    return { RouterLink, RouterView, EventsApi, tabs };
-  },
-  mounted() {
+  setup: () => ({
+    tabs
+  }),
+  mounted(a) {
     // on router init
     var unwatchRoute = watch(() => this.$route, () => {
       if (this.$route.query.e) {
-        EventsApi.getEvent(this.$route.query.e).then(event => {
+        this.$api.getEvent(this.$route.query.e).then(event => {
           this.$store.event = event;
         });
       }
@@ -38,7 +39,7 @@ export default {
       this.$router.replace({ name: this.$route.name, query: { ...this.$route.query, e: this.$store.event?.id } });
     });
 
-    EventsApi.getSelfUser().then(user => {
+    this.$api.getSelfUser().then(user => {
       this.$store.setLoggedUser(user);
     });
   }

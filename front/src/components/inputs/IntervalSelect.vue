@@ -39,7 +39,7 @@ export default {
       required: true
     }
   },
-  emits: ['change', 'update:modelValue'],
+  emits: ['update:modelValue'],
   data: () => ({
     opened: false,
     value: { min: null, max: null },
@@ -51,7 +51,6 @@ export default {
     value: {
       handler(value) {
         this.$emit('update:modelValue', value);
-        this.$emit('change');
       },
       deep: true
     }

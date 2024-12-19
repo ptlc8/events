@@ -10,7 +10,6 @@
 </template>
 
 <script>
-import EventsApi from '@/api';
 import EventPreview from './EventPreview.vue';
 import MessageBox from './MessageBox.vue';
 
@@ -27,11 +26,13 @@ export default {
         }
     },
     data: () => ({
+        gloc: null,
         events: [],
         searchId: 0,
         canSearchMore: false
     }),
     mounted() {
+        this.$geolocation.get().then(gloc => this.gloc = gloc);
         this.launchSearch();
     },
     watch: {
@@ -50,7 +51,7 @@ export default {
         launchSearch(more = false) {
             if (!this.search)
                 return;
-            EventsApi.getEvents({
+            this.$api.getEvents({
                 text: this.search.text,
                 datemin: this.search.date.min,
                 datemax: this.search.date.max,

@@ -6,7 +6,7 @@
         </p>
         <a :href="'mailto:' + email">{{ email }}</a>
         <br />
-        <center>{{ author }} {{ new Date().getFullYear() }} - {{ $text.get('all_rights_reserved') }}</center>
+        <p class="copyright">{{ author }} {{ new Date().getFullYear() }} - {{ $text.get('all_rights_reserved') }}</p>
     </Modal>
 </template>
 
@@ -22,3 +22,10 @@ export default {
     })
 }
 </script>
+
+<style scoped lang="scss">
+.copyright {
+    font-size: .8em;
+    text-align: center;
+}
+</style>

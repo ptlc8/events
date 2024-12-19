@@ -36,29 +36,26 @@
 </template>
 
 <script>
-import EventsApi from '../api';
-import MessageBox from '../components/MessageBox.vue';
-import { canInstallWebApp, promptInstallWebApp } from '../pwa';
+import MessageBox from '@/components/MessageBox.vue';
+import { canInstallWebApp, promptInstallWebApp } from '@/pwa';
 
 export default {
   name: 'MeView',
   components: { MessageBox },
-  setup() {
-    return {
-      EventsApi,
-      canInstallWebApp,
-      promptInstallWebApp
-    };
-  },
+  setup: () => ({
+    canInstallWebApp,
+    promptInstallWebApp
+  }),
   methods: {
     logout() {
-      EventsApi.logout();
+      this.$api.logout();
       this.$store.setLoggedUser(null);
     },
     getLangName(code) {
-      //return code.toUpperCase().replace(/./g, char => String.fromCodePoint(char.charCodeAt(0) + 127397));
-      return code.match(/[^-]+$/)[0].toUpperCase().split('').map(c => String.fromCodePoint(c.charCodeAt(0) + 127397)).join('')
-        + ' ' + code.match(/[^-]+/)[0];
+      var country = code.match(/[^-]+$/)[0];
+      var lang = code.match(/[^-]+/)[0];
+      return country.toUpperCase().split('').map(c => String.fromCodePoint(c.charCodeAt(0) + 127397)).join('')
+        + ' ' + lang;
     }
   }
 }

@@ -8,7 +8,7 @@
             <div class="infos">
                 <span class="description">{{ event.description }}</span>
                 <span class="categories">
-                    <span v-for="cat in event.categories">{{ $text.get(cat) }}</span>
+                    <span v-for="c in categories">{{ c.emoji }} {{ $text.get(c.id) }}</span>
                 </span>
                 <span class="whenwhere">
                     <b>{{ $text.getDisplayDateTime(event.start) }}</b>
@@ -23,6 +23,7 @@
 
 <script>
 import { backendUrl } from '@/config.js';
+
 export default {
     name: "EventPreview",
     props: {
@@ -32,6 +33,12 @@ export default {
         }
     },
     emits: ["click"],
+    data: () => ({
+        allCategories: []
+    }),
+    mounted() {
+        this.$api.getCategories().then(cats => this.allCategories = cats);
+    },
     computed: {
         banner() {
             var nonRepresentative = !!this.event.nonRepresentativeImage;
@@ -40,6 +47,11 @@ export default {
                 credits: nonRepresentative ? this.$text.get('non representative') : this.event.imagesCredits[0],
                 nonRepresentative
             }
+        },
+        categories() {
+            if (!this.allCategories.length)
+                return [];
+            return this.event.categories.map(id => this.allCategories.find(c => c.id == id));
         }
     }
 }
