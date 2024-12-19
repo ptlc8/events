@@ -1,12 +1,12 @@
 
 <template>
     <section>
-        <h1>⭐ {{ $text.get('fav') }}</h1>
-        <MessageBox v-if="!$store.logged" :message="$text.get('logintofav')" :button="$text.get('login')" @click="$store.login" />
-        <MessageBox v-else-if="!events.length" :message="$text.get('nofavorites')" :button="$text.get('searchthem')" @click="$router.push('/search')"></MessageBox>
+        <h1>⭐ {{ $t.fav }}</h1>
+        <MessageBox v-if="!$store.logged" :message="$t.login_to_fav" :button="$t.login" @click="$store.login" />
+        <MessageBox v-else-if="!events.length" :message="$t.no_favorites" :button="$t.search_them" @click="$router.push('/search')"></MessageBox>
         <div class="favorites">
             <EventPreview v-for="event in events" :event="event" @click="$store.event = event">
-                <button class="delete-event" @click="remove(event.id)">{{ $text.get('remove_fav') }}</button>
+                <button class="delete-event" @click="remove(event.id)">{{ $t.remove_fav }}</button>
             </EventPreview>
         </div>
     </section>

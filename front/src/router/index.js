@@ -1,10 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import Texts from '@/texts';
+import { get as T, init as initTexts } from '@/texts';
 import { baseUrl } from '@/config';
 
 const createMainRouter = async () => {
   
-  await Texts.init(["fr-FR", "en-GB", "en-US"]);
+  await initTexts(["fr-FR", "en-GB", "en-US"]);
 
   var router = createRouter({
     base: "./",
@@ -15,7 +15,7 @@ const createMainRouter = async () => {
         name: 'map',
         component: () => import('../views/MapView.vue'),
         meta: {
-          title: Texts.get('map')
+          title: T('map')
         }
       },
       {
@@ -23,7 +23,7 @@ const createMainRouter = async () => {
         name: 'search',
         component: () => import('../views/SearchView.vue'),
         meta: {
-          title: Texts.get('search')
+          title: T('search')
         }
       },
       {
@@ -31,7 +31,7 @@ const createMainRouter = async () => {
         name: "fav",
         component: () => import("../views/FavoritesView.vue"),
         meta: {
-          title: Texts.get('fav')
+          title: T('fav')
         }
       },
       {
@@ -43,7 +43,7 @@ const createMainRouter = async () => {
         name: "me",
         component: () => import("../views/MeView.vue"),
         meta: {
-          title: Texts.get('me')
+          title: T('me')
         }
       },
       {
@@ -51,7 +51,7 @@ const createMainRouter = async () => {
         name: "orga",
         component: () => import("../views/OrganizeView.vue"),
         meta: {
-          title: Texts.get('orga')
+          title: T('orga')
         }
       },
       {
@@ -59,7 +59,7 @@ const createMainRouter = async () => {
         name: "categories",
         component: () => import("../views/CategoriesView.vue"),
         meta: {
-          title: Texts.get('categories')
+          title: T('categories')
         }
       },
       {
@@ -67,7 +67,7 @@ const createMainRouter = async () => {
         name: "login",
         component: () => import("../views/LoginView.vue"),
         meta: {
-          title: Texts.get('login')
+          title: T('login')
         }
       }
     ]

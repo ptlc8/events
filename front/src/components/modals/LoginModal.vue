@@ -1,15 +1,15 @@
 <template>
   <Modal v-bind="$attrs" ref="modal">
-    <span class="title">{{ $text.get('login') }}</span>
+    <span class="title">{{ $t.login }}</span>
     <!--<form @submit.prevent="login">
       <input v-model="username" placeholder="Nom d'utilisateur" autofocus="true" autocomplete="username">
       <input v-model="password" placeholder="Mot de passe" type="password" autocomplete="current-password">
-      <button>{{ $text.get("login") }}</button>
+      <button>{{ $t.login }}</button>
       <a v-if="info" href="/forgotten-password" target="_blank">J'ai oublié mon mot de passe</a>
     </form>-->
     <button class="login-with-link" @click="loginWith">
       <img src="https://ambi.dev/favicon.ico" />
-      {{ $text.get('loginwith') }} Ambi.dev
+      {{ $t.login_with }} Ambi.dev
     </button>
     <span class="info">{{ info }}</span>
   </Modal>
@@ -43,7 +43,7 @@ export default {
           this.$refs.modal.close();
         })
         .catch(err => {
-          this.info = this.$text.get(err);
+          this.info = this.$t[err];
         });
     },
     loginWith() {
@@ -53,11 +53,11 @@ export default {
     },
     receiveMessage(event) {
       if (typeof event.data === "object" && event.data.target === "events") {
-        if (event.data.loggedin) {
+        if (event.data.logged_in) {
           this.$store.setLoggedUser(event.data.user);
           this.$refs.modal.close();
         } else {
-          this.info = this.$text.get("logginginfailed");
+          this.info = this.$t.logging_in_failed;
         }
         event.source.close();
       }

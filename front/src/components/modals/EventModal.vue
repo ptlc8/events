@@ -3,10 +3,10 @@
     <div class="banner" :style="'background-image: url(\'' + banner.url + '\');'" :title="banner.credits"></div>
     <div class="body">
       <h2 class="title">{{ event.title }}</h2>
-      <span class="author">{{ $text.get("by") }} {{ event.author }}</span>
+      <span class="author">{{ $t.by }} {{ event.author }}</span>
       📍 {{ event.placename }}
       <div class="categories">
-        <span v-for="cat in categories">{{ cat.emoji }} {{ $text.get(cat.id) }}</span>
+        <span v-for="cat in categories">{{ cat.emoji }} {{ $t[cat.id] }}</span>
       </div>
       <div class="description">{{ event.description }}</div>
       <div class="sidebar">
@@ -17,25 +17,25 @@
         </div>
         <AgendaPage v-else :datetime="event.start"></AgendaPage>
         <span>
-          {{ $text.get('from') }} {{ $text.getDisplayTime(event.start) }}
-          {{ $text.get('to') }} {{ $text.getDisplayTime(event.end) }}
+          {{ $t.from }} {{ $texts.getDisplayTime(event.start) }}
+          {{ $t.to }} {{ $texts.getDisplayTime(event.end) }}
         </span>
         <hr />
-        <h3>🌡️ {{ $text.get('weather') }}</h3>
+        <h3>🌡️ {{ $t.weather }}</h3>
         <Weather :datetime="event.start" :lat="event.lat" :lng="event.lng"></Weather>
         <hr />
         <div v-if="event.contact.length > 0">
-          <h3>📞 {{ $text.get('contact') }}</h3>
+          <h3>📞 {{ $t.contact }}</h3>
           <Contacts :contacts="event.contact"></Contacts>
           <hr />
         </div>
         <div v-if="event.registration.length > 0">
-          <h3>📝 {{ $text.get('registration') }}</h3>
+          <h3>📝 {{ $t.registration }}</h3>
           <Contacts :contacts="event.registration"></Contacts>
         </div>
-        <button class="show-on-map" @click="showOnMap">📍 {{ $text.get('show_on_map') }}</button>
-        <button v-if="isApp" class="open-map" @click="openMapApp">🗺️ {{ $text.get('open_map_app') }}</button>
-        <button class="add-fav" @click="switchFavorite">⭐ {{ $text.get(event.fav ? 'remove_fav' : 'add_fav') }}</button>
+        <button class="show-on-map" @click="showOnMap">📍 {{ $t.show_on_map }}</button>
+        <button v-if="isApp" class="open-map" @click="openMapApp">🗺️ {{ $t.open_map_app }}</button>
+        <button class="add-fav" @click="switchFavorite">⭐ {{ event.fav ? $t.remove_fav : $t.add_fav }}</button>
         <button v-if="canShare()" class="large-share-button" @click="share()">🚀 Partager</button>
         <div v-else class="share-buttons">
           <a class="tumblr" target="_blank" title="Partager sur Tumblr"
@@ -102,7 +102,7 @@ export default {
     },
     copy(event) {
       navigator.clipboard.writeText(this.url).then(() => {
-        event.target.innerText = this.$text.get("copied");
+        event.target.innerText = this.$t.copied;
       }).catch(err => {
         event.target.innerText = err;
       });
@@ -142,7 +142,7 @@ export default {
       let nonRepresentative = !!this.event.nonRepresentativeImage;
       return {
         url: nonRepresentative ? backendUrl + this.event.nonRepresentativeImage : this.event.images[0],
-        credits: nonRepresentative ? this.$text.get('non representative') : this.event.imagesCredits[0],
+        credits: nonRepresentative ? this.$t.non_representative : this.event.imagesCredits[0],
         nonRepresentative
       };
     },

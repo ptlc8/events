@@ -3,7 +3,7 @@
         <div class="results">
             <EventPreview class="event" v-for="event in events" :event="event" @click="$store.event = event" />
         </div>
-        <MessageBox v-if="!events.length" :message="$text.get('noresults')" :button="$text.get('organizeit')"
+        <MessageBox v-if="!events.length" :message="$t.no_results" :button="$t.organize_it"
             @click="$router.push('/orga')" />
         <button v-else-if="canSearchMore" class="more-button" @click="launchSearch(true)">Afficher plus d'évents</button>
     </div>

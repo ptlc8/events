@@ -3,18 +3,18 @@
         <span class="title">{{ event.title }}</span>
         <div class="wrapper">
             <div class="picture" :style="'background-image: url(\'' + banner.url + '\');'" :title="banner.credits">
-                <span v-if="banner.nonRepresentative" :title="$text.get('non representative')">❗</span>
+                <span v-if="banner.nonRepresentative" :title="$t.non_representative">❗</span>
             </div>
             <div class="infos">
                 <span class="description">{{ event.description }}</span>
                 <span class="categories">
-                    <span v-for="c in categories">{{ c.emoji }} {{ $text.get(c.id) }}</span>
+                    <span v-for="c in categories">{{ c.emoji }} {{ $t[c.id] }}</span>
                 </span>
                 <span class="whenwhere">
-                    <b>{{ $text.getDisplayDateTime(event.start) }}</b>
+                    <b>{{ $texts.getDisplayDateTime(event.start) }}</b>
                     à <b>{{ event.placename }}</b>
                 </span>
-                <button class="infos-button" @click="$emit('click')">{{ $text.get('moreinfo') }}</button>
+                <button class="infos-button" @click="$emit('click')">{{ $t.more_info }}</button>
                 <slot></slot>
             </div>
         </div>
@@ -44,7 +44,7 @@ export default {
             var nonRepresentative = !!this.event.nonRepresentativeImage;
             return {
                 url: nonRepresentative ? backendUrl + this.event.nonRepresentativeImage : this.event.images[0],
-                credits: nonRepresentative ? this.$text.get('non representative') : this.event.imagesCredits[0],
+                credits: nonRepresentative ? this.$t.non_representative : this.event.imagesCredits[0],
                 nonRepresentative
             }
         },

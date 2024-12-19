@@ -1,12 +1,12 @@
 <template>
     <Modal>
-        <h1>{{ $text.get('about') }}</h1>
-        <p v-for="line in $text.get('about_text')">
+        <h1>{{ $t.about }}</h1>
+        <p v-for="line in $t.about_text">
             {{ line }}
         </p>
         <a :href="'mailto:' + email">{{ email }}</a>
         <br />
-        <p class="copyright">{{ author }} {{ new Date().getFullYear() }} - {{ $text.get('all_rights_reserved') }}</p>
+        <p class="copyright">{{ author }} {{ new Date().getFullYear() }} - {{ $t.all_rights_reserved }}</p>
     </Modal>
 </template>
 

@@ -70,7 +70,7 @@ export default {
       this.mouseover = false;
     },
     mapboxQuery(query) {
-      return fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?language=${this.$text.getShortLang()}&access_token=${mapboxAccessToken}`)
+      return fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?language=${this.$texts.getShortLang()}&access_token=${mapboxAccessToken}`)
         .then(res => res.json())
         .catch(err => {
           console.error('[GeolocationInput] ' + err);

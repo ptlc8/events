@@ -1,6 +1,6 @@
 <template>
     <section>
-        <h1>🔍 {{ $text.get('search') }}</h1>
+        <h1>🔍 {{ $t.search }}</h1>
     </section>
     <section>
         <SearchInputs v-model="search" />

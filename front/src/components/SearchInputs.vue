@@ -1,18 +1,18 @@
 <template>
     <div class="fields">
-        <SearchBar v-model="search.text" :placeholder="$text.get('searchevents')" />
+        <SearchBar v-model="search.text" :placeholder="$t.search_events" />
         <IntervalSelect class="dateselect" type="date" v-model="search.date" :options="defaultDateOptions" />
         <IntervalSelect class="timeselect" type="time" v-model="search.time" :options="defaultTimeOptions" />
         <select class="sort-select" v-model="search.sort">
-            <option value="datetime">{{ $text.get('sortbydate') }}</option>
-            <option value="relevance" :disabled="!geolocation">{{ $text.get('sortbyrelevance') }}</option>
-            <option value="popularity">{{ $text.get('sortbypopularity') }}</option>
-            <option value="distance" :disabled="!geolocation">{{ $text.get('sortbydistance') }}</option>
+            <option value="datetime">{{ $t.sort_by_date }}</option>
+            <option value="relevance" :disabled="!geolocation">{{ $t.sort_by_relevance }}</option>
+            <option value="popularity">{{ $t.sort_by_popularity }}</option>
+            <option value="distance" :disabled="!geolocation">{{ $t.sort_by_distance }}</option>
         </select>
         <GeolocationInput class="geolocation-input" v-model="search.gloc" :placeholder="gloc?.name" />
         <DistanceInput v-if="geolocation" class="distance-input" v-model="search.dist" />
-        <MultiSelect class="catselect" :title="$text.get('categories')" v-model="search.cats"
-            :options="categories.reduce((acc, c) => (acc[c.id] = c.emoji + ' ' + $text.get(c.id)) && acc, {})" />
+        <MultiSelect class="catselect" :title="$t.categories" v-model="search.cats"
+            :options="categories.reduce((acc, c) => (acc[c.id] = c.emoji + ' ' + $t[c.id]) && acc, {})" />
     </div>
 </template>
 
@@ -68,22 +68,22 @@ export default {
     computed: {
         defaultDateOptions() {
             return [
-                { min: formatRelativeDate(0), max: null, label: this.$text.get("fromtoday") },
-                { min: null, max: null, label: this.$text.get("alldate") },
-                { min: formatRelativeDate(0), max: formatRelativeDate(1), label: this.$text.get("today") },
-                { min: formatRelativeDate(1), max: formatRelativeDate(2), label: this.$text.get("tomorrow") },
-                { min: formatRelativeDate(0), max: formatRelativeDate(7), label: this.$text.get("week") },
-                { min: formatRelativeDate(0), max: formatRelativeDate(30), label: this.$text.get("month") }
+                { min: formatRelativeDate(0), max: null, label: this.$t.from_today },
+                { min: null, max: null, label: this.$t.all_date },
+                { min: formatRelativeDate(0), max: formatRelativeDate(1), label: this.$t.today },
+                { min: formatRelativeDate(1), max: formatRelativeDate(2), label: this.$t.tomorrow },
+                { min: formatRelativeDate(0), max: formatRelativeDate(7), label: this.$t.week },
+                { min: formatRelativeDate(0), max: formatRelativeDate(30), label: this.$t.month }
             ];
         },
         defaultTimeOptions() {
             return [
-                { min: null, max: null, label: this.$text.get('alltime') },
-                { min: formatRelativeTime(-3), max: formatRelativeTime(3), label: this.$text.get('now') },
-                { min: '00:00', max: '06:00', label: this.$text.get('night') },
-                { min: '06:00', max: '12:00', label: this.$text.get('morning') },
-                { min: '12:00', max: '18:00', label: this.$text.get('afternoon') },
-                { min: '18:00', max: '00:00', label: this.$text.get('evening') }
+                { min: null, max: null, label: this.$t.all_time },
+                { min: formatRelativeTime(-3), max: formatRelativeTime(3), label: this.$t.now },
+                { min: '00:00', max: '06:00', label: this.$t.night },
+                { min: '06:00', max: '12:00', label: this.$t.morning },
+                { min: '12:00', max: '18:00', label: this.$t.afternoon },
+                { min: '18:00', max: '00:00', label: this.$t.evening }
             ];
         },
         geolocation() {

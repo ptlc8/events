@@ -1,36 +1,36 @@
 <template>
   <section>
-    <h1>👤 {{ $text.get('me') }}</h1>
+    <h1>👤 {{ $t.me }}</h1>
   </section>
   <section>
-    <MessageBox v-if="!$store.logged" :message="$text.get('notloggedin')" :button="$text.get('login')"
+    <MessageBox v-if="!$store.logged" :message="$t.not_logged_in" :button="$t.login"
       @click="$store.login" />
     <article v-else>
       <img class="avatar" width="200" height="200" :src="$store.user.avatar" />
       <h2>{{ $store.user.name }}</h2>
-      <button class="logout" @click="logout">{{ $text.get('logout') }}</button>
+      <button class="logout" @click="logout">{{ $t.logout }}</button>
     </article>
   </section>
   <section>
     <article class="button" v-if="canInstallWebApp" @click="promptInstallWebApp()">
-      <h2>📱 {{ $text.get('install_app') }}</h2>
+      <h2>📱 {{ $t.install_app }}</h2>
     </article>
     <article class="button" @click="$router.push({ name: 'fav' })">
-      <h2>⭐ {{ $text.get('fav') }}</h2>
+      <h2>⭐ {{ $t.fav }}</h2>
     </article>
     <article class="button" @click="$router.push({ name: 'orga' })">
-      <h2>📝 {{ $text.get('orga') }}</h2>
+      <h2>📝 {{ $t.orga }}</h2>
     </article>
     <article>
-      <h2>{{ $text.get('language') }}</h2>
-      <select @change="$text.setLang($event.target.value, true).then($forceUpdate)">
-        <option v-for="lang in $text.getAvailableLangs()" :value="lang" :selected="lang === $text.getSavedLang()">{{
+      <h2>{{ $t.language }}</h2>
+      <select @change="$texts.setLang($event.target.value, true).then($forceUpdate)">
+        <option v-for="lang in $texts.getAvailableLangs()" :value="lang" :selected="lang === $texts.getSavedLang()">{{
           getLangName(lang) }}</option>
-        <option value="" :selected="!$text.getSavedLang()">🌐 {{ $text.get('navigatorlanguage') }}</option>
+        <option value="" :selected="!$texts.getSavedLang()">🌐 {{ $t.navigator_language }}</option>
       </select>
     </article>
     <article class="button" @click="$store.showAbout = true">
-      <h2>📖 {{ $text.get('about') }}</h2>
+      <h2>📖 {{ $t.about }}</h2>
     </article>
   </section>
 </template>

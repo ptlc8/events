@@ -9,7 +9,7 @@
       <span>{{ temperature_max }}</span>
     </div>
   </div>
-  <span class="description">{{ $text.get(description) }}</span>
+  <span class="description">{{ $t[description] }}</span>
 </template>
 
 <script>
@@ -17,34 +17,34 @@ import WeatherIcon from './WeatherIcon.vue';
 
 // WMO weather interpretation codes
 const interpretations = {
-  0: { name: "clear-sky", sky: true },
-  1: { name: "mainly-clear", clouds: 1, sky: true },
-  2: { name: "partly-cloudy", clouds: 2, sky: true },
+  0: { name: "clear_sky", sky: true },
+  1: { name: "mainly_clear", clouds: 1, sky: true },
+  2: { name: "partly_cloudy", clouds: 2, sky: true },
   3: { name: "overcast", clouds: 3 },
   45: { name: "fog", fog: true },
-  48: { name: "depositing-rime-fog", fog: true },
-  51: { name: "light-drizzle", rain: 1, fog: true },
-  53: { name: "moderate-drizzle", rain: 1, fog: true },
-  55: { name: "dense-drizzle", rain: 1, fog: true },
-  56: { name: "light-freezing-drizzle", snow: 1, fog: true },
-  57: { name: "dense freezing-drizzle", snow: 1, fog: true },
-  61: { name: "slight-rain", clouds: 2, rain: 1, sky: true },
-  63: { name: "moderate-rain", clouds: 2, rain: 2 },
-  65: { name: "heavy-rain", clouds: 2, rain: 3 },
-  66: { name: "light-freezing rain", clouds: 2, rain: 1, snow: 1, sky: true },
-  67: { name: "heavy-freezing rain", clouds: 2, rain: 2, snow: 2 },
-  71: { name: "slight-snowfall", clouds: 2, snow: 1, sky: true },
-  73: { name: "moderate-snowfall", clouds: 2, snow: 2 },
-  75: { name: "heavy-snowfall", clouds: 2, snow: 3 },
-  77: { name: "snow-grains", clouds: 2, snow: 3, hail: true },
-  80: { name: "slight-rain-showers", clouds: 2, rain: 1, sky: true },
-  81: { name: "moderate-rain-showers", clouds: 2, rain: 2, sky: true },
-  82: { name: "violent-rain-showers", clouds: 2, rain: 3 },
-  85: { name: "slight-snow-showers", clouds: 2, snow: 1, sky: true },
-  86: { name: "heavy-snow-showers", clouds: 2, snow: 3 },
+  48: { name: "depositing_rime_fog", fog: true },
+  51: { name: "light_drizzle", rain: 1, fog: true },
+  53: { name: "moderate_drizzle", rain: 1, fog: true },
+  55: { name: "dense_drizzle", rain: 1, fog: true },
+  56: { name: "light_freezing_drizzle", snow: 1, fog: true },
+  57: { name: "dense_freezing_drizzle", snow: 1, fog: true },
+  61: { name: "slight_rain", clouds: 2, rain: 1, sky: true },
+  63: { name: "moderate_rain", clouds: 2, rain: 2 },
+  65: { name: "heavy_rain", clouds: 2, rain: 3 },
+  66: { name: "light_freezing_rain", clouds: 2, rain: 1, snow: 1, sky: true },
+  67: { name: "heavy_freezing_rain", clouds: 2, rain: 2, snow: 2 },
+  71: { name: "slight_snowfall", clouds: 2, snow: 1, sky: true },
+  73: { name: "moderate_snowfall", clouds: 2, snow: 2 },
+  75: { name: "heavy_snowfall", clouds: 2, snow: 3 },
+  77: { name: "snow_grains", clouds: 2, snow: 3, hail: true },
+  80: { name: "slight_rain_showers", clouds: 2, rain: 1, sky: true },
+  81: { name: "moderate_rain_showers", clouds: 2, rain: 2, sky: true },
+  82: { name: "violent_rain_showers", clouds: 2, rain: 3 },
+  85: { name: "slight_snow_showers", clouds: 2, snow: 1, sky: true },
+  86: { name: "heavy_snow_showers", clouds: 2, snow: 3 },
   95: { name: "thunderstorm", clouds: 2, stroke: true },
-  96: { name: "thunderstorm-with-slight-hail", clouds: 2, stroke: true, hail: true },
-  99: { name: "thunderstorm-with-heavy-hail", clouds: 2, stroke: true, hail: true }
+  96: { name: "thunderstorm_with_slight_hail", clouds: 2, stroke: true, hail: true },
+  99: { name: "thunderstorm_with_heavy_hail", clouds: 2, stroke: true, hail: true }
 };
 
 export default {

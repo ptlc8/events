@@ -28,7 +28,7 @@ export default {
         };
     },
     mounted() {
-        var language = this.$text.getLang() == 'zh' ? 'zh-Hans' : this.$text.getLang();
+        var language = this.$texts.getLang() == 'zh' ? 'zh-Hans' : this.$texts.getLang();
         var dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
         this.map = new mapboxgl.Map({
@@ -123,7 +123,7 @@ export default {
                 accessToken: mapboxgl.accessToken,
                 localGeocoder: this.forwardGeocoder,
                 zoom: 14,
-                placeholder: this.$text.get('search') + (this.$store.events.length ? ' (' + this.$text.get('eg') + ' ' + this.$store.events[parseInt(Math.random() * this.$store.events.length)][3] + ')' : ''),
+                placeholder: this.$t.search + (this.$store.events.length ? ' (' + this.$t.eg + ' ' + this.$store.events[parseInt(Math.random() * this.$store.events.length)][3] + ')' : ''),
                 mapboxgl: mapboxgl
             })
         );

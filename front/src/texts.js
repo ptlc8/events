@@ -1,87 +1,112 @@
 import { baseUrl } from "./config";
 
-// Objet pour retourner les textes en fonction de la langue
-const Texts = function () {
-    var availableLangs = [];
-    var texts = [];
-    var lang;
-    var shortLang;
-    return {
-        async init(langs) {
-            if (!langs || !langs.length) throw new Error("No languages provided to Texts.init()");
-            availableLangs = langs;
-            await this.setLang(this.getSavedLang() ?? this.getNavigatorLang(), false);
-        },
-        get(id) {
-            return texts[shortLang]?.[id] ?? "[" + id + "]";
-        },
-        getLang() {
-            return lang;
-        },
-        getShortLang() {
-            return shortLang;
-        },
-        async setLang(newLang, save=false) {
-            if (newLang && !availableLangs.includes(newLang)) {
-                console.error("[Texts] " + newLang + " is not an available language");
-                newLang = null;
-            }
-            if (save) {
-                window.localStorage.setItem("lang", newLang);
-            }
-            if (!newLang) newLang = this.getNavigatorLang();
-            lang = newLang;
-            shortLang = newLang.match("[^\-]*")[0];
-            if (!texts[shortLang]) {
-                texts[shortLang] = {};
-                console.debug("[Texts] Fetching lang: " + shortLang);
-                return fetch(baseUrl + "langs/" + shortLang + ".json")
-                    .then(res => res.text())
-                    .then(res => {
-                        texts[shortLang] = JSON.parse(res);
-                        console.info("[Texts] Lang loaded: " + shortLang)
-                    })
-                    .catch(err => {
-                        console.error("[Texts] " + err);
-                    });
-            }
-        },
-        getAvailableLangs() {
-            return availableLangs;
-        },
-        getSavedLang() {
-            return window.localStorage.getItem("lang");
-        },
-        getNavigatorLang() {
-            return navigator.language ?? navigator.userLanguage ?? "";
-        }
-    };
-}();
+
+var availableLangs = [];
+var texts = [];
+var lang;
+var shortLang;
+
+export async function init(langs) {
+    if (!langs || !langs.length) throw new Error("No languages provided to init()");
+    availableLangs = langs;
+    await setLang(getSavedLang(), false);
+}
+
+export function get(id) {
+    return texts[shortLang]?.[id] ?? "[" + id + "]";
+}
+
+function getLang() {
+    return lang;
+}
+
+function getShortLang() {
+    return shortLang;
+}
+
+async function setLang(newLang, save = false) {
+    if (save) {
+        window.localStorage.setItem("lang", newLang);
+    }
+    if (!newLang) {
+        newLang = getNavigatorLang();
+    }
+    if (!availableLangs.includes(newLang)) {
+        console.error("[Texts] " + newLang + " is not an available language");
+        newLang = availableLangs[0];
+    }
+    lang = newLang;
+    shortLang = newLang.match("[^\-]*")[0];
+    if (!texts[shortLang]) {
+        texts[shortLang] = {};
+        console.debug("[Texts] Fetching lang: " + shortLang);
+        return fetch(baseUrl + "langs/" + shortLang + ".json")
+            .then(res => res.text())
+            .then(res => {
+                texts[shortLang] = JSON.parse(res);
+                console.info("[Texts] Lang loaded: " + shortLang)
+            })
+            .catch(err => {
+                console.error("[Texts] " + err);
+            });
+    }
+}
+
+export function getAvailableLangs() {
+    return availableLangs;
+}
+
+export function getSavedLang() {
+    return window.localStorage.getItem("lang");
+}
+
+function getNavigatorLang() {
+    return navigator.language ?? navigator.userLanguage ?? "";
+}
 
 // Retourne la date sous forme de texte
-Texts.getDisplayDate = function(datetime) {
+function getDisplayDate(datetime) {
     var date = new Date(datetime);
     date.setHours(0, 0, 0, 0);
     var today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    if (date.getTime() == today.getTime() - 86400000) return Texts.get("yesterday");
-    if (date.getTime() < today.getTime()) return Texts.get("past");
-    if (date.getTime() == today.getTime()) return Texts.get("today");
-    if (date.getTime() == today.getTime() + 86400000) return Texts.get("tomorrow");
-    if (date.getTime() < today.getTime() + 6 * 86400000) return date.toLocaleString(Texts.getLang(), { weekday: "long" }) + Texts.get("next");
-    return Texts.get("thedate") + date.getDate() + " " + date.toLocaleString(Texts.getLang(), { month: "long" }) + (date.getYear() == today.getYear() ? "" : " " + date.getYear())
+    if (date.getTime() == today.getTime() - 86400000) return get("yesterday");
+    if (date.getTime() < today.getTime()) return get("past");
+    if (date.getTime() == today.getTime()) return get("today");
+    if (date.getTime() == today.getTime() + 86400000) return get("tomorrow");
+    if (date.getTime() < today.getTime() + 6 * 86400000) return date.toLocaleString(getLang(), { weekday: "long" }) + get("next");
+    return get("the_date") + date.getDate() + " " + date.toLocaleString(getLang(), { month: "long" }) + (date.getYear() == today.getYear() ? "" : " " + date.getYear())
 }
 
 // Retourne l'heure sous forme de texte
-Texts.getDisplayTime = function(datetime) {
+function getDisplayTime(datetime) {
     var time = new Date(datetime);
     return time.getHours() + ":" + (time.getMinutes() < 10 ? "0" : "") + time.getMinutes();
 }
 
 // Retourne la date et l'heure sous forme de texte
-Texts.getDisplayDateTime = function(datetime) {
-    return Texts.getDisplayDate(datetime) + " " + Texts.get("at") + " " + Texts.getDisplayTime(datetime);
+function getDisplayDateTime(datetime) {
+    return getDisplayDate(datetime) + " " + get("at") + " " + getDisplayTime(datetime);
 }
-    
-export default Texts;
+
+export const values = new Proxy({}, {
+    get: function(_, name) {
+        return get(name);
+    }
+});
+
+export default {
+    init,
+    get,
+    getLang,
+    getShortLang,
+    setLang,
+    getAvailableLangs,
+    getSavedLang,
+    getNavigatorLang,
+    getDisplayDate,
+    getDisplayTime,
+    getDisplayDateTime,
+    values
+};

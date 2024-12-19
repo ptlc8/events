@@ -53,7 +53,7 @@ export default {
 
   <nav>
     <RouterLink v-for="tab in tabs" :to="{ name: tab.name }" :style="`background-image: url('${tab.icon}');`">
-      {{ $text.get(tab.name) }}
+      {{ $t[tab.name] }}
     </RouterLink>
   </nav>
 

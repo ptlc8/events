@@ -1,7 +1,7 @@
 <template>
-    <MessageBox v-if="loggedin === null" :message="$text.get('loggingin')" />
-    <MessageBox v-else-if="loggedin" :message="$text.get('loggedin')" :button="$text.get('ok')" @click="$router.push('/')" />
-    <MessageBox v-else :message="$text.get('logginginfailed')" :button="$text.get('retry')" @click="$store.login" />
+    <MessageBox v-if="loggedin === null" :message="$t.logging_in" />
+    <MessageBox v-else-if="loggedin" :message="$t.loggedin" :button="$t.ok" @click="$router.push('/')" />
+    <MessageBox v-else :message="$t.logging_in_failed" :button="$t.retry" @click="$store.login" />
 </template>
 
 <script>

@@ -21,7 +21,8 @@ import './assets/main.scss';
   app.config.globalProperties.$api = Api;
 
   await Texts.init(["fr-FR", "en-GB", "en-US"]);
-  app.config.globalProperties.$text = Texts;
+  app.config.globalProperties.$texts = Texts;
+  app.config.globalProperties.$t = Texts.values;
 
   app.use(await createRouter());
 
