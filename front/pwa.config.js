@@ -1,11 +1,11 @@
-export default {
+export default env => ({
   registerType: 'autoUpdate',
   injectRegister: null,
 
   manifest: {
-    name: 'Évents',
-    short_name: 'Évents',
-    description: 'Explorez les événements autour de vous.',
+    name: env.VITE_SITE_NAME,
+    short_name: env.VITE_SITE_NAME,
+    description: env.VITE_SITE_DESCRIPTION,
     theme_color: '#3cb371',
     icons: [
       {
@@ -60,4 +60,4 @@ export default {
     suppressWarnings: true,
     type: 'module',
   },
-}
+});

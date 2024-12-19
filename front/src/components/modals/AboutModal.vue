@@ -1,7 +1,7 @@
 <template>
     <Modal>
         <h1>{{ $t.about }}</h1>
-        <p v-for="line in $t.about_text">
+        <p v-for="line in $t('about_text', siteName)">
             {{ line }}
         </p>
         <a :href="'mailto:' + email">{{ email }}</a>
@@ -12,10 +12,12 @@
 
 <script>
 import Modal from './Modal.vue';
+import { siteName } from '@/config';
 
 export default {
     name: 'AboutModal',
     components: { Modal },
+    setup: () => ({ siteName }),
     data: () => ({
         email: 'ptlcptlcptlc@gmail.com',
         author: 'Ambi'

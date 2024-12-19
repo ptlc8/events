@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { get as T, init as initTexts } from '@/texts';
-import { baseUrl } from '@/config';
+import { baseUrl, siteName } from '@/config';
 
 const createMainRouter = async () => {
   
@@ -74,7 +74,7 @@ const createMainRouter = async () => {
   });
 
   router.beforeEach((to, from, next) => {
-    document.title = to.meta.title + ' - Events';
+    document.title = to.meta.title + ' - ' + siteName;
     next();
   });
 

@@ -3,7 +3,7 @@ import { defineConfig, loadEnv } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import handlebars from 'vite-plugin-handlebars'
 import { VitePWA } from 'vite-plugin-pwa'
-import PWAConfig from './pwa.config'
+import getPWAConfig from './pwa.config'
 
 // https://vitejs.dev/config/
 export default defineConfig(({ command, mode, ssrBuild }) => {
@@ -14,11 +14,12 @@ export default defineConfig(({ command, mode, ssrBuild }) => {
       handlebars({
         context: {
           base_url: env.VITE_BASE_URL,
-          description: 'Explorez les événements autour de vous',
+          site_name: env.VITE_SITE_NAME,
+          description: env.VITE_SITE_DESCRIPTION,
           year: new Date().getFullYear()
         }
       }),
-      VitePWA(PWAConfig)
+      VitePWA(getPWAConfig(env))
     ],
     resolve: {
       alias: {

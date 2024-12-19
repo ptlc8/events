@@ -12,8 +12,15 @@ export async function init(langs) {
     await setLang(getSavedLang(), false);
 }
 
-export function get(id) {
-    return texts[shortLang]?.[id] ?? "[" + id + "]";
+export function get(id, ...args) {
+    let text = texts[shortLang]?.[id] ?? "[" + id + "]";
+    for (let i = 0; i < args.length; i++) {
+        if (text.map)
+            text = text.map(s => s.replace("{" + i + "}", args[i]));
+        else
+            text = text.replace("{" + i + "}", args[i]);
+    }
+    return text;
 }
 
 function getLang() {
@@ -90,7 +97,7 @@ function getDisplayDateTime(datetime) {
     return getDisplayDate(datetime) + " " + get("at") + " " + getDisplayTime(datetime);
 }
 
-export const values = new Proxy({}, {
+export const values = new Proxy(get, {
     get: function(_, name) {
         return get(name);
     }

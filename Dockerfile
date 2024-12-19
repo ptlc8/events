@@ -12,7 +12,7 @@ COPY front/package*.json ./
 RUN npm ci --omit=dev
 
 # Copy the source files
-COPY front/*.js front/*.html ./
+COPY front/*.js front/*.html front/.env ./
 COPY front/public/ ./public/
 COPY front/src/ ./src/
 
