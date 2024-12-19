@@ -1,7 +1,7 @@
 <template>
     <Modal>
         <h1>{{ $t.about }}</h1>
-        <p v-for="line in $t.about_text">
+        <p v-for="line in $t('about_text', $t.site_name)">
             {{ line }}
         </p>
         <a :href="'mailto:' + email">{{ email }}</a>

@@ -1,11 +1,11 @@
-export default {
+export default (name, description) => ({
   registerType: 'autoUpdate',
   injectRegister: null,
 
   manifest: {
-    name: 'Évents',
-    short_name: 'Évents',
-    description: 'Explorez les événements autour de vous.',
+    name: name,
+    short_name: name,
+    description: description,
     theme_color: '#3cb371',
     icons: [
       {
@@ -60,4 +60,4 @@ export default {
     suppressWarnings: true,
     type: 'module',
   },
-}
+});

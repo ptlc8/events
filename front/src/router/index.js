@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import { get as T, init as initTexts } from '@/texts';
+import { values as T, init as initTexts } from '@/texts';
 import { baseUrl } from '@/config';
 
 const createMainRouter = async () => {
@@ -15,7 +15,7 @@ const createMainRouter = async () => {
         name: 'map',
         component: () => import('../views/MapView.vue'),
         meta: {
-          title: T('map')
+          title: T.map
         }
       },
       {
@@ -23,7 +23,7 @@ const createMainRouter = async () => {
         name: 'search',
         component: () => import('../views/SearchView.vue'),
         meta: {
-          title: T('search')
+          title: T.search
         }
       },
       {
@@ -31,7 +31,7 @@ const createMainRouter = async () => {
         name: "fav",
         component: () => import("../views/FavoritesView.vue"),
         meta: {
-          title: T('fav')
+          title: T.fav
         }
       },
       {
@@ -43,7 +43,7 @@ const createMainRouter = async () => {
         name: "me",
         component: () => import("../views/MeView.vue"),
         meta: {
-          title: T('me')
+          title: T.me
         }
       },
       {
@@ -51,7 +51,7 @@ const createMainRouter = async () => {
         name: "orga",
         component: () => import("../views/OrganizeView.vue"),
         meta: {
-          title: T('orga')
+          title: T.orga
         }
       },
       {
@@ -59,7 +59,7 @@ const createMainRouter = async () => {
         name: "categories",
         component: () => import("../views/CategoriesView.vue"),
         meta: {
-          title: T('categories')
+          title: T.categories
         }
       },
       {
@@ -67,14 +67,14 @@ const createMainRouter = async () => {
         name: "login",
         component: () => import("../views/LoginView.vue"),
         meta: {
-          title: T('login')
+          title: T.login
         }
       }
     ]
   });
 
   router.beforeEach((to, from, next) => {
-    document.title = to.meta.title + ' - Events';
+    document.title = to.meta.title + ' - ' + T.site_name;
     next();
   });
 

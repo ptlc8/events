@@ -1,4 +1,7 @@
 {
+    "site_name": "Évents",
+    "site_description": "Explorez les événements autour de vous.",
+
     "orga": "Organiser",
     "search": "Rechercher",
     "map": "Carte",
@@ -143,8 +146,8 @@
     "about": "À propos",
     "about_text": [
         "Que faire ce soir ? Où sortir ce week-end ? Quels événements sont organisés près de chez moi ?",
-        "L'application Évents te permet de trouver des événements près de chez toi, de les enregistrer dans tes favoris et de les partager avec tes amis.",
-        "Évents est une plateforme ouverte et collaborative donc certaines informations peuvent être incorrectes.",
+        "L'application {0} te permet de trouver des événements près de chez toi, de les enregistrer dans tes favoris et de les partager avec tes amis.",
+        "{0} est une plateforme ouverte et collaborative donc certaines informations peuvent être incorrectes.",
         "Si tu as des questions, des suggestions ou des commentaires, n'hésite pas à nous contacter à l'adresse suivante :"
     ],
     "all_rights_reserved": "Tous droits réservés"

@@ -4,7 +4,7 @@ services:
       context: .
       args:
         VITE_MAPBOX_ACCESS_TOKEN: ${MAPBOX_ACCESS_TOKEN?}
-        VITE_BASE_URL: /${BASE_URL:-events/}
+        VITE_BASE_URL: /${BASE_URL:-events}${BASE_URL:+/}
     ports:
       - 80
     depends_on:

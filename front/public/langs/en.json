@@ -1,4 +1,7 @@
 {
+    "site_name": "Évents",
+    "site_description": "Discover events happening around you",
+
     "orga": "Organize",
     "search": "Search",
     "map": "Map",
@@ -143,8 +146,8 @@
     "about": "About",
     "about_text": [
         "What to do tonight? Where to go this weekend? What events are organized near me?",
-        "The Évents application allows you to find events near you, save them in your favorites and share them with your friends.",
-        "Évents is an open and collaborative platform so some information may be incorrect.",
+        "The {0} application allows you to find events near you, save them in your favorites and share them with your friends.",
+        "{0} is an open and collaborative platform so some information may be incorrect.",
         "If you have any questions, suggestions or comments, do not hesitate to contact us at the following address:"
     ],
     "all_rights_reserved": "All rights reserved"
