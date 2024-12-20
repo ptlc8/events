@@ -5,17 +5,17 @@
       <div class="option" v-for="option in options" @click="void (value.min = option.min) || (value.max = option.max)">
         {{ option.label }}
       </div>
-      <label>minimum</label>
+      <label>{{ $t.minimum }}</label>
       <div class="inputs-wrapper">
         <input :type="type" v-model="value.min" />
         <button class="reset" @click="value.min=undefined">✖</button>
       </div>
-      <label>maximum</label>
+      <label>{{ $t.maximum }}</label>
       <div class="inputs-wrapper">
         <input :type="type" v-model="value.max" />
         <button class="reset" @click="value.max=undefined">✖</button>
       </div>
-      <button @click="close">OK</button>
+      <button @click="close">{{ $t.ok }}</button>
     </div>
   </div>
 </template>

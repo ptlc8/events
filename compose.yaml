@@ -4,14 +4,14 @@ services:
       context: .
       args:
         VITE_MAPBOX_ACCESS_TOKEN: ${MAPBOX_ACCESS_TOKEN?}
-        VITE_BASE_URL: /${BASE_URL:-events}${BASE_URL:+/}
+        VITE_BASE_URL: /${BASE_URL-events/}${BASE_URL:+/}
     ports:
       - 80
     depends_on:
       - api
     restart: always
     labels:
-      - webproxy.path=${BASE_URL:-events}
+      - webproxy.path=${BASE_URL-events}
   api:
     build:
       context: api

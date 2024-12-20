@@ -71,6 +71,7 @@
     "more_info": "Plus d'infos",
 
     "search_events": "Rechercher des évents...",
+    "search_more_events": "Afficher plus d'évents",
     "from_today": "À venir",
     "all_date": "Toute période",
     "week": "Cette semaine",
@@ -85,6 +86,8 @@
     "sort_by_relevance": "Trier par pertinence",
     "sort_by_popularity": "Trier par popularité",
     "sort_by_distance": "Trier par distance",
+    "minimum": "minimum",
+    "maximum": "maximum",
 
     "yesterday": "Hier",
     "past": "Passé",

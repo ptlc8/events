@@ -5,7 +5,7 @@
         </div>
         <MessageBox v-if="!events.length" :message="$t.no_results" :button="$t.organize_it"
             @click="$router.push('/orga')" />
-        <button v-else-if="canSearchMore" class="more-button" @click="launchSearch(true)">Afficher plus d'évents</button>
+        <button v-else-if="canSearchMore" class="more-button" @click="launchSearch(true)">{{ $t.search_more_events }}</button>
     </div>
 </template>
 

@@ -70,6 +70,7 @@
     "more_info": "More info",
 
     "search_events": "Search events...",
+    "search_more_events": "Show more events",
     "eg": "e.g.",
     "from_today": "From today",
     "all_date": "Any day",
@@ -85,6 +86,8 @@
     "sort_by_relevance": "Sort by relevance",
     "sort_by_popularity": "Sort by popularity",
     "sort_by_distance": "Sort by distance",
+    "minimum": "minimum",
+    "maximum": "maximum",
 
     "yesterday": "Yesterday",
     "past": "Past",
