@@ -4,7 +4,7 @@ include('../init.php');
 
 if (!isset($_REQUEST['query'])) exitError('need query');
 
-$query = substr($_REQUEST['query'], 0, 64);
+$query = empty($_REQUEST['query']) ? 'event' : substr($_REQUEST['query'], 0, 64);
 
 initDatabase();
 
