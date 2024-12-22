@@ -5,9 +5,12 @@
  */
 
 import axios from "axios";
-import { Event, EventsFetch } from "./event.js";
-import { findCategories } from "./categories.js";
-import { isSafe } from "./filter.js";
+import { Event, EventsFetch } from "../event.js";
+import { findCategories } from "../categories.js";
+import { isSafe } from "../filter.js";
+
+export const shortId = "OA";
+export const envVars = ["OPENAGENDA_KEY"];
 
 /**
  * Get all events from OpenAgenda
@@ -15,7 +18,7 @@ import { isSafe } from "./filter.js";
  * @param {boolean} [official = false]
  * @returns {EventsFetch}
  */
-function fetchAll(key, official = false) {
+export function fetchAll(key = process.env.OPENAGENDA_KEY, official = false) {
     var emitter = new EventsFetch();
     var events = [];
     var agendasCount = Infinity;
@@ -47,7 +50,7 @@ function fetchAll(key, official = false) {
  * @param {boolean} [official = false]
  * @returns {EventsFetch}
  */
-function fetchAgendas(key, official = false) {
+function fetchAgendas(key = process.env.OPENAGENDA_KEY, official = false) {
     var emitter = new EventsFetch();
     (async function() {
         var after = []
@@ -79,7 +82,7 @@ function fetchAgendas(key, official = false) {
  * @param {Object} agenda OpenAgenda agenda
  * @returns {EventsFetch}
  */
-function fetchAgendaEvents(key, agenda) {
+function fetchAgendaEvents(key = process.env.OPENAGENDA_KEY, agenda) {
     var emitter = new EventsFetch();
     (async function() {
         var after = [];
@@ -118,7 +121,7 @@ function parseEvent(oaEvent, agenda) {
         return null;
     var url = `https://openagenda.com/agendas/${agenda.slug}/events/${oaEvent.slug}`;
     var event = {
-        id: "OA" + agenda.uid + "-" + oaEvent.uid,
+        id: agenda.uid + "-" + oaEvent.uid,
         title: oaEvent.title.fr ?? oaEvent.title.en ?? "",
         author: agenda.title,
         description: oaEvent.longDescription?.fr ?? oaEvent.longDescription?.en ?? oaEvent.description.fr ?? oaEvent.description.en ?? "",
@@ -136,7 +139,6 @@ function parseEvent(oaEvent, agenda) {
         public: true,
         createdAt: formatDate(oaEvent.createdAt),
         updatedAt: formatDate(oaEvent.updatedAt),
-        source: "openagenda",
         sourceUrl: url
     };
     return event;

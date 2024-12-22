@@ -9,8 +9,11 @@ import crypto from "crypto";
 import fs from "fs";
 import stream from "stream";
 import axios from "axios";
-import { Event, Status, EventsFetch } from "./event.js";
-import { findCategories } from "./categories.js";
+import { Event, Status, EventsFetch } from "../event.js";
+import { findCategories } from "../categories.js";
+
+export const shortId = "DT";
+export const envVars = ["DATATOURISME_GET_URL"];
 
 /**
  * Get the index and events from a Datatourisme zip from url
@@ -108,7 +111,7 @@ function parseEvent(dtEvent) {
     if (!takesPlaceAt) takesPlaceAt = dtEvent.takesPlaceAt.sort((a, b) => new Date(b) - new Date(a))[0];
     var dtCategories = dtEvent["@type"].concat(dtEvent.hasTheme?.map(theme => theme["@id"]) ?? [])
     return {
-        id: "DT" + id,
+        id,
         title,
         author: dtEvent.hasBeenCreatedBy["schema:legalName"],
         description,
@@ -134,7 +137,6 @@ function parseEvent(dtEvent) {
         public: true,
         createdAt: formatDate(dtEvent.creationDate),
         updatedAt: formatDate(dtEvent.lastUpdateDatatourisme),
-        source: "datatourisme",
         sourceUrl: dtEvent["@id"]
     };
 }
@@ -144,7 +146,7 @@ function parseEvent(dtEvent) {
  * @param {string} datatourismeUrl Datatourisme stream link
  * @returns {EventsFetch}
  */
-function fetchAll(datatourismeUrl) {
+export function fetchAll(datatourismeUrl = process.env.DATATOURISME_GET_URL) {
     return loadZipFromUrl(datatourismeUrl);
 }
 
@@ -153,7 +155,7 @@ function fetchAll(datatourismeUrl) {
  * @param {string} datatourismeUrl
  * @returns {EventsFetch}
  */
-function fetchLastUpdated(datatourismeUrl, date = Date.now()) {
+function fetchLastUpdated(datatourismeUrl = process.env.DATATOURISME_GET_URL, date = Date.now()) {
     var emitter = new EventsFetch();
     loadZipFromUrl(datatourismeUrl)
         .on("events", events => emitter.emit("events", events.filter(e => new Date(e.updatedAt) > date)))

@@ -1,19 +1,38 @@
-import datatourisme from "./datatourisme.js";
-import openagenda from "./openagenda.js";
+import fs from "fs";
 import Database from "./database.js";
 
 import "dotenv/config.js";
 
+// Check if the script is running in interactive mode
+const args = process.argv.slice(2);
+const isInteractive = args.includes("-i");
 
-const isInteractive = process.argv.slice(2).includes("-i");
+// Get the list of providers to fetch or all of them if none are specified
+const wantedProviders = args.filter(a => !a.startsWith("-"));
 
-const db = new Database({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASS,
-    database: process.env.DB_NAME
-});
+// Load providers
+const providers = [];
+for (let file of fs.readdirSync(import.meta.dirname + "/providers")) {
+    if(!file.endsWith(".js"))
+        continue;
+    let name = file.slice(0, -3);
+    if (wantedProviders.length != 0 && !wantedProviders.includes(name))
+        continue;
+    var module = await import("./providers/" + file);
+    console.log("Loaded provider", name, `(${file})`);
+    var missingVars = module.envVars.filter(v => process.env[v] === undefined);
+    if (missingVars.length != 0) {
+        console.error(`Provider ${name} is missing environment variables: ${missingVars.join(", ")}`);
+        continue;
+    }
+    providers.push({
+        name,
+        shortId: module.shortId,
+        fetchAll: module.fetchAll
+    });
+}
 
+// Progress tracking
 var progress = {};
 
 function updateProgress(p, prefix = "") {
@@ -37,27 +56,24 @@ function onError(error, prefix = "") {
     updateProgress({ errors: 1 }, prefix);
 }
 
+// Connect to the database
+const db = new Database({
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASS,
+    database: process.env.DB_NAME
+});
 db.on("progress", p => updateProgress(p, "db."));
 db.on("error", error => onError(error, "db."));
 
-var providers = [
-    { name: "DT", fetchAll: () => datatourisme.fetchAll(process.env.DATATOURISME_GET_URL) },
-    { name: "OA", fetchAll: () => openagenda.fetchAll(process.env.OPENAGENDA_KEY) }
-];
-
-// Filter providers if command line arguments, e.g. node update.js OA
-var args = process.argv.slice(2);
-if (args.filter(a => !a.startsWith("-")).length > 0) {
-    providers = providers.filter(p => args.includes(p.name))
-}
-
+// Fetch events from providers
 await Promise.all(providers.map(provider =>
     new Promise(resolve => {
         provider.fetchAll()
-            .on("events", events => db.update(events))
-            .on("progress", progress => updateProgress(progress, provider.name + "."))
-            .on("error", error => onError(error, provider.name + "."))
-            .on("end", events => db.clean(events, provider.name).then(resolve));
+            .on("events", events => db.update(events, provider.shortId, provider.name))
+            .on("progress", progress => updateProgress(progress, provider.shortId + "."))
+            .on("error", error => onError(error, provider.shortId + "."))
+            .on("end", events => db.clean(events, provider.shortId).then(resolve));
     })
 ));
 

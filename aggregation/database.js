@@ -15,7 +15,7 @@ const eventsColumns = ["title", "author", "description", "start", "end", "lng", 
 export default class Database extends EventEmitter {
 
     /**
-     * @param {mysql.ConnectionOptions} connectionConfig 
+     * @param {mysql.ConnectionOptions} connectionConfig
      */
     constructor(connectionConfig) {
         super();
@@ -29,12 +29,16 @@ export default class Database extends EventEmitter {
 
     /**
      * Update the database with the given events
-     * @param {Array<Event>} events 
+     * @param {Array<Event>} events
+     * @param {string} shortId short identifier for the provider
+     * @param {string} source name of the provider
      * @returns {Promise<null>}
      */
-    update(events) {
+    update(events, shortId, source) {
         return new Promise(resolve => {
             for (let event of events) {
+                event.id = shortId + event.id;
+                event.source = source;
                 if (!this.keys[event.id]) this.keys[event.id] = 0;
                 else this.emit("progress", { dupplicate: 1 });
                 this.keys[event.id]++;
