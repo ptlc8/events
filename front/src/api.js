@@ -33,6 +33,7 @@ const categories = [
     [ "fair", "🎇"],
     [ "religion", "🙏"],
     [ "science", "🔬"],
+    [ "fashion", "👗"],
     [ "seminar", "💼"],
     [ "videogame", "🎮"],
     [ "boardgame", "🎲"]

@@ -1,7 +1,7 @@
 <template>
     <div class="list">
         <div class="results">
-            <EventPreview class="event" v-for="event in events" :event="event" @click="$store.event = event" />
+            <EventPreview v-for="event in events" :event="event" @click="$store.event = event" />
         </div>
         <MessageBox v-if="!events.length" :message="$t.no_results" :button="$t.organize_it"
             @click="$router.push('/orga')" />
@@ -27,7 +27,7 @@ export default {
     },
     data: () => ({
         gloc: null,
-        events: [],
+        events: [undefined, undefined, undefined, undefined],
         searchId: 0,
         canSearchMore: false
     }),
@@ -86,7 +86,7 @@ export default {
         gap: .5em;
         margin: 1em 0;
 
-        .event {
+        >* {
             width: 32em;
             flex-grow: 1;
         }

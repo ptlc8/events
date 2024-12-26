@@ -1,62 +1,66 @@
 <template>
   <Modal big v-bind="$attrs" ref="modal">
-    <div class="banner" :style="'background-image: url(\'' + banner.url + '\');'" :title="banner.credits"></div>
+    <div v-if="banner" class="banner" :style="'background-image: url(\'' + banner.url + '\');'" :title="banner.credits"></div>
+    <div v-else class="banner loading"></div>
     <div class="body">
-      <h2 class="title">{{ event.title }}</h2>
-      <span class="author">{{ $t.by }} {{ event.author }}</span>
-      📍 {{ event.placename }}
+      <h2 class="title loadable">{{ event?.title }}</h2>
+      <div class="author loadable">{{ event?.author }}</div>
+      <div class="place loadable">{{ event?.placename }}</div>
       <div class="categories">
         <span v-for="cat in categories">{{ cat.emoji }} {{ $t[cat.id] }}</span>
       </div>
-      <div class="description">{{ event.description }}</div>
+      <div class="description">{{ event?.description }}</div>
       <div class="sidebar">
-        <!--<h3>📅 Quand ?</h3>-->
-        <div v-if="event.start.substring(0, 10) != event.end.substring(0, 10)" class="datetimes">
+        <h3>📅 Quand ?</h3>
+        <div v-if="event?.start.substring(0, 10) != event?.end.substring(0, 10)" class="datetimes">
           <AgendaPage :datetime="event.start" />
           <AgendaPage :datetime="event.end" />
         </div>
-        <AgendaPage v-else :datetime="event.start"></AgendaPage>
-        <span>
+        <AgendaPage v-else :datetime="event?.start"></AgendaPage>
+        <span v-if="event">
           {{ $t.from }} {{ $texts.getDisplayTime(event.start) }}
           {{ $t.to }} {{ $texts.getDisplayTime(event.end) }}
         </span>
         <hr />
         <h3>🌡️ {{ $t.weather }}</h3>
-        <Weather :datetime="event.start" :lat="event.lat" :lng="event.lng"></Weather>
+        <Weather :datetime="event?.start" :lat="event?.lat" :lng="event?.lng"></Weather>
         <hr />
-        <div v-if="event.contact.length > 0">
+        <div v-if="event?.contact?.length > 0">
           <h3>📞 {{ $t.contact }}</h3>
           <Contacts :contacts="event.contact"></Contacts>
           <hr />
         </div>
-        <div v-if="event.registration.length > 0">
+        <div v-if="event?.registration?.length > 0">
           <h3>📝 {{ $t.registration }}</h3>
           <Contacts :contacts="event.registration"></Contacts>
+          <hr />
         </div>
-        <button class="show-on-map" @click="showOnMap">📍 {{ $t.show_on_map }}</button>
-        <button v-if="isApp" class="open-map" @click="openMapApp">🗺️ {{ $t.open_map_app }}</button>
-        <button class="add-fav" @click="switchFavorite">⭐ {{ event.fav ? $t.remove_fav : $t.add_fav }}</button>
-        <button v-if="canShare()" class="large-share-button" @click="share()">🚀 Partager</button>
-        <div v-else class="share-buttons">
-          <a class="tumblr" target="_blank" title="Partager sur Tumblr"
-            :href="`https://www.tumblr.com/share/link?url=${encodeURIComponent(url)}&title=${encodeURIComponent(event.title)}&title=${encodeURIComponent(event.title)}`"></a>
-          <a class="email" target="_blank" title="Envoyer par email"
-            :href="`mailto:?Subject=${encodeURIComponent(event.title)}&Body=${encodeURIComponent('Regarde cet évent, il a l\'air intéréssant : ' + url)}`"></a>
-          <a class="facebook" target="_blank" title="Partager sur Facebook"
-            :href="`https://www.facebook.com/sharer.php?u=${encodeURIComponent(url)}`"></a>
-          <a class="twitter" target="_blank" title="Partager sur Twitter"
-            :href="`https://twitter.com/share?url=${encodeURIComponent(url)}&text=${encodeURIComponent(event.title)}&hashtags=events`"></a>
-          <a class="whatsapp" target="_blank" title="Partager sur WhatsApp"
-            :href="`https://api.whatsapp.com/send?text=${encodeURIComponent(event.title + ' : ' + url)}`"></a>
-          <a class="messenger" target="_blank" title="Partager sur Messenger"
-            :href="`fb-messenger://share/?link=${encodeURIComponent(url)}`"></a>
-          <a class="telegram" target="_blank" title="Partager sur Telegram"
-            :href="`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(event.title)}`"></a>
-          <button class="copy-button" @click="copy"></button>
-        </div>
+        <button :disabled="!event" class="show-on-map" @click="showOnMap">📍 {{ $t.show_on_map }}</button>
+        <button :disabled="!event" v-if="isApp" class="open-map" @click="openMapApp">🗺️ {{ $t.open_map_app }}</button>
+        <button :disabled="!event" class="add-fav" @click="switchFavorite">⭐ {{ event?.fav ? $t.remove_fav : $t.add_fav }}</button>
+        <template v-if="event">
+          <button v-if="canShare()" class="large-share-button" @click="share()">🚀 Partager</button>
+          <div v-else class="share-buttons">
+            <a class="tumblr" target="_blank" title="Partager sur Tumblr"
+              :href="`https://www.tumblr.com/share/link?url=${encodeURIComponent(url)}&title=${encodeURIComponent(event.title)}&title=${encodeURIComponent(event.title)}`"></a>
+            <a class="email" target="_blank" title="Envoyer par email"
+              :href="`mailto:?Subject=${encodeURIComponent(event.title)}&Body=${encodeURIComponent('Regarde cet évent, il a l\'air intéréssant : ' + url)}`"></a>
+            <a class="facebook" target="_blank" title="Partager sur Facebook"
+              :href="`https://www.facebook.com/sharer.php?u=${encodeURIComponent(url)}`"></a>
+            <a class="twitter" target="_blank" title="Partager sur Twitter"
+              :href="`https://twitter.com/share?url=${encodeURIComponent(url)}&text=${encodeURIComponent(event.title)}&hashtags=events`"></a>
+            <a class="whatsapp" target="_blank" title="Partager sur WhatsApp"
+              :href="`https://api.whatsapp.com/send?text=${encodeURIComponent(event.title + ' : ' + url)}`"></a>
+            <a class="messenger" target="_blank" title="Partager sur Messenger"
+              :href="`fb-messenger://share/?link=${encodeURIComponent(url)}`"></a>
+            <a class="telegram" target="_blank" title="Partager sur Telegram"
+              :href="`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(event.title)}`"></a>
+            <button class="copy-button" @click="copy"></button>
+          </div>
+        </template>
       </div>
       <div class="images">
-        <figure v-for="(img, i) in event.images">
+        <figure v-for="(img, i) in event?.images">
           <img :src="img">
           <figcaption>{{ getImageCredits(i) }}</figcaption>
         </figure>
@@ -139,6 +143,7 @@ export default {
       return origin + '?e=' + this.event.id;
     },
     banner() {
+      if (!this.event) return undefined;
       let nonRepresentative = !!this.event.nonRepresentativeImage;
       return {
         url: nonRepresentative ? backendUrl + this.event.nonRepresentativeImage : this.event.images[0],
@@ -147,7 +152,7 @@ export default {
       };
     },
     categories() {
-      if (!this.allCategories.length)
+      if (!this.event || !this.allCategories.length)
         return [];
       return this.event.categories.map(id => this.allCategories.find(c => c.id === id));
     }
@@ -162,7 +167,8 @@ export default {
   position: sticky;
   top: 0;
   height: 18em;
-  background: center / cover;
+  background-position: center;
+  background-size: cover;
   @include image;
 }
 
@@ -188,10 +194,17 @@ export default {
     line-height: 1;
   }
 
-  .author {
-    display: block;
+  .author, .place {
     margin-left: .5em;
     margin-bottom: .5em;
+  }
+  
+  .author:before {
+    content: "🔸 ";
+  }
+
+  .place:before {
+    content: "📍 ";
   }
 
   .categories span {

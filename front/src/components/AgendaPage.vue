@@ -1,9 +1,10 @@
 <template>
-  <div>
+  <div v-if="datetime">
     <span class="month">{{ month }}</span>
     <span class="day">{{ day }}</span>
     <span class="weekday">{{ weekday }}</span>
   </div>
+  <div v-else class="loading"></div>
 </template>
 
 <script>
@@ -32,6 +33,7 @@ export default {
 <style lang="scss" scoped>
 div {
   width: 8em;
+  height: 8em;
   background-color: #f2f2f2;
   color: #181818;
   border-radius: .5em;

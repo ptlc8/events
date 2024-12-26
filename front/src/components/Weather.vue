@@ -9,7 +9,7 @@
       <span>{{ temperature_max }}</span>
     </div>
   </div>
-  <span class="description">{{ $t[description] }}</span>
+  <span class="description loadable">{{ $t[description] }}</span>
 </template>
 
 <script>
@@ -66,7 +66,7 @@ export default {
   components: { WeatherIcon },
   data() {
     return {
-      weather: null
+      weather: undefined
     };
   },
   mounted() {
@@ -76,7 +76,7 @@ export default {
     fetchWeather() {
       var limitDate = new Date();
       limitDate.setDate(limitDate.getDate() + 16);
-      if (limitDate < new Date(this.datetime))
+      if (!this.datetime || limitDate < new Date(this.datetime))
         return;
       fetch(`https://api.open-meteo.com/v1/forecast?latitude=${this.lat}&longitude=${this.lng}&daily=weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset&timezone=auto&start_date=${this.date}&end_date=${this.date}`)
         .then(res => res.json())
@@ -100,6 +100,8 @@ export default {
       return interpretations[this.weatherCode] ?? {};
     },
     description() {
+      if (this.weather === undefined)
+        return;
       return this.interpretation.name ?? "unknown";
     },
     isNight() {

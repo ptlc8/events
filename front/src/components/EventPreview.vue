@@ -1,5 +1,5 @@
 <template>
-    <article class="event-preview">
+    <article v-if="event" class="event-preview">
         <span class="title">{{ event.title }}</span>
         <div class="wrapper">
             <div class="picture" :style="'background-image: url(\'' + banner.url + '\');'" :title="banner.credits">
@@ -19,6 +19,7 @@
             </div>
         </div>
     </article>
+    <article v-else class="loading event-preview"></article>
 </template>
 
 <script>
@@ -28,8 +29,7 @@ export default {
     name: "EventPreview",
     props: {
         event: {
-            type: Object,
-            required: true
+            type: Object
         }
     },
     emits: ["click"],
@@ -59,7 +59,7 @@ export default {
 
 <style lang="scss">
 .event-preview {
-    min-height: 120px;
+    min-height: 16em;
     justify-content: space-between;
 
     .wrapper {

@@ -51,6 +51,7 @@ async function setLang(newLang, save = false) {
             .then(res => res.text())
             .then(res => {
                 texts[shortLang] = JSON.parse(res);
+                texts[shortLang][undefined] = "";
                 console.info("[Texts] Lang loaded: " + shortLang)
             })
             .catch(err => {
