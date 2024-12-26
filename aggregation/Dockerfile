@@ -1,7 +1,7 @@
 ARG NODE_VERSION=lts
 FROM node:${NODE_VERSION}-slim
 
-RUN apt update && apt install -y cron curl
+RUN apt update && apt install -y cron curl jq
 
 WORKDIR /app
 
