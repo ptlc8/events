@@ -51,7 +51,8 @@ function updateProgress(p, prefix = "") {
 }
 
 function onError(error, prefix = "") {
-    console.log();
+    if (isInteractive)
+        console.log();
     console.error(error);
     updateProgress({ errors: 1 }, prefix);
 }
@@ -77,6 +78,5 @@ await Promise.all(providers.map(provider =>
     })
 ));
 
-console.log("\nDone!");
 console.log(JSON.stringify(progress, null, 2));
 db.end();
