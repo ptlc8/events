@@ -53,5 +53,5 @@ cd front
 npm install
 npm run build
 ```
- - exécuter dans la base de données le script SQL [init.sql](init.sql)
+ - exécuter dans la base de données le script SQL [database/init.sql](database/init.sql)
  - lancer le serveur php dans le dossier `dist`

@@ -15,7 +15,7 @@ function get_config($name) {
 	return getenv($name) ?? NULL;
 }
 
-// initialisation session + BDD
+// initialisation BDD
 function initDatabase() {
 	global $mysqli;
 	$mysqli = new mysqli(get_config('DB_HOST'), get_config('DB_USER'), get_config('DB_PASS'), get_config('DB_NAME'));

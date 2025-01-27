@@ -48,12 +48,10 @@ services:
     depends_on:
       - database
   database:
-    image: mariadb:${MARIADB_VERSION:-10.11}
+    build: database
     expose:
       - 3306
     volumes:
-      - ./mariadb.cnf:/etc/mysql/conf.d/mariadb.cnf:ro
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
       - database-data:/var/lib/mysql
     environment:
       MARIADB_ROOT_PASSWORD: super_secret
