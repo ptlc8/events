@@ -47,6 +47,7 @@ services:
       EVENTBRITE_TOKEN: ${EVENTBRITE_TOKEN}
     depends_on:
       - database
+    restart: always
   database:
     build: database
     expose:
