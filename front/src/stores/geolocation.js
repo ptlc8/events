@@ -28,6 +28,7 @@ async function getFromAPI() {
     try {
         let loc = await Api.getLocation();
         console.log('[Geo] Got location from API');
+        loc.zoom = 10;
         return loc;
     } catch (err) {
         console.error('[Geo] ' + err);
