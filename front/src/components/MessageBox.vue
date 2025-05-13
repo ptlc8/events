@@ -31,7 +31,7 @@ div {
     width: fit-content;
     margin: auto;
     padding: 1em 2em;
-    border-radius: 4px;
+    border-radius: 8px;
     text-align: center;
     @include shadow;
 }

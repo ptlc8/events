@@ -36,7 +36,7 @@ div {
   height: 8em;
   background-color: #f2f2f2;
   color: #181818;
-  border-radius: .5em;
+  border-radius: 8px;
   text-align: center;
   overflow: hidden;
   border: solid 1px var(--color-border);

@@ -61,7 +61,7 @@ export default {
 <style lang="scss">
 .multiselect {
     display: inline-block;
-    border-radius: 4px;
+    border-radius: 8px;
     padding: 8px;
     background-color: var(--color-background);
     border: 0;
@@ -77,7 +77,7 @@ export default {
     span {
         padding: 2px;
         border: 1px solid var(--color-border);
-        border-radius: 2px;
+        border-radius: 4px;
         display: inline-block;
         user-select: none;
         margin: 1px;
@@ -94,7 +94,7 @@ export default {
 
     .dropdown {
         position: absolute;
-        border-radius: 4px;
+        border-radius: 8px;
         background-color: var(--color-background);
         left: 0;
         width: 100%;

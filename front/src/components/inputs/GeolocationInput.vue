@@ -84,7 +84,7 @@ export default {
 <style lang="scss">
 .geolocation-input {
   z-index: 50;
-  border-radius: 4px;
+  border-radius: 8px;
   @include interactive;
   @include shadow;
 
@@ -118,7 +118,7 @@ export default {
     flex-direction: column;
     background-color: var(--color-background);
     margin-left: -2px;
-    border-radius: 0 0 4px 4px;
+    border-radius: 0 0 8px 8px;
     border-top: solid 1px var(--color-border);
     user-select: none;
     @include shadow-bottom;

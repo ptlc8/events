@@ -177,7 +177,7 @@ export default {
   top: 16em;
   width: 100%;
   background-color: var(--color-background);
-  border-radius: 0.5em;
+  border-radius: 8px;
   padding: 1em 4em;
   margin: auto;
 
@@ -209,7 +209,7 @@ export default {
 
   .categories span {
     border: 1px solid var(--color-border);
-    border-radius: .25em;
+    border-radius: 4px;
     margin-right: .25em;
     padding: 0 .25em;
   }
@@ -273,7 +273,7 @@ export default {
         background: no-repeat center/cover;
         width: 100%;
         padding-top: 100%;
-        border-radius: .2em;
+        border-radius: 8px;
         @include image;
 
         @each $social in facebook twitter whatsapp email tumblr messenger telegram /*reddit linkedin line viber skype wechat*/ {

@@ -47,7 +47,7 @@ export default {
 
 .modal {
   background: var(--color-background);
-  border-radius: 0.5em;
+  border-radius: 8px;
   width: 32em;
   padding: 1em 2em;
   @include shadow;

@@ -37,7 +37,7 @@ export default {
     width: 100%;
     display: block;
     background-color: var(--color-background);
-    border-radius: 4px;
+    border-radius: 8px;
     position: relative;
 
     img {

@@ -48,7 +48,7 @@ export default {
     display: flex;
     align-items: center;
     background-color: var(--color-background);
-    border-radius: 4px;
+    border-radius: 8px;
     @include interactive;
     @include shadow;
 

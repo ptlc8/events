@@ -97,7 +97,7 @@ export default {
 
 <style lang="scss" scoped>
 .interval-select {
-  border-radius: 4px;
+  border-radius: 8px;
   padding: 12px 8px;
   background-color: var(--color-background);
   border: 0;
@@ -130,7 +130,7 @@ export default {
 
   .dropdown {
     position: absolute;
-    border-radius: 0 0 4px 4px;
+    border-radius: 0 0 8px 8px;
     background-color: var(--color-background);
     top: 100%;
     left: 0;
