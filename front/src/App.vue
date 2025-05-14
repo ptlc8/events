@@ -7,7 +7,7 @@ import AboutModal from '@/components/modals/AboutModal.vue';
 
 const tabs = ref({});
 
-for (const tab of ['search', 'categories', 'home', 'map', 'me']) {
+for (const tab of ['home', 'map', 'search', 'me']) {
   tabs.value[tab] = { name: tab };
   import(`@/assets/icons/${tab}.svg?no-inline`)
     .then(icon => tabs.value[tab].icon = icon.default);
@@ -47,13 +47,28 @@ export default {
 </script>
 
 <template>
+  <header>
+    <RouterLink :to="{ name: 'home' }">
+      <h1>{{ $t.site_name }}</h1>
+    </RouterLink>
+    <h2>
+      {{ $route.meta.title }} 
+    </h2>
+    <nav>
+      <RouterLink v-for="tab in tabs" :to="{ name: tab.name }">
+        <img :src="tab.icon" :alt="$t[tab.name]" :title="$t[tab.name]" />
+      </RouterLink>
+    </nav>
+  </header>
+
   <main>
     <RouterView />
   </main>
 
   <nav>
-    <RouterLink v-for="tab in tabs" :to="{ name: tab.name }" :style="`background-image: url('${tab.icon}');`">
-      {{ $t[tab.name] }}
+    <RouterLink v-for="tab in tabs" :to="{ name: tab.name }">
+      <img :src="tab.icon" :alt="$t[tab.name]" :title="$t[tab.name]" />
+      <span>{{ $t[tab.name] }}</span>
     </RouterLink>
   </nav>
 
@@ -63,22 +78,43 @@ export default {
 </template>
 
 <style lang="scss" scoped>
-nav {
-  flex: 1;
-  display: flex;
+header {
+  nav {
+    display: flex;
+    gap: 1em;
+    flex-grow: 0;
+
+    a {
+      display: flex;
+
+      img {
+        height: 2em;
+      }
+    }
+  }
+}
+
+main {
+  flex: 10;
+}
+
+main + nav {
+  display: none;
 
   a {
     flex: 3;
     display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: end;
+    padding: .2em;
     border: 1px solid var(--color-border);
-    background: var(--color-background) center .5em / auto calc(100% - 2em) no-repeat;
-    align-items: end;
-    justify-content: center;
+    border-radius: 0;
     color: var(--color-text);
 
-    &:hover:not(.router-link-exact-active) {
-      background-size: auto calc(100% - 1.5em);
-      color: var(--color-heading);
+    img {
+      height: 2em;
+      transition: transform .2s ease-in-out;
     }
 
     &.router-link-exact-active {
@@ -88,5 +124,16 @@ nav {
   }
 }
 
-@media (min-width: 1024px) {}
+@media (hover: none) {
+  header {
+    padding-right: 2rem;
+    padding-left: 2rem;
+  }
+  header nav {
+    display: none;
+  }
+  main + nav {
+    display: flex;
+  }
+}
 </style>

@@ -1,6 +1,5 @@
 <template>
   <section class="categories">
-    <h1>🗂 {{ $t.categories }}</h1>
     <article v-for="categorie in categories" class="categorie" @click="$router.push({name:'search',query:{c:categorie.id}})">
       <div class="banner" :style="`background-image:url('${categorie.image}')`"></div>
       <h2>{{ categorie.emoji }} {{ $t[categorie.id] }}</h2>

@@ -1,6 +1,6 @@
 <template>
     <MessageBox v-if="loggedin === null" :message="$t.logging_in" />
-    <MessageBox v-else-if="loggedin" :message="$t.loggedin" :button="$t.ok" @click="$router.push('/')" />
+    <MessageBox v-else-if="loggedin" :message="$t.logged_in" :button="$t.ok" @click="$router.push('/')" />
     <MessageBox v-else :message="$t.logging_in_failed" :button="$t.retry" @click="$store.login" />
 </template>
 

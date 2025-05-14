@@ -1,7 +1,6 @@
 
 <template>
     <section>
-        <h1>⭐ {{ $t.fav }}</h1>
         <MessageBox v-if="!$store.logged" :message="$t.login_to_fav" :button="$t.login" @click="$store.login" />
         <MessageBox v-else-if="!events.length" :message="$t.no_favorites" :button="$t.search_them" @click="$router.push('/search')"></MessageBox>
         <div class="favorites">

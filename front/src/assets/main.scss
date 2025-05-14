@@ -6,8 +6,18 @@
   --color-primary: mediumseagreen;
 }
 
+header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0.5rem 2rem;
+}
+
 main {
-  flex: 10;
   display: flex;
   flex-direction: column;
   overflow: auto;
@@ -20,7 +30,7 @@ section {
   align-items: center;
   max-width: 1280px;
   margin: 0 auto;
-  padding: 1rem 2rem;
+  padding: .5rem 2rem;
   font-weight: normal;
 }
 
@@ -69,7 +79,11 @@ button {
   @include interactive;
 }
 
-h1,
+h1 {
+  color: var(--color-primary);
+  font-family: Chilanka, var(--font-family);
+}
+
 h2,
 h3,
 h4,
@@ -146,8 +160,8 @@ hr {
 }
 
 @media (max-width: 960px) {
-  section {
-    padding: .5rem;
+  header, section {
+    padding: .5rem .5rem 0 .5rem;
   }
 }
 

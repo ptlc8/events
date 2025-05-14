@@ -1,8 +1,5 @@
 <template>
     <section>
-        <h1>{{ $t.site_name }}</h1>
-    </section>
-    <section>
         <SearchBar :placeholder="$t.search_events" @click="$router.push({ name: 'search' })" />
     </section>
     <section class="categories">
@@ -160,7 +157,7 @@ section {
     }
 
     .more {
-        border-radius: 4px;
+        border-radius: 8px;
         display: flex;
         justify-content: center;
         align-items: center;
