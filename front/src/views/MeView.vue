@@ -1,8 +1,5 @@
 <template>
   <section>
-    <h1>👤 {{ $t.me }}</h1>
-  </section>
-  <section>
     <MessageBox v-if="!$store.logged" :message="$t.not_logged_in" :button="$t.login"
       @click="$store.login" />
     <article v-else>

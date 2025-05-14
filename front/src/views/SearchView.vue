@@ -1,8 +1,5 @@
 <template>
     <section>
-        <h1>🔍 {{ $t.search }}</h1>
-    </section>
-    <section>
         <SearchInputs v-model="search" />
         <EventsList :search="search" />
     </section>
