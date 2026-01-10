@@ -76,15 +76,20 @@ export default {
     fetchWeather() {
       var limitDate = new Date();
       limitDate.setDate(limitDate.getDate() + 16);
-      if (!this.datetime || limitDate < new Date(this.datetime))
+      if (!this.datetime || limitDate < new Date(this.datetime)) {
+        this.weather = null;
         return;
+      }
       fetch(`https://api.open-meteo.com/v1/forecast?latitude=${this.lat}&longitude=${this.lng}&daily=weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset&timezone=auto&start_date=${this.date}&end_date=${this.date}`)
         .then(res => res.json())
         .then(data => {
           if (data.error) {
             console.error("[Weather] " + data.reason);
+            this.weather = null;
+          } else {
+            console.log("[Weather] Fetched data:", data);
+            this.weather = data;
           }
-          this.weather = data.error ? null : data;
         })
         .catch(err => {
           console.error("[Weather] " + err);
