@@ -94,7 +94,7 @@ export default {
 
     .dropdown {
         position: absolute;
-        border-radius: 8px;
+        border-radius: 0 0 8px 8px;
         background-color: var(--color-background);
         left: 0;
         width: 100%;

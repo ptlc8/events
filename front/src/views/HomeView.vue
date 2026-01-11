@@ -151,9 +151,7 @@ section {
 
     >* {
         flex: 0 0 20em;
-        cursor: pointer;
         //scroll-snap-align: center;
-        @include interactive;
     }
 
     .more {

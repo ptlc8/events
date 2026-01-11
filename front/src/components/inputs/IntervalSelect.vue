@@ -119,13 +119,14 @@ export default {
 
   &.opened {
     z-index: 100;
+    border-radius: 8px 8px 0 0;
   }
 
   .value {
     height: 100%;
     display: flex;
     align-items: center;
-    margin: 0 1em;
+    margin: 0 16px;
   }
 
   .dropdown {

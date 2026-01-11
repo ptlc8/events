@@ -1,5 +1,5 @@
 <template>
-  <div class="geolocation-input" @mouseenter="mouseover = true" @mouseleave="mouseover = false">
+  <div :class="{ 'geolocation-input': true, opened }" @mouseenter="mouseover = true" @mouseleave="mouseover = false">
     <input type="text" v-model="query" :placeholder="placeholder"
       @focusin="focus = true" @focusout="focus = false" />
     <div v-if="opened" class="dropdown">
@@ -88,18 +88,15 @@ export default {
   @include interactive;
   @include shadow;
 
-  &:focus-within {
-    outline-style: solid;
-
-    .dropdown {
-      outline-style: solid;
-    }
+  &.opened {
+    border-radius: 8px 8px 0 0;
   }
 
   input {
     width: 100%;
     height: 100%;
     margin: 0;
+    padding: 12px 24px;
     border: 0;
 
     &:focus {

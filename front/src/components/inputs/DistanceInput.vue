@@ -68,9 +68,5 @@ export default {
         width: 4em;
         text-align: right;
     }
-
-    &:focus-within {
-        outline-style: solid;
-    }
 }
 </style>

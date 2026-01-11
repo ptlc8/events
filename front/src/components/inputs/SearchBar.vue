@@ -1,6 +1,6 @@
 <template>
     <div class="search-bar">
-        <img src="@/assets/icons/search-icon.svg">
+        <img class="invert-on-dark" src="@/assets/icons/search-icon.svg">
         <input type="text" v-model="value" :placeholder="placeholder" @keypress="update" @paste="update" />
     </div>
 </template>

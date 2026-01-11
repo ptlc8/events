@@ -72,6 +72,10 @@ button {
   @include shadow;
 }
 
+select {
+  padding: 12px 24px;
+}
+
 button {
   background-color: var(--color-primary);
   color: var(--color-background);
@@ -184,5 +188,11 @@ hr {
 
   100% {
     background-position: 1000% 0;
+  }
+}
+
+.invert-on-dark {
+  @media (prefers-color-scheme: dark) {
+    filter: invert(1);
   }
 }

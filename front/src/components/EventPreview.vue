@@ -67,6 +67,8 @@ export default {
     flex-direction: column;
     justify-content: space-between;
     min-height: 16em;
+    cursor: pointer;
+    @include interactive;
 
     .wrapper {
         display: flex;
