@@ -72,9 +72,9 @@ function getNavigatorLang() {
     return navigator.language ?? navigator.userLanguage ?? "";
 }
 
-// Retourne la date sous forme de texte
+// Retourne la date sous forme de texte et dans le fuseau local
 function getDisplayDate(datetime) {
-    var date = new Date(datetime);
+    var date = new Date(datetime + "Z");
     date.setHours(0, 0, 0, 0);
     var today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -87,9 +87,9 @@ function getDisplayDate(datetime) {
     return get("the_date") + date.getDate() + " " + date.toLocaleString(getLang(), { month: "long" }) + (date.getYear() == today.getYear() ? "" : " " + date.getYear())
 }
 
-// Retourne l'heure sous forme de texte
+// Retourne l'heure sous forme de texte et dans le fuseau local
 function getDisplayTime(datetime) {
-    var time = new Date(datetime);
+    var time = new Date(datetime + "Z");
     return time.getHours() + ":" + (time.getMinutes() < 10 ? "0" : "") + time.getMinutes();
 }
 

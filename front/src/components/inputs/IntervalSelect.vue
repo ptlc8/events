@@ -24,18 +24,20 @@
 export default {
   name: "IntervalSelect",
   props: {
-    modelValue: {
+    modelValue: { // UTC timezone
       type: Object,
       required: false,
       default: () => ({ min: undefined, max: undefined })
     },
-    options: {
+    options: { // local timezone
       type: Array,
+      validator: value => value.every(o => 'label' in o),
       required: false,
       default: () => []
     },
     type: {
       type: String,
+      validator: value => ['date', 'time'].includes(value),
       required: true
     }
   },
@@ -46,17 +48,22 @@ export default {
   }),
   watch: {
     modelValue(value) {
-      this.value = value;
+      this.value.min = this.fromUTC(value.min);
+      this.value.max = this.fromUTC(value.max);
     },
     value: {
       handler(value) {
-        this.$emit('update:modelValue', value);
+        this.$emit('update:modelValue', {
+          min: this.toUTC(value.min),
+          max: this.toUTC(value.max)
+        });
       },
       deep: true
     }
   },
   mounted() {
-    this.value = this.modelValue;
+    this.value.min = this.fromUTC(this.modelValue.min);
+    this.value.max = this.fromUTC(this.modelValue.max);
   },
   methods: {
     open() {
@@ -90,6 +97,41 @@ export default {
       if (this.value.min)
         return "Après " + this.value.min.split("-").reverse().join("/");
       return "Peu importe";
+    },
+    toUTC(value) {
+      if (!value)
+        return value;
+      let date = new Date();
+      if (this.type === 'time') {
+        let parts = value.split(":").map(Number);
+        date.setHours(parts[0]);
+        date.setMinutes(parts[1]);
+        return date.toISOString().substring(11, 16);
+      } else if (this.type === 'date') {
+        let parts = value.split("-").map(Number);
+        date.setFullYear(parts[0]);
+        date.setMonth(parts[1] - 1);
+        date.setDate(parts[2]);
+        date.setHours(0, 0, 0, 0);
+        return date.toISOString().substring(0, 16);
+      }
+      return value;
+    },
+    fromUTC(value) {
+      if (!value)
+        return value;
+      if (this.type === 'time') {
+        let utcDate = new Date().toISOString().substring(0, 10);
+        let date = new Date(utcDate + "T" + value + "Z");
+        return date.getHours().toString().padStart(2, '0')
+          + ":" + date.getMinutes().toString().padStart(2, '0');
+      } else if (this.type === 'date') {
+        let date = new Date(value + "Z");
+        return date.getFullYear()
+          + "-" + (date.getMonth() + 1).toString().padStart(2, '0')
+          + "-" + date.getDate().toString().padStart(2, '0');
+      }
+      return value;
     }
   }
 }

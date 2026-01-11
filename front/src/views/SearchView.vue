@@ -31,11 +31,11 @@ export default {
             let [lng, lat] = query.g?.split(',') ?? [];
             let [dmin, dmax] = query.d?.split(',') ?? [];
             let [tmin, tmax] = query.t?.split(',') ?? [];
-            return {
+            return {    
                 text: query.q ?? '',
                 cats: query.c?.split(',') ?? [],
                 sort: query.s ?? 'relevance',
-                date: { min: formatRelativeDate(0), max: dmax },
+                date: { min: dmin ?? formatRelativeDate(0), max: dmax },
                 time: { min: tmin, max: tmax },
                 gloc: query.g ? { lng: parseFloat(lng), lat: parseFloat(lat) } : undefined,
                 dist: isNaN(parseInt(query.r)) ? undefined : parseInt(query.r)

@@ -12,7 +12,7 @@ if ($min) {
     $request = "SELECT events.*";
 }
 
-// Geolocation for distance filter and/or pertinence or distance sort
+// Geolocation for distance filter and/or relevance or distance sort
 $lng = isset($_REQUEST['lng']) && is_numeric($_REQUEST['lng']) ? floatval($_REQUEST['lng']) : null;
 $lat = isset($_REQUEST['lat']) && is_numeric($_REQUEST['lat']) ? floatval($_REQUEST['lat']) : null;
 
@@ -57,14 +57,12 @@ if (isset($_REQUEST['id'])) {
 
 } else {
 
-    // Timezone offset in minutes, TODO: use to convert dates from UTC to local time
     date_default_timezone_set('Etc/GMT');
-    $timezoneOffset = (isset($_REQUEST['timezoneoffset'])) ? intval($_REQUEST['timezoneoffset']) : 0; // en minutes
     
     $request .= " AND public = '1'";
     
     // Date filter
-    $dateInf = isset($_REQUEST['datemin']) ? parseDate($_REQUEST['datemin']) : date('Y-m-d');
+    $dateInf = isset($_REQUEST['datemin']) ? parseDate($_REQUEST['datemin']) : null;
     $dateSup = isset($_REQUEST['datemax']) ? parseDate($_REQUEST['datemax']) : null;
     if ($dateInf) $request .= " AND '$dateInf' <= CAST(start AS date)";
     if ($dateSup) $request .= " AND CAST(start AS date) < '$dateSup'";
@@ -124,6 +122,11 @@ if (isset($_REQUEST['id'])) {
         if (!isset($lng, $lat))
             exitError('need location for distance filter');
         $request .= " AND ".floatval($_REQUEST['distance'])." >= 6371 * 2 * ASIN(SQRT(POW(SIN((RADIANS(lat) - RADIANS($lat)) / 2), 2) + COS(RADIANS(lat)) * COS(RADIANS($lat)) * POW(SIN((RADIANS(lng) - RADIANS($lng)) / 2), 2)))";
+    }
+
+    // Image filter
+    if (isset($_REQUEST['hasimage'])) {
+        $request .= " AND images != ''";
     }
 
 }

@@ -62,7 +62,6 @@ export default {
                 lat: this.search.gloc?.lat ?? this.gloc?.lat,
                 distance: this.search.gloc || this.gloc ? this.search.dist : undefined,
                 sort: !this.search.gloc && !this.gloc && ['relevance', 'distance'].includes(this.search.sort) ? undefined : this.search.sort,
-                timezoneoffset: new Date().getTimezoneOffset(),
                 limit: 50,
                 offset: more ? this.events.length : null
             }).then(events => {

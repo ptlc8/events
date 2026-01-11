@@ -34,7 +34,7 @@
         </div>
     </section>
     <section>
-        <h2>⏰ {{ $t.soon }}</h2>
+        <h2>⏰ {{ $t.starting_soon }}</h2>
         <div class="events-list">
             <EventPreview vertical class="event" v-for="event in soonEvents" :event="event" @click="$store.event = event" />
             <RouterLink class="more" :to="{ name: 'search', query: { s: 'datetime' } }">{{ $t.view_more }}</RouterLink>
@@ -69,17 +69,18 @@ export default {
             EventsApi.getEvents({
                 lng: loc.lng,
                 lat: loc.lat,
+                datemin: new Date().toISOString().substring(0, 19),
+                hasimage: true,
                 sort: 'relevance',
-                datemin: new Date(new Date().getTimezoneOffset() * 60 * 1000).toISOString().split('T')[0],
-                timemin: new Date(new Date().getTimezoneOffset() * 60 * 1000).toISOString().substring(11, 19),
-                limit: 10,
-                timezoneoffset: new Date().getTimezoneOffset()
+                limit: 10
             }).then(events => {
                 this.relevantEvents = events;
             });
             EventsApi.getEvents({
                 lng: loc.lng,
                 lat: loc.lat,
+                datemin: new Date().toISOString().substring(0, 19),
+                hasimage: true,
                 sort: 'distance',
                 limit: 10
             }).then(events => {
@@ -87,17 +88,18 @@ export default {
             });
         });
         EventsApi.getEvents({
+            datemin: new Date().toISOString().substring(0, 19),
+            hasimage: true,
             sort: 'popularity',
             limit: 10
         }).then(events => {
             this.popularEvents = events;
         });
         EventsApi.getEvents({
+            datemin: new Date().toISOString().substring(0, 19),
+            hasimage: true,
             sort: 'datetime',
-            datemin: new Date(new Date().getTimezoneOffset() * 60 * 1000).toISOString().split('T')[0],
-            timemin: new Date(new Date().getTimezoneOffset() * 60 * 1000).toISOString().substring(11, 19),
-            limit: 10,
-            timezoneoffset: new Date().getTimezoneOffset()
+            limit: 10
         }).then(events => {
             this.soonEvents = events;
         });

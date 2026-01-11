@@ -111,7 +111,7 @@ function parseDate($date, $default=false) {
 	$timestamp = strtotime($date);
 	if ($timestamp === false)
 		return $default;
-	return date("Y-m-d", $timestamp);
+	return date("Y-m-d H:i:s", $timestamp);
 }
 
 function parseTime($time, $default=false) {
