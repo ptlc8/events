@@ -65,7 +65,7 @@
           <figcaption>{{ getImageCredits(i) }}</figcaption>
         </figure>
       </div>
-      <div class="footer">Ça a l'air chouette, non ?! 🦉</div>
+      <div class="footer">{{ $t.whimsical_signoff }}</div>
     </div>
   </Modal>
 </template>
