@@ -3,14 +3,14 @@
         <SearchBar :placeholder="$t.search_events" @click="$router.push({ name: 'search' })" />
     </section>
     <section class="categories">
-        <router-link v-for="cat in categories" :to="{ name: 'search', query: { c: cat.id } }" class="categorie">
+        <RouterLink v-for="cat in categories" :to="{ name: 'search', query: { c: cat.id } }" class="categorie">
             <span class="icon">{{ cat.emoji }}</span>
             {{ $t[cat.id] }}
-        </router-link>
-        <router-link :to="{ name: 'categories' }" class="categorie">
+        </RouterLink>
+        <RouterLink :to="{ name: 'categories' }" class="categorie">
             <span class="icon">...</span>
             Autres
-        </router-link>
+        </RouterLink>
     </section>
     <section>
         <h2>🎯 {{ $t.relevant }}</h2>
@@ -20,7 +20,7 @@
         </div>
     </section>
     <section>
-        <h2>⭐ {{ $t.popular }}</h2>
+        <h2>🔥 {{ $t.popular }}</h2>
         <div class="events-list">
             <EventPreview vertical class="event" v-for="event in popularEvents" :event="event" @click="$store.event = event" />
             <RouterLink class="more" :to="{ name: 'search', query: { s: 'popularity' } }">{{ $t.view_more }}</RouterLink>
@@ -31,6 +31,13 @@
         <div class="events-list">
             <EventPreview vertical class="event" v-for="event in nearbyEvents" :event="event" @click="$store.event = event" />
             <RouterLink class="more" :to="{ name: 'search', query: { s: 'distance' } }">{{ $t.view_more }}</RouterLink>
+        </div>
+    </section>
+    <section v-if="favoriteEvents.length">
+        <h2>⭐ {{ $t.fav }}</h2>
+        <div class="events-list">
+            <EventPreview vertical class="event" v-for="event in favoriteEvents" :event="event" @click="$store.event = event" />
+            <RouterLink class="more" :to="{ name: 'fav' }">{{ $t.view_more }}</RouterLink>
         </div>
     </section>
     <section>
@@ -53,9 +60,10 @@ export default {
     components: { SearchBar, EventPreview, RouterLink },
     data: () => ({
         categories: [],
-        nearbyEvents: [],
-        popularEvents: [],
         relevantEvents: [],
+        popularEvents: [],
+        nearbyEvents: [],
+        favoriteEvents: [],
         soonEvents: [],
         gloc: null
     }),
@@ -94,6 +102,13 @@ export default {
             limit: 10
         }).then(events => {
             this.popularEvents = events;
+        });
+        EventsApi.getEvents({
+            favorite: true,
+            sort: 'datetime',
+            limit: 10
+        }).then(events => {
+            this.favoriteEvents = events;
         });
         EventsApi.getEvents({
             datemin: new Date().toISOString().substring(0, 19),
