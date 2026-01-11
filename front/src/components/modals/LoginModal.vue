@@ -53,7 +53,7 @@ export default {
     },
     receiveMessage(event) {
       if (typeof event.data === "object" && event.data.target === "events") {
-        if (event.data.logged_in) {
+        if (event.data.loggedin) {
           this.$store.setLoggedUser(event.data.user);
           this.$refs.modal.close();
         } else {
