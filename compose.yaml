@@ -12,6 +12,11 @@ services:
     restart: always
     labels:
       - webproxy.path=${BASE_URL-events}
+    develop:
+      watch:
+        - action: rebuild
+          path: ./front
+
   api:
     build:
       context: api
@@ -34,6 +39,12 @@ services:
     depends_on:
       - database
     restart: always
+    develop:
+      watch:
+        - action: sync
+          path: ./api/src
+          target: /var/www/html
+
   aggregator:
     build: aggregation
     environment:
@@ -48,6 +59,14 @@ services:
     depends_on:
       - database
     restart: always
+    develop:
+      watch:
+        - action: sync
+          path: ./aggregation
+          target: /app
+        - action: rebuild
+          path: ./aggregation/setup-cron.sh
+
   database:
     build: database
     expose:
@@ -60,6 +79,7 @@ services:
       MARIADB_PASSWORD: secret
       MARIADB_DATABASE: events
     restart: always
+
 volumes:
   database-data:
     driver: local
