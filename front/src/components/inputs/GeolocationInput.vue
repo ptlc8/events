@@ -88,7 +88,7 @@ export default {
   @include interactive;
   @include shadow;
 
-  &.opened {
+  &.opened, &.opened input {
     border-radius: 8px 8px 0 0;
   }
 
