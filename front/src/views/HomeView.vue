@@ -15,35 +15,35 @@
     <section>
         <h2>🎯 {{ $t.relevant }}</h2>
         <div class="events-list">
-            <EventPreview vertical class="event" v-for="event in relevantEvents" :event="event" @click="$store.event = event" />
+            <EventPreview class="event" v-for="event in relevantEvents" :event="event" @click="$store.event = event" />
             <RouterLink class="more" :to="{ name: 'search', query: { s: 'relevance' } }">{{ $t.view_more }}</RouterLink>
         </div>
     </section>
     <section>
         <h2>🔥 {{ $t.popular }}</h2>
         <div class="events-list">
-            <EventPreview vertical class="event" v-for="event in popularEvents" :event="event" @click="$store.event = event" />
+            <EventPreview class="event" v-for="event in popularEvents" :event="event" @click="$store.event = event" />
             <RouterLink class="more" :to="{ name: 'search', query: { s: 'popularity' } }">{{ $t.view_more }}</RouterLink>
         </div>
     </section>
     <section>
         <h2>📍 {{ $t.nearby }} ({{ gloc?.name }})</h2>
         <div class="events-list">
-            <EventPreview vertical class="event" v-for="event in nearbyEvents" :event="event" @click="$store.event = event" />
+            <EventPreview class="event" v-for="event in nearbyEvents" :event="event" @click="$store.event = event" />
             <RouterLink class="more" :to="{ name: 'search', query: { s: 'distance' } }">{{ $t.view_more }}</RouterLink>
         </div>
     </section>
     <section v-if="favoriteEvents.length">
         <h2>⭐ {{ $t.fav }}</h2>
         <div class="events-list">
-            <EventPreview vertical class="event" v-for="event in favoriteEvents" :event="event" @click="$store.event = event" />
+            <EventPreview class="event" v-for="event in favoriteEvents" :event="event" @click="$store.event = event" />
             <RouterLink class="more" :to="{ name: 'fav' }">{{ $t.view_more }}</RouterLink>
         </div>
     </section>
     <section>
         <h2>⏰ {{ $t.starting_soon }}</h2>
         <div class="events-list">
-            <EventPreview vertical class="event" v-for="event in soonEvents" :event="event" @click="$store.event = event" />
+            <EventPreview class="event" v-for="event in soonEvents" :event="event" @click="$store.event = event" />
             <RouterLink class="more" :to="{ name: 'search', query: { s: 'datetime' } }">{{ $t.view_more }}</RouterLink>
         </div>
     </section>
@@ -164,10 +164,10 @@ section {
     overflow: auto;
     scroll-snap-type: x mandatory;
     padding: 0.5em;
-    gap: 1em;
+    gap: 12px;
 
     >* {
-        flex: 0 0 20em;
+        flex: 0 0 18em;
         //scroll-snap-align: center;
     }
 

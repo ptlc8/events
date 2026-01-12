@@ -80,15 +80,10 @@ export default {
     margin: 0 auto;
 
     .results {
-        display: flex;
-        flex-wrap: wrap;
-        gap: .5em;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(16em, 1fr));
+        gap: 12px;
         margin: 0 0 1em 0;
-
-        >* {
-            width: 32em;
-            flex-grow: 1;
-        }
     }
 
     .more-button {

@@ -1,23 +1,23 @@
 <template>
-    <article v-if="event" class="event-preview" @click="$emit('click')" :class="{ vertical }">
+    <article v-if="event" class="event-preview" @click="$emit('click')">
         <span class="title">{{ event.title }}</span>
-        <div class="wrapper">
-            <div class="picture" :style="'background-image: url(\'' + banner.url + '\');'" :title="banner.credits">
-                <span v-if="banner.nonRepresentative" :title="$t.non_representative">❗</span>
+        <div class="picture" :style="'background-image: url(\'' + banner.url + '\');'" :title="banner.credits">
+            <span v-if="banner.nonRepresentative" :title="$t.non_representative">❗</span>
+        </div>
+        <div class="infos">
+            <div class="date">
+                <div class="month">{{ $texts.getDisplayMonth(event.start) }}</div>
+                <div class="day">{{ $texts.getDisplayDay(event.start) }}</div>
             </div>
-            <div class="infos">
-                <span class="description">{{ event.description }}</span>
-                <span class="categories">
+            <div class="details">
+                <div>📍 {{ event.placename }}</div>
+                <div>🕓 {{ $texts.getDisplayTime(event.start) }}</div>
+                <div class="categories">
                     <span v-for="c in categories">{{ c.emoji }} {{ $t[c.id] }}</span>
-                </span>
-                <span class="whenwhere">
-                    <b>{{ $texts.getDisplayDateTime(event.start) }}</b>
-                    à <b>{{ event.placename }}</b>
-                </span>
-                <!--<button @click="$emit('click')">{{ $t.more_info }}</button>-->
-                <slot></slot>
+                </div>
             </div>
         </div>
+        <slot></slot>
     </article>
     <article v-else class="loading event-preview"></article>
 </template>
@@ -30,10 +30,6 @@ export default {
     props: {
         event: {
             type: Object
-        },
-        vertical: {
-            type: Boolean,
-            default: false
         }
     },
     emits: ["click"],
@@ -65,87 +61,80 @@ export default {
 .event-preview {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    min-height: 16em;
+    align-items: normal;
+    gap: 8px;
     cursor: pointer;
     @include interactive;
 
-    .wrapper {
-        display: flex;
-        gap: 8px;
-        flex-grow: 1;
-        justify-content: space-between;
-    }
-
-    &.vertical .wrapper {
-        flex-direction: column;
-    }
-
     .picture {
-        flex: 3;
         background: center center / cover var(--color-background-mute);
         border-radius: 4px;
-    }
-
-    &.vertical .picture {
-        min-height: 10em;
-    }
-
-    .infos {
-        flex: 3;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between
-    }
-
-    &.vertical .infos {
-        flex: unset;
+        min-height: 12em;
     }
 
     .title {
         display: block;
         font-size: x-large;
         font-variant: small-caps;
-        margin-left: 1em;
+        margin: 0 8px;
+        overflow: hidden;
+        word-break: break-all;
         display: -webkit-box;
+        -webkit-box-orient: vertical;
         -webkit-line-clamp: 1;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
     }
 
-    .description {
-        display: -webkit-inline-box;
-        -webkit-line-clamp: 4;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        text-align: justify;
-        line-height: 1.2;
-        max-height: 5em;
-        word-break: break-word;
-    }
+    .infos {
+        flex: 1;
+        display: flex;
+        flex-direction: row;
+    
+        .date {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            border-right: 2px solid var(--color-text);
+            margin: 0 8px;
+            padding-right: 8px;
+            text-align: center;
 
-    .categories {
-        font-size: .8em;
-        overflow: hidden;
-        line-height: 1.5;
-        max-height: 1.5em;
+            .month {
+                font-size: 1.2em;
+                line-height: 1;
+                text-transform: uppercase;
+            }
 
-        span {
-            border: 1px solid var(--color-border);
-            border-radius: 0.25em;
-            margin: 0.25em;
-            padding: 0 0.25em;
+            .day {
+                font-size: 2.4em;
+                line-height: 1;
+            }
         }
-    }
 
-    .whenwhere {
-        margin-left: 2em;
-    }
+        .details {
+            display: flex;
+            flex-direction: column;
 
-    button {
-        width: 80%;
-        align-self: center;
-        font-weight: bold;
+            > * {
+                line-height: 1.5;
+                max-height: 1.5em;
+                overflow: hidden;
+                word-break: break-all;
+                display: -webkit-inline-box;
+                -webkit-box-orient: vertical;
+                -webkit-line-clamp: 1;
+            }
+
+            .categories {
+                font-size: .8em;
+
+                span {
+                    border: 1px solid var(--color-border);
+                    border-radius: 0.25em;
+                    margin: 0.25em;
+                    padding: 0 0.25em;
+                }
+            }
+        }
     }
 }
 </style>

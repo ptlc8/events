@@ -53,16 +53,13 @@ export default {
 .favorites {
     width: 90%;
     margin: 2em auto;
-    display: flex;
-    flex-wrap: wrap;
-    gap: .5em;
-
-    >* {
-        width: 24em;
-        flex-grow: 1;
-    }
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(16em, 1fr));
+    gap: 12px;
 
     .delete-event {
+        margin: 0;
+        padding: 4px 8px;
         background-color: indianred;
     }
 }

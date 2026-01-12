@@ -98,6 +98,16 @@ function getDisplayDateTime(datetime) {
     return getDisplayDate(datetime) + " " + get("at") + " " + getDisplayTime(datetime);
 }
 
+function getDisplayMonth(datetime) {
+    var date = new Date(datetime + "Z");
+    return date.toLocaleString(getLang(), { month: "short" });
+}
+
+function getDisplayDay(datetime) {
+    var date = new Date(datetime + "Z");
+    return (date.getDate() < 10 ? "0" : "") + date.getDate();
+}
+
 export const values = new Proxy(get, {
     get: function(_, name) {
         return get(name);
@@ -115,6 +125,8 @@ export default {
     getNavigatorLang,
     getDisplayDate,
     getDisplayTime,
+    getDisplayMonth,
+    getDisplayDay,
     getDisplayDateTime,
     values
 };
