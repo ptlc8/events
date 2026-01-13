@@ -1,6 +1,9 @@
 <template>
-    <section>
+    <section class="search">
         <SearchBar :placeholder="$t.search_events" @click="$router.push({ name: 'search' })" />
+        <article class="map-button" @click="$router.push({ name: 'search', query: { map: null } })">
+            Rechercher sur la carte
+        </article>
     </section>
     <section class="categories">
         <RouterLink v-for="cat in categories" :to="{ name: 'search', query: { c: cat.id } }" class="categorie">
@@ -137,6 +140,21 @@ h1 {
 
 section {
     align-items: normal;
+}
+
+.search {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(24rem, 1fr));
+    gap: 12px;
+
+    .map-button {
+        color: black;
+        background-image: url('@/assets/icons/map-button.jpg');
+        background-size: cover;
+        background-position: center;
+        cursor: pointer;
+        @include interactive;
+    }
 }
 
 .categories {
