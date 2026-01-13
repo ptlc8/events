@@ -1,22 +1,21 @@
 <template>
   <Modal big v-bind="$attrs">
-    <div v-if="banner" class="banner" :style="'background-image: url(\'' + banner.url + '\');'" :title="banner.credits"></div>
-    <div v-else class="banner loading"></div>
+    <div :class="{ banner: true, loading }" :style="'background-image: url(\'' + banner?.url + '\');'" :title="banner?.credits"></div>
     <div class="body">
-      <h2 class="title loadable">{{ event?.title }}</h2>
-      <div class="author loadable">{{ event?.author }}</div>
-      <div class="place loadable">{{ event?.placename }}</div>
+      <h2 :class="{ title: true, loading }">{{ event?.title }}</h2>
+      <div :class="{ author: true, loading }">👤 {{ event?.author }}</div>
+      <div :class="{ place: true, loading }">📍 {{ event?.placename }}</div>
       <div class="categories">
         <span v-for="cat in categories">{{ cat.emoji }} {{ $t[cat.id] }}</span>
       </div>
-      <div class="description">{{ event?.description }}</div>
+      <div :class="{ description: true, loading }">{{ event?.description }}</div>
       <div class="sidebar">
         <h3>📅 Quand ?</h3>
-        <div v-if="event?.start.substring(0, 10) != event?.end.substring(0, 10)" class="datetimes">
+        <div v-if="event?.start?.substring(0, 10) != event?.end?.substring(0, 10)" class="datetimes">
           <AgendaPage :datetime="event.start" />
           <AgendaPage :datetime="event.end" />
         </div>
-        <AgendaPage v-else :datetime="event?.start" />
+        <AgendaPage v-else :class="{ loading }" :datetime="event?.start" />
         <span v-if="event">
           {{ $t.from }} {{ $texts.getDisplayTime(event.start) }}
           {{ $t.to }} {{ $texts.getDisplayTime(event.end) }}
@@ -129,7 +128,7 @@ export default {
     },
     showOnMap() {
       if (this.$route.name == "search")
-        this.$router.replace({ name: "search", query: { ...this.$route.query, map: null, show: this.event.id, e: undefined } });
+        this.$router.replace({ ...this.$route, query: { ...this.$route.query, map: null, show: this.event.id, e: undefined } });
       else
         this.$router.push({ name: "search", query: { map: null, show: this.event.id } });
     },
@@ -137,24 +136,27 @@ export default {
       window.open(`geo:${this.event.lat},${this.event.lng}?q=${this.event.placename}`);
     },
     getImageCredits(i) {
-      return this.event.imagesCredits.length > 0 ? this.event.imagesCredits[i % this.event.imagesCredits.length] : "";
+      return this.event?.imagesCredits?.length ? this.event.imagesCredits[i % this.event.imagesCredits.length] : "";
     }
   },
   computed: {
+    loading() {
+      return this.event === undefined;
+    },
     url() {
       return origin + '?e=' + this.event.id;
     },
     banner() {
-      if (!this.event) return undefined;
+      if (!this.event?.images) return null;
       let nonRepresentative = !!this.event.nonRepresentativeImage;
       return {
         url: nonRepresentative ? backendUrl + this.event.nonRepresentativeImage : this.event.images[0],
-        credits: nonRepresentative ? this.$t.non_representative : this.event.imagesCredits[0],
+        credits: nonRepresentative ? this.$t.non_representative : this.event.imagesCredits?.[0],
         nonRepresentative
       };
     },
     categories() {
-      if (!this.event || !this.allCategories.length)
+      if (!this.event?.categories || !this.allCategories.length)
         return [];
       return this.event.categories.map(id => this.allCategories.find(c => c.id === id));
     }
@@ -200,14 +202,6 @@ export default {
     margin-left: .5em;
     margin-bottom: .5em;
   }
-  
-  .author:before {
-    content: "🔸 ";
-  }
-
-  .place:before {
-    content: "📍 ";
-  }
 
   .categories span {
     border: 1px solid var(--color-border);
@@ -217,6 +211,7 @@ export default {
   }
 
   .description {
+    min-height: 16em;
     font-size: 1.2em;
     line-height: 1.5;
     width: calc(100% - 8em);

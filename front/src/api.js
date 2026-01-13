@@ -47,8 +47,11 @@ const Api = {
     getEvents: function (parameters = {}) {
         return sendApiRequest("events/get.php", parameters, "Getting events");
     },
-    getEvent: function (id) {
-        return sendApiRequest("events/get.php", { id }, "Getting event " + id).then(events => events[0]);
+    getEvent: async function (id) {
+        let events = await sendApiRequest("events/get.php", { id }, "Getting event " + id);
+        if (!events.length)
+            throw new Error("Event not found: " + id);
+        return events[0];
     },
     createEvent: function (event) {
         return sendApiRequest("events/create.php", event, "Creating event " + event.name);
@@ -85,27 +88,24 @@ const Api = {
     },
 };
 
-function sendApiRequest(endpoint, parameters, message) {
-    return new Promise(function (resolve, reject) {
-        console.info("[API] " + message);
-        var urlParameters = Object.entries(parameters)
-            .filter(([_, v]) => v !== null && v !== undefined)
-            .map(([k, v]) =>
-                v instanceof Array ? v.map(i => k + "[]=" + encodeURIComponent(i)).join("&") : k + "=" + encodeURIComponent(v)
-            ).join("&");
-        console.debug("[API] Fetching " + backendUrl + "api/" + endpoint + "?" + urlParameters);
-        fetch(backendUrl + "api/" + endpoint + "?" + urlParameters)
-            .then(res => res.json())
-            .then(function (response) {
-                if (!response.success) {
-                    console.error("[API] " + response.error);
-                    reject(response.error);
-                } else {
-                    resolve(response.data);
-                }
-            })
-            .catch(reject);
-    });
+async function sendApiRequest(endpoint, parameters, message) {
+    console.info("[API] " + message);
+    var urlParameters = Object.entries(parameters)
+        .filter(([_, v]) => v !== null && v !== undefined)
+        .map(([k, v]) =>
+            v instanceof Array ? v.map(i => k + "[]=" + encodeURIComponent(i)).join("&") : k + "=" + encodeURIComponent(v)
+        ).join("&");
+    console.debug("[API] Fetching " + backendUrl + "api/" + endpoint + "?" + urlParameters);
+    return fetch(backendUrl + "api/" + endpoint + "?" + urlParameters)
+        .then(res => res.json())
+        .then(function (response) {
+            if (!response.success) {
+                console.error("[API] " + response.error);
+                throw new Error(response.error);
+            } else {
+                return response.data;
+            }
+        });
 }
 
 export default Api;

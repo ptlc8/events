@@ -37,12 +37,12 @@ export default {
         },
         search: {
             handler(value) {
-                this.$router.replace({ query: { ...this.$route.query, ...this.getSearchInQueryFormat(value) } });
+                this.$router.replace({ ...this.$route, query: { ...this.$route.query, ...this.getSearchInQueryFormat(value) } });
             },
             deep: true
         },
         showMap(value) {
-            this.$router.replace({ query: { ...this.$route.query, map: value ? null : undefined } });
+            this.$router.replace({ ...this.$route, query: { ...this.$route.query, map: value ? null : undefined } });
         }
     },
     methods: {
@@ -50,11 +50,12 @@ export default {
             let [lng, lat] = query.g?.split(',') ?? [];
             let [dmin, dmax] = query.d?.split(',') ?? [];
             let [tmin, tmax] = query.t?.split(',') ?? [];
+            let today = new Date(new Date().setHours(0, 0, 0)).toISOString().substring(0, 16);
             return {    
                 text: query.q ?? '',
                 cats: query.c?.split(',') ?? [],
                 sort: query.s ?? 'relevance',
-                date: { min: (dmin ?? formatRelativeDate(0)) || null, max: dmax || null },
+                date: { min: (dmin ?? today) || null, max: dmax || null },
                 time: { min: tmin || null, max: tmax || null },
                 gloc: query.g ? { lng: parseFloat(lng), lat: parseFloat(lat) } : undefined,
                 dist: isNaN(parseInt(query.r)) ? undefined : parseInt(query.r)

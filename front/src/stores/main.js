@@ -6,7 +6,6 @@ export const useMainStore = defineStore('main', {
     user: null,
     loggingIn: false,
     event: null,
-    events: [],
     showAbout: false
   }),
   getters: {

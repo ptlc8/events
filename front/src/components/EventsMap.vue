@@ -23,7 +23,8 @@ export default {
         search: Object
     },
     data: () => ({
-        map: null
+        map: null,
+        events: []
     }),
     mounted() {
         var language = this.$texts.getLang() == 'zh' ? 'zh-Hans' : this.$texts.getLang();
@@ -67,7 +68,7 @@ export default {
                     clusterMaxZoom: 14,
                     clusterRadius: 50
                 });
-                watch(() => this.$store.events, () => {
+                watch(() => this.events, () => {
                     this.map.getSource('events').setData(this.getEventsAsGeoJson());
                 });
                 this.updateEvents();
@@ -134,10 +135,8 @@ export default {
             while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
                 coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
             }
-            this.$api.getEvent(e.features[0].properties.eventId).then(event => {
-                this.$route.query.show = undefined;
-                this.$store.event = event;
-            });
+            let eventId = e.features[0].properties.eventId;
+            this.$router.replace({ ...this.$route, query: { ...this.$route.query, show: undefined, e: eventId } });
         });
 
         this.map.on('click', 'events-clusters', e => {
@@ -171,7 +170,7 @@ export default {
         getEventsAsGeoJson() {
             return {
                 type: 'FeatureCollection',
-                features: this.$store.events.map(event => ({
+                features: this.events.map(event => ({
                     type: 'Feature',
                     geometry: { type: 'Point', coordinates: [event[1], event[2]] },
                     properties: { eventTitle: event[3], eventId: event[0] }
@@ -191,8 +190,7 @@ export default {
                 timemin: this.search.time.min,
                 timemax: this.search.time.max,
                 cats: this.search.cats
-            })
-                .then(events => this.$store.events = events);
+            }).then(events => this.events = events);
         }
     }
 };

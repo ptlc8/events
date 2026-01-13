@@ -9,7 +9,7 @@
       <span>{{ temperature_max }}</span>
     </div>
   </div>
-  <span class="description loadable">{{ $t[description] }}</span>
+  <span :class="{description: true, loading}">{{ $t[description] }}</span>
 </template>
 
 <script>
@@ -98,6 +98,9 @@ export default {
     }
   },
   computed: {
+    loading() {
+      return this.weather === undefined;
+    },
     weatherCode() {
       return this.weather ? this.weather.daily.weathercode[0] : null;
     },

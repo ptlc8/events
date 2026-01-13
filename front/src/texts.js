@@ -74,6 +74,7 @@ function getNavigatorLang() {
 
 // Retourne la date sous forme de texte et dans le fuseau local
 function getDisplayDate(datetime) {
+    if (!datetime) return "";
     var date = new Date(datetime + "Z");
     date.setHours(0, 0, 0, 0);
     var today = new Date();
@@ -89,21 +90,25 @@ function getDisplayDate(datetime) {
 
 // Retourne l'heure sous forme de texte et dans le fuseau local
 function getDisplayTime(datetime) {
+    if (!datetime) return "";
     var time = new Date(datetime + "Z");
     return time.getHours() + ":" + (time.getMinutes() < 10 ? "0" : "") + time.getMinutes();
 }
 
 // Retourne la date et l'heure sous forme de texte
 function getDisplayDateTime(datetime) {
+    if (!datetime) return "";
     return getDisplayDate(datetime) + " " + get("at") + " " + getDisplayTime(datetime);
 }
 
 function getDisplayMonth(datetime) {
+    if (!datetime) return "";
     var date = new Date(datetime + "Z");
     return date.toLocaleString(getLang(), { month: "short" });
 }
 
 function getDisplayDay(datetime) {
+    if (!datetime) return "";
     var date = new Date(datetime + "Z");
     return (date.getDate() < 10 ? "0" : "") + date.getDate();
 }

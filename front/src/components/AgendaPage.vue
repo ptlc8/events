@@ -1,10 +1,9 @@
 <template>
-  <div v-if="datetime">
+  <div>
     <span class="month">{{ month }}</span>
     <span class="day">{{ day }}</span>
     <span class="weekday">{{ weekday }}</span>
   </div>
-  <div v-else class="loading"></div>
 </template>
 
 <script>
@@ -18,12 +17,15 @@ export default {
   },
   computed: {
     month() {
+      if (!this.datetime) return "";
       return new Date(this.datetime).toLocaleString(this.$texts.getLang(), { month: "long" });
     },
     day() {
+      if (!this.datetime) return "";
       return new Date(this.datetime).toLocaleString(this.$texts.getLang(), { day: "numeric" });
     },
     weekday() {
+      if (!this.datetime) return "";
       return new Date(this.datetime).toLocaleString(this.$texts.getLang(), { weekday: "long" });
     }
   }
@@ -44,6 +46,7 @@ div {
 
   .month {
     display: block;
+    height: 1.6em;
     background-color: #f02e2e;
     font-size: 1.6em;
     line-height: 1.4;

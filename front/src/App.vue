@@ -32,16 +32,21 @@ export default {
   watch: {
     $route(to) {
       if (to.query.e) {
-        this.$api.getEvent(to.query.e).then(event => {
-          this.$store.event = event;
-        });
+        if (!this.$store.event || this.$store.event.id != to.query.e) {
+          this.$store.event = undefined;
+          this.$api.getEvent(to.query.e).then(event => {
+            this.$store.event = event;
+          }).catch(err => {
+            this.$store.event = { id: to.query.e, description: err };
+          });
+        }
       } else {
         this.$store.event = null;
       }
     },
     '$store.event'(event) {
-      console.log("Setting route event to ", event);
-      this.$router.replace({ name: this.$route.name, query: { ...this.$route.query, e: event?.id } });
+      if (event === undefined) return;
+      this.$router.replace({ ...this.$route, query: { ...this.$route.query, e: event?.id } });
     }
   }
 }
@@ -73,7 +78,7 @@ export default {
     </RouterLink>
   </nav>
 
-  <EventModal :show="$store.event != null" :event="$store.event" @close="$store.event = null" />
+  <EventModal :show="$store.event !== null" :event="$store.event" @close="$store.event = null" />
   <LoginModal :show="$store.loggingIn" @close="$store.loggingIn = false" />
   <AboutModal :show="$store.showAbout" @close="$store.showAbout = false" />
 </template>

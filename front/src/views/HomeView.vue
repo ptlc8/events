@@ -51,7 +51,6 @@
 
 <script>
 import EventPreview from '@/components/EventPreview.vue';
-import EventsApi from '@/api';
 import { RouterLink } from 'vue-router';
 import SearchBar from '@/components/inputs/SearchBar.vue';
 
@@ -60,21 +59,21 @@ export default {
     components: { SearchBar, EventPreview, RouterLink },
     data: () => ({
         categories: [],
-        relevantEvents: [],
-        popularEvents: [],
-        nearbyEvents: [],
+        relevantEvents: [ undefined, undefined, undefined, undefined ],
+        popularEvents: [ undefined, undefined, undefined, undefined ],
+        nearbyEvents: [ undefined, undefined, undefined, undefined ],
         favoriteEvents: [],
-        soonEvents: [],
+        soonEvents: [ undefined, undefined, undefined, undefined ],
         gloc: null
     }),
     mounted() {
-        EventsApi.getCategories().then(categories => {
+        this.$api.getCategories().then(categories => {
             let index = Math.floor(Math.random() * (categories.length - 8));
             this.categories = categories.slice(index, index + 9);
         });
         this.$geolocation.get().then(loc => {
             this.gloc = loc;
-            EventsApi.getEvents({
+            this.$api.getEvents({
                 lng: loc.lng,
                 lat: loc.lat,
                 datemin: new Date().toISOString().substring(0, 19),
@@ -83,8 +82,10 @@ export default {
                 limit: 10
             }).then(events => {
                 this.relevantEvents = events;
+            }).catch(() => {
+                this.relevantEvents = [];
             });
-            EventsApi.getEvents({
+            this.$api.getEvents({
                 lng: loc.lng,
                 lat: loc.lat,
                 datemin: new Date().toISOString().substring(0, 19),
@@ -93,30 +94,36 @@ export default {
                 limit: 10
             }).then(events => {
                 this.nearbyEvents = events;
+            }).catch(() => {
+                this.nearbyEvents = [];
             });
         });
-        EventsApi.getEvents({
+        this.$api.getEvents({
             datemin: new Date().toISOString().substring(0, 19),
             hasimage: true,
             sort: 'popularity',
             limit: 10
         }).then(events => {
             this.popularEvents = events;
+        }).catch(() => {
+            this.popularEvents = [];
         });
-        EventsApi.getEvents({
+        this.$api.getEvents({
             favorite: true,
             sort: 'datetime',
             limit: 10
         }).then(events => {
             this.favoriteEvents = events;
         });
-        EventsApi.getEvents({
+        this.$api.getEvents({
             datemin: new Date().toISOString().substring(0, 19),
             hasimage: true,
             sort: 'datetime',
             limit: 10
         }).then(events => {
             this.soonEvents = events;
+        }).catch(() => {
+            this.soonEvents = [];
         });
     }
 }

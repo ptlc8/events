@@ -1,25 +1,24 @@
 <template>
-    <article v-if="event" class="event-preview" @click="$emit('click')">
-        <span class="title">{{ event.title }}</span>
-        <div class="picture" :style="'background-image: url(\'' + banner.url + '\');'" :title="banner.credits">
-            <span v-if="banner.nonRepresentative" :title="$t.non_representative">❗</span>
+    <article class="event-preview" @click="$emit('click')">
+        <span :class="{ title: true, loading }">{{ event?.title }}</span>
+        <div :class="{ picture: true, loading }" :style="'background-image: url(\'' + banner?.url + '\');'" :title="banner?.credits">
+            <span v-if="banner?.nonRepresentative" :title="$t.non_representative">❗</span>
         </div>
         <div class="infos">
             <div class="date">
-                <div class="month">{{ $texts.getDisplayMonth(event.start) }}</div>
-                <div class="day">{{ $texts.getDisplayDay(event.start) }}</div>
+                <div :class="{ month: true, loading }">{{ $texts.getDisplayMonth(event?.start) }}</div>
+                <div :class="{ day: true, loading }">{{ $texts.getDisplayDay(event?.start) }}</div>
             </div>
             <div class="details">
-                <div>📍 {{ event.placename }}</div>
-                <div>🕓 {{ $texts.getDisplayTime(event.start) }}</div>
-                <div class="categories">
+                <div :class="{ loading }">🕓 {{ event?.placename }}</div>
+                <div :class="{ loading }">📍 {{ $texts.getDisplayTime(event?.start) }}</div>
+                <div :class="{ categories: true, loading }">
                     <span v-for="c in categories">{{ c.emoji }} {{ $t[c.id] }}</span>
                 </div>
             </div>
         </div>
         <slot></slot>
     </article>
-    <article v-else class="loading event-preview"></article>
 </template>
 
 <script>
@@ -40,16 +39,20 @@ export default {
         this.$api.getCategories().then(cats => this.allCategories = cats);
     },
     computed: {
+        loading() {
+            return this.event === undefined;
+        },
         banner() {
+            if (!this.event?.images) return null;
             var nonRepresentative = !!this.event.nonRepresentativeImage;
             return {
                 url: nonRepresentative ? backendUrl + this.event.nonRepresentativeImage : this.event.images[0],
-                credits: nonRepresentative ? this.$t.non_representative : this.event.imagesCredits[0],
+                credits: nonRepresentative ? this.$t.non_representative : this.event.imagesCredits?.[0],
                 nonRepresentative
             }
         },
         categories() {
-            if (!this.allCategories.length)
+            if (!this.event?.categories || !this.allCategories.length)
                 return [];
             return this.event.categories.map(id => this.allCategories.find(c => c.id == id));
         }
@@ -67,7 +70,9 @@ export default {
     @include interactive;
 
     .picture {
-        background: center center / cover var(--color-background-mute);
+        background-position: center;
+        background-size: cover;
+        background-color: var(--color-background-mute);
         border-radius: 4px;
         min-height: 12em;
     }
@@ -90,33 +95,38 @@ export default {
         flex-direction: row;
     
         .date {
+            flex: 1;
             display: flex;
             flex-direction: column;
             justify-content: center;
+            gap: 0.1em;
             border-right: 2px solid var(--color-text);
             margin: 0 8px;
             padding-right: 8px;
             text-align: center;
 
             .month {
+                min-height: 1em;
                 font-size: 1.2em;
                 line-height: 1;
                 text-transform: uppercase;
             }
 
             .day {
+                min-height: 1em;
                 font-size: 2.4em;
                 line-height: 1;
             }
         }
 
         .details {
+            flex: 4;
             display: flex;
             flex-direction: column;
+            gap: .1em;
 
             > * {
-                line-height: 1.5;
-                max-height: 1.5em;
+                height: 1.6em;
                 overflow: hidden;
                 word-break: break-all;
                 display: -webkit-inline-box;
