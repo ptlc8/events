@@ -72,45 +72,73 @@ function getNavigatorLang() {
     return navigator.language ?? navigator.userLanguage ?? "";
 }
 
-// Retourne la date sous forme de texte et dans le fuseau local
+/**
+ * Retourne la date sous forme de texte localisée
+ * @param {string} datetime Date au format ISO 8601 (YYYY-MM-DDTHH:MM:SS)
+ * @return {string} Date sous forme de texte localisée
+ */
 function getDisplayDate(datetime) {
     if (!datetime) return "";
-    var date = new Date(datetime + "Z");
+    var date = new Date(datetime);
     date.setHours(0, 0, 0, 0);
     var today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    if (date.getTime() == today.getTime() - 86400000) return get("yesterday");
-    if (date.getTime() < today.getTime()) return get("past");
-    if (date.getTime() == today.getTime()) return get("today");
-    if (date.getTime() == today.getTime() + 86400000) return get("tomorrow");
-    if (date.getTime() < today.getTime() + 6 * 86400000) return date.toLocaleString(getLang(), { weekday: "long" }) + get("next");
-    return get("the_date") + date.getDate() + " " + date.toLocaleString(getLang(), { month: "long" }) + (date.getYear() == today.getYear() ? "" : " " + date.getYear())
+    if (date.getTime() == today.getTime() - 86400000)
+        return get("yesterday");
+    if (date.getTime() < today.getTime())
+        return get("past");
+    if (date.getTime() == today.getTime())
+        return get("today");
+    if (date.getTime() == today.getTime() + 86400000)
+        return get("tomorrow");
+    if (date.getTime() < today.getTime() + 6 * 86400000)
+        return date.toLocaleString(getLang(), { weekday: "long" }) + get("next");
+    return get("the_date", date.toLocaleString(getLang(), { month: "long", day: "2-digit", year: date.getYear() == today.getYear() ? undefined : "numeric" }));
 }
 
-// Retourne l'heure sous forme de texte et dans le fuseau local
+/**
+ * Retourne l'heure sous forme de texte localisée
+ * @param {string} datetime Date au format ISO 8601 (YYYY-MM-DDTHH:MM:SS)
+ * @param {boolean} isUTC Indique si la date est en UTC
+ * @return {string} Heure sous forme de texte localisée
+ */
 function getDisplayTime(datetime) {
     if (!datetime) return "";
-    var time = new Date(datetime + "Z");
-    return time.getHours() + ":" + (time.getMinutes() < 10 ? "0" : "") + time.getMinutes();
+    var time = new Date(datetime);
+    return time.toLocaleString(getLang(), { hour: "numeric", minute: "2-digit" });
 }
 
-// Retourne la date et l'heure sous forme de texte
+/**
+ * Retourne la date et l'heure sous forme de texte localisée
+ * @param {string} datetime Date au format ISO 8601 (YYYY-MM-DDTHH:MM:SS)
+ * @return {string} Date et heure sous forme de texte localisée
+ */
 function getDisplayDateTime(datetime) {
     if (!datetime) return "";
-    return getDisplayDate(datetime) + " " + get("at") + " " + getDisplayTime(datetime);
+    return get("date_at_time", getDisplayDate(datetime), getDisplayTime(datetime));
 }
 
+/**
+ * Retourne le mois sous forme de texte localisé
+ * @param {string} datetime Date au format ISO 8601 (YYYY-MM-DDTHH:MM:SS)
+ * @return {string} Mois sous forme de texte localisé
+ */
 function getDisplayMonth(datetime) {
     if (!datetime) return "";
-    var date = new Date(datetime + "Z");
+    var date = new Date(datetime);
     return date.toLocaleString(getLang(), { month: "short" });
 }
 
+/**
+ * Retourne le jour sous forme de texte localisé
+ * @param {string} datetime Date au format ISO 8601 (YYYY-MM-DDTHH:MM:SS)
+ * @return {string} Jour sous forme de texte localisé
+ */
 function getDisplayDay(datetime) {
     if (!datetime) return "";
-    var date = new Date(datetime + "Z");
-    return (date.getDate() < 10 ? "0" : "") + date.getDate();
+    var date = new Date(datetime);
+    return date.toLocaleDateString(getLang(), { day: "2-digit" });
 }
 
 export const values = new Proxy(get, {

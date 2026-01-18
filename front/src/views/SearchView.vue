@@ -50,12 +50,12 @@ export default {
             let [lng, lat] = query.g?.split(',') ?? [];
             let [dmin, dmax] = query.d?.split(',') ?? [];
             let [tmin, tmax] = query.t?.split(',') ?? [];
-            let today = new Date(new Date().setHours(0, 0, 0)).toISOString().substring(0, 16);
+            let now = new Date().toISOString().substring(0, 16) + 'Z';
             return {    
                 text: query.q ?? '',
                 cats: query.c?.split(',') ?? [],
                 sort: query.s ?? 'relevance',
-                date: { min: (dmin ?? today) || null, max: dmax || null },
+                date: { min: (dmin ?? now) || null, max: dmax || null },
                 time: { min: tmin || null, max: tmax || null },
                 gloc: query.g ? { lng: parseFloat(lng), lat: parseFloat(lat) } : undefined,
                 dist: isNaN(parseInt(query.r)) ? undefined : parseInt(query.r)

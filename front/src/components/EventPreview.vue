@@ -10,8 +10,8 @@
                 <div :class="{ day: true, loading }">{{ $texts.getDisplayDay(event?.start) }}</div>
             </div>
             <div class="details">
-                <div :class="{ loading }">🕓 {{ event?.placename }}</div>
-                <div :class="{ loading }">📍 {{ $texts.getDisplayTime(event?.start) }}</div>
+                <div :class="{ loading }">📍 {{ event?.placename }}</div>
+                <div :class="{ loading }">🕓 {{ $texts.getDisplayTime(event?.start) }}</div>
                 <div :class="{ categories: true, loading }">
                     <span v-for="c in categories">{{ c.emoji }} {{ $t[c.id] }}</span>
                 </div>

@@ -121,6 +121,11 @@ function parseTime($time, $default=false) {
 	return date("H:i:s", $timestamp);
 }
 
+function formatDateTimeISO($datetime) {
+	$dt = new DateTime($datetime, new DateTimeZone('Etc/GMT'));
+	return $dt->format('Y-m-d\TH:i:s\Z');
+}
+
 function fixLongitude($lng) {
     return fmod(fmod($lng, 360) + 540, 360) - 180;
 }

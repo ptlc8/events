@@ -64,8 +64,8 @@ if (isset($_REQUEST['id'])) {
     // Date filter
     $dateInf = isset($_REQUEST['datemin']) ? parseDate($_REQUEST['datemin']) : null;
     $dateSup = isset($_REQUEST['datemax']) ? parseDate($_REQUEST['datemax']) : null;
-    if ($dateInf) $request .= " AND '$dateInf' <= CAST(start AS date)";
-    if ($dateSup) $request .= " AND CAST(start AS date) < '$dateSup'";
+    if ($dateInf) $request .= " AND '$dateInf' <= start";
+    if ($dateSup) $request .= " AND start < '$dateSup'";
     
     // Categories filter
     $categories = isset($_REQUEST['cats']) && is_array($_REQUEST['cats']) ? $_REQUEST['cats'] : array();
@@ -154,6 +154,10 @@ while (($event = $result->fetch_assoc()) != null) {
     if (!$min) {
         $event['lng'] = floatval($event['lng']);
         $event['lat'] = floatval($event['lat']);
+        $event['start'] = $event['start'] ? formatDateTimeISO($event['start']) : null;
+        $event['end'] = $event['end'] ? formatDateTimeISO($event['end']) : null;
+        $event['createdAt'] = $event['createdAt'] ? formatDateTimeISO($event['createdAt']) : null;
+        $event['updatedAt'] = $event['updatedAt'] ? formatDateTimeISO($event['updatedAt']) : null;
         $event['categories'] = parseDatabaseArray($event['categories']);
         $event['images'] = parseDatabaseArray($event['images']);
         $event['imagesCredits'] = parseDatabaseArray($event['imagesCredits']);

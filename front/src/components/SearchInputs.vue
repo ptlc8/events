@@ -28,10 +28,16 @@ import GeolocationInput from './inputs/GeolocationInput.vue';
 import DistanceInput from './inputs/DistanceInput.vue';
 
 export function formatRelativeDate(days = 0) {
-    return new Date(Date.now() + (days * 24 * 60 - new Date().getTimezoneOffset()) * 60 * 1000).toISOString().split('T')[0];
+    let date = new Date(new Date().setHours(0, 0, 0, 0) + (days * 24 * 60) * 60 * 1000);
+    return date.getFullYear().toString().padStart(4, '0')
+        + '-' + (date.getMonth() + 1).toString().padStart(2, '0')
+        + '-' + date.getDate().toString().padStart(2, '0')
+        + 'T00:00';
 }
 function formatRelativeTime(hours = 0) {
-    return new Date(Date.now() + (hours * 60 - new Date().getTimezoneOffset()) * 60 * 1000).toISOString().substring(11, 19);
+    let date = new Date(Date.now() + (hours * 60) * 60 * 1000);
+    return date.getHours().toString().padStart(2, '0')
+        + ':' + date.getMinutes().toString().padStart(2, '0');
 }
 
 export default {

@@ -1,5 +1,6 @@
 <template>
-  <div :class="{ 'interval-select': true, opened }" tabindex="0" @mouseleave="close" @mouseover="open" @keydown.up.prevent="previous" @keydown.down.prevent="next">
+  <div :class="{ 'interval-select': true, opened }" tabindex="0" @mouseleave="close" @mouseover="open"
+    @keydown.up.prevent="previous" @keydown.down.prevent="next">
     <span class="value">{{ getLabel() }}</span>
     <div class="dropdown" v-if="opened">
       <div class="option" v-for="option in options" @click="void (value.min = option.min) || (value.max = option.max)">
@@ -7,13 +8,13 @@
       </div>
       <label>{{ $t.minimum }}</label>
       <div class="inputs-wrapper">
-        <input :type="type" v-model="value.min" />
-        <button class="reset" @click="value.min=undefined">✖</button>
+        <input :type="inputType" v-model="value.min" />
+        <button class="reset" @click="value.min = undefined">✖</button>
       </div>
       <label>{{ $t.maximum }}</label>
       <div class="inputs-wrapper">
-        <input :type="type" v-model="value.max" />
-        <button class="reset" @click="value.max=undefined">✖</button>
+        <input :type="inputType" v-model="value.max" />
+        <button class="reset" @click="value.max = undefined">✖</button>
       </div>
       <button @click="close">{{ $t.ok }}</button>
     </div>
@@ -21,8 +22,10 @@
 </template>
 
 <script>
+import texts from '@/texts';
+
 export default {
-  name: "IntervalSelect",
+  name: 'IntervalSelect',
   props: {
     modelValue: { // UTC timezone
       type: Object,
@@ -61,6 +64,11 @@ export default {
       deep: true
     }
   },
+  computed: {
+    inputType() {
+      return this.type === 'date' ? 'datetime-local' : this.type;
+    }
+  },
   mounted() {
     this.value.min = this.fromUTC(this.modelValue.min);
     this.value.max = this.fromUTC(this.modelValue.max);
@@ -81,7 +89,7 @@ export default {
     next() {
       let i = this.options.indexOf(this.getOption());
       if (i >= 0 && i < this.options.length - 1) {
-        this.value = { min: this.options[i + 1].min, max: this.options[i + 1].max};
+        this.value = { min: this.options[i + 1].min, max: this.options[i + 1].max };
       }
     },
     getOption() {
@@ -91,29 +99,40 @@ export default {
       if (this.getOption())
         return this.getOption().label;
       if (this.value.max && this.value.min)
-        return "Entre " + this.value.min.split("-").reverse().join("/") + " et " + this.value.max.split("-").reverse().join("/");
+        return texts.get("between", this.toLabel(this.value.min), this.toLabel(this.value.max));
       if (this.value.max)
-        return "Avant " + this.value.max.split("-").reverse().join("/");
+        return texts.get("before", this.toLabel(this.value.max));
       if (this.value.min)
-        return "Après " + this.value.min.split("-").reverse().join("/");
-      return "Peu importe";
+        return texts.get("after", this.toLabel(this.value.min));
+      return texts.get("no_matter");
+    },
+    toLabel(value) {
+      if (!value)
+        return '';
+      if (this.type === 'date') {
+        let time = '';
+        if (value.substring(11, 16) != '00:00')
+          time = ' (' + texts.getDisplayTime(value) + ')';
+        return texts.getDisplayDate(value) + time;
+      } else if (this.type === 'time') {
+        let todayDate = new Date().toISOString().substring(0, 10);
+        return texts.getDisplayTime(`${todayDate}T${value}`);
+      }
     },
     toUTC(value) {
       if (!value)
         return value;
-      let date = new Date();
       if (this.type === 'time') {
-        let parts = value.split(":").map(Number);
+        let date = new Date();
+        let parts = value.split(':').map(Number);
         date.setHours(parts[0]);
         date.setMinutes(parts[1]);
         return date.toISOString().substring(11, 16);
       } else if (this.type === 'date') {
-        let parts = value.split("-").map(Number);
-        date.setFullYear(parts[0]);
-        date.setMonth(parts[1] - 1);
-        date.setDate(parts[2]);
-        date.setHours(0, 0, 0, 0);
-        return date.toISOString().substring(0, 16);
+        if (value.startsWith('Z'))
+          throw new Error('Expected local datetime not ending with "Z": ' + value);
+        let date = new Date(value);
+        return date.toISOString().substring(0, 16) + 'Z';
       }
       return value;
     },
@@ -122,14 +141,18 @@ export default {
         return value;
       if (this.type === 'time') {
         let utcDate = new Date().toISOString().substring(0, 10);
-        let date = new Date(utcDate + "T" + value + "Z");
+        let date = new Date(utcDate + 'T' + value + 'Z');
         return date.getHours().toString().padStart(2, '0')
-          + ":" + date.getMinutes().toString().padStart(2, '0');
+          + ':' + date.getMinutes().toString().padStart(2, '0');
       } else if (this.type === 'date') {
-        let date = new Date(value + "Z");
-        return date.getFullYear()
-          + "-" + (date.getMonth() + 1).toString().padStart(2, '0')
-          + "-" + date.getDate().toString().padStart(2, '0');
+        if (!value.endsWith('Z'))
+          throw new Error('Expected UTC datetime ending with "Z": ' + value);
+        let date = new Date(value);
+        return date.getFullYear().toString().padStart(4, '0')
+          + '-' + (date.getMonth() + 1).toString().padStart(2, '0')
+          + '-' + date.getDate().toString().padStart(2, '0')
+          + 'T' + date.getHours().toString().padStart(2, '0')
+          + ':' + date.getMinutes().toString().padStart(2, '0');
       }
       return value;
     }
