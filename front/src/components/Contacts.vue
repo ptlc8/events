@@ -14,14 +14,13 @@ export default {
     computed: {
         contactsLinks() {
             return this.contacts.map(c => {
-                if (c.startsWith("http"))
-                    return { href: c, text: c };
+                if (c.startsWith("http://") || c.startsWith("https://"))
+                    return { href: c, text: c.replace(/^https?:\/\//, "") };
                 if (c.includes("@"))
                     return { href: "mailto:" + c, text: c };
-                if (c.match(/^(\+|)[\d ]+$/))
+                if (c.match(/^(\+|)[\d\s\-]+$/))
                     return { href: "tel:" + c, text: c };
-                else
-                    return { text: c };
+                return { text: c };
             });
         }
     }
