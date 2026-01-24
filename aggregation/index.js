@@ -20,7 +20,7 @@ for (let file of fs.readdirSync(import.meta.dirname + "/providers")) {
         continue;
     var module = await import("./providers/" + file);
     console.log("Loaded provider", name, `(${file})`);
-    var missingVars = module.envVars.filter(v => process.env[v] === undefined);
+    var missingVars = module.envVars.filter(v => !process.env[v]);
     if (missingVars.length != 0) {
         console.error(`Provider ${name} is missing environment variables: ${missingVars.join(", ")}`);
         continue;

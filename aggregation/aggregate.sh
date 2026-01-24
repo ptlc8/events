@@ -27,9 +27,12 @@ if [ $exitcode -eq 0 ]; then
     emojis=(🍏 🥬 💚 📗 🍀 🌱)
     emoji=${emojis[$RANDOM % ${#emojis[@]}]}
     result=$(echo $(echo "$logs" | tr '\n' ' ') | grep -oP '\{[^\{]*\}$')
-    newevents=$(echo "$result" | jq '."db.inserted"')
+    inserted=$(echo "$result" | jq '."db.inserted"')
+    updated=$(echo "$result" | jq '."db.updated"')
+    unchanged=$(echo "$result" | jq '."db.unchanged"')
+    deleted=$(echo "$result" | jq '."db.deleted"')
     echo "$emoji $1 aggregation success"
-    sendwebhook "$emoji $1 aggregation success\n$newevents new events"
+    sendwebhook "$emoji $1 aggregation success\n${inserted} inserted, ${updated} updated, ${unchanged} unchanged, ${deleted} deleted"
 else
     emojis=(🍎 ❤ 📕 🍅 🍒 🌶)
     emoji=${emojis[$RANDOM % ${#emojis[@]}]}

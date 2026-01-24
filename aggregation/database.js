@@ -45,7 +45,7 @@ export default class Database extends EventEmitter {
                 var values = Object.keys(event)
                     .filter(k => eventsColumns.includes(k))
                     .reduce((obj, k) => {
-                        obj[k] = event[k] instanceof Array ? event[k].filter(v => v).map(v => v.replace("\\", "\\\\").replace(",", "\\,")).join(",") : event[k];
+                        obj[k] = event[k] instanceof Array ? event[k].filter(v => v).map(v => v.replaceAll("\\", "\\\\").replaceAll(",", "\\,")).join(",") : event[k];
                         return obj;
                     }, {});
                 this.pool.query(
@@ -56,7 +56,7 @@ export default class Database extends EventEmitter {
                 )
                     .on("error", error => this.emit("error", error))
                     .on("result", result => {
-                        this.emit("progress", { updated: result.affectedRows == 2 ? 1 : 0, inserted: result.affectedRows == 1 ? 1 : 0 });
+                        this.emit("progress", { updated: result.affectedRows == 2 ? 1 : 0, inserted: result.affectedRows == 1 ? 1 : 0, unchanged: result.affectedRows == 0 ? 1 : 0 });
                     })
                     .on("end", () => resolve);
             }
@@ -70,6 +70,8 @@ export default class Database extends EventEmitter {
      * @returns {Promise<null>}
      */
     clean(events, prefix) {
+        if (events.length == 0)
+            return Promise.resolve();
         return new Promise(resolve => {
             var ids = events.map(event => event.id);
             this.pool.query("DELETE FROM `events` WHERE `id` LIKE '" + prefix + "%' AND `id` NOT IN (?)", [ids])
