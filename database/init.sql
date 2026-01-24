@@ -2,7 +2,7 @@ CREATE TABLE `events` (
   `id` varchar(34) NOT NULL COMMENT 'id',
   `title` text COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'nom',
   `author` text NOT NULL COMMENT 'organisateur',
-  `description` text COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT ('') COMMENT 'description',
+  `description` text COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT ('') COMMENT 'markdown description',
   `start` datetime NOT NULL COMMENT 'date et horaire de début',
   `end` datetime NOT NULL COMMENT 'date et horaire de fin',
   `lng` float NOT NULL COMMENT 'longitude',

@@ -8,7 +8,7 @@
       <div class="categories">
         <span v-for="cat in categories">{{ cat.emoji }} {{ $t[cat.id] }}</span>
       </div>
-      <div :class="{ description: true, loading }">{{ event?.description }}</div>
+      <div :class="{ description: true, loading }" v-html="marked.parse(event?.description)"></div>
       <div class="sidebar">
         <h3>📅 Quand ?</h3>
         <div v-if="event?.start?.substring(0, 10) != event?.end?.substring(0, 10)" class="datetimes">
@@ -70,6 +70,7 @@
 </template>
 
 <script>
+import { marked } from "marked";
 import AgendaPage from "@/components/AgendaPage.vue";
 import Weather from "@/components/Weather.vue";
 import Contacts from "@/components/Contacts.vue";
@@ -86,7 +87,8 @@ export default {
   },
   components: { AgendaPage, Weather, Contacts, Modal },
   setup: () => ({
-    isApp
+    isApp,
+    marked
   }),
   data: () => ({
     allCategories: []
@@ -211,7 +213,7 @@ export default {
   }
 
   .description {
-    min-height: 16em;
+    min-height: 8em;
     font-size: 1.2em;
     line-height: 1.5;
     width: calc(100% - 8em);
