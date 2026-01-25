@@ -1,16 +1,11 @@
-import { EventsFetch } from "./event.js";
+import { Readable } from "stream";
 
-/**
- * @property {string} name Name of the provider
- * @property {string} shortId Short identifier of the provider
- * @property {function(): import("./event.js").EventsFetch} fetchAll Function to fetch all events from the provider
- */
 export default class Provider {
 
     /**
-     * @param {string} name
-     * @param {string} shortId
-     * @param {Array<string>} envVars
+     * @param {string} name name of the provider
+     * @param {string} shortId short identifier
+     * @param {Array<string>} envVars environment variables required by the provider
      */
     constructor(name, shortId, envVars = []) {
         this.name = name;
@@ -21,7 +16,7 @@ export default class Provider {
     /**
      * Fetch all events from the provider
      * @abstract
-     * @returns {EventsFetch}
+     * @returns {Readable}
      */
     fetchAll() {
         throw new Error("Not implemented");

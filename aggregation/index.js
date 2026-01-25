@@ -57,7 +57,7 @@ function updateProgress(p, prefix = "") {
  * @param {Error} error 
  * @param {string} prefix 
  */
-function onError(error, prefix = "") {
+function onWarn(error, prefix = "") {
     if (isInteractive)
         console.info();
     console.error(error);
@@ -80,17 +80,19 @@ const db = new Database({
     password: process.env.DB_PASS,
     database: process.env.DB_NAME
 });
-db.on("progress", p => updateProgress(p, "db."));
-db.on("error", error => onError(error, "db."));
 
 // Fetch events from providers
 await Promise.all(providers.map(provider =>
     new Promise(resolve => {
-        provider.fetchAll()
-            .on("events", events => db.update(events, provider.shortId, provider.name))
+        let eventsFetcher = provider.fetchAll()
+            .on("data", events => updateProgress({ events: events.length }, provider.shortId + "."))
             .on("progress", progress => updateProgress(progress, provider.shortId + "."))
-            .on("error", error => onError(error, provider.shortId + "."))
-            .on("end", events => db.clean(events, provider.shortId).then(resolve));
+            .on("warn", warn => onWarn(warn, provider.shortId + "."));
+        let dbWritable = db.getWritableStream(provider.shortId, provider.name)
+            .on("progress", progress => updateProgress(progress, "db."))
+            .on("warn", warn => onWarn(warn, "db."))
+            .on("finish", () => resolve(true));
+        eventsFetcher.pipe(dbWritable);
     })
 ));
 

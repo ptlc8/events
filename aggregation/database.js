@@ -1,5 +1,6 @@
+import { EventEmitter } from "events";
 import mysql from "mysql2";
-import EventEmitter from "events";
+import { Writable } from "stream";
 import { Event } from "./event.js";
 
 const eventsColumns = ["title", "author", "description", "start", "end", "lng", "lat", "placename", "categories", "images", "imagesCredits", "status", "contact", "registration", "public", "createdAt", "updatedAt", "source", "sourceUrl"];
@@ -7,13 +8,12 @@ const eventsColumns = ["title", "author", "description", "start", "end", "lng", 
 /**
  * Class for updating the events database
  */
-export default class Database extends EventEmitter {
+export default class Database {
 
     /**
      * @param {mysql.ConnectionOptions} connectionConfig
      */
     constructor(connectionConfig) {
-        super();
         /** @type {mysql.Pool} */
         this.pool = mysql.createPool({ ...connectionConfig, flags: [...(connectionConfig.flags ?? []), "-FOUND_ROWS"] });
         /** @type {Record<string, number>} */
@@ -21,13 +21,45 @@ export default class Database extends EventEmitter {
     }
 
     /**
+     * @param {string} shortId 
+     * @param {string} source 
+     * @returns {Writable}
+     */
+    getWritableStream(shortId, source) {
+        let db = this;
+        /** @type {Array<string>} */
+        let ids = [];
+        return new Writable({
+            objectMode: true,
+            /**
+             * @param {Array<Event|null>} events
+             * @param {string} encoding
+             * @param {function(Error=): void} callback
+             */
+            write(events, encoding, callback) {
+                ids.push(...events.filter(event => event != null).map(event => event.id));
+                db.update(this, events, shortId, source)
+                    .then(() => callback())
+                    .catch(callback);
+            },
+            final(callback) {
+                db.clean(this, ids, shortId)
+                    .then(() => callback())
+                    .catch(callback);
+            },
+
+        });
+    }
+
+    /**
      * Update the database with the given events
+     * @param {EventEmitter} emitter
      * @param {Array<Event|null>} events
      * @param {string} shortId short identifier for the provider
      * @param {string} source name of the provider
-     * @returns {Promise<null>}
+     * @returns {Promise<void>}
      */
-    update(events, shortId, source) {
+    update(emitter, events, shortId, source) {
         return new Promise(resolve => {
             for (let event of events) {
                 if (event == null)
@@ -35,7 +67,7 @@ export default class Database extends EventEmitter {
                 event.id = shortId + event.id;
                 event.source = source;
                 if (!this.keys[event.id]) this.keys[event.id] = 0;
-                else super.emit("progress", { dupplicate: 1 });
+                else emitter.emit("progress", { duplicate: 1 });
                 this.keys[event.id]++;
                 /** @type {Record<string, string>} */
                 let values = {};
@@ -51,32 +83,30 @@ export default class Database extends EventEmitter {
                     + " ON DUPLICATE KEY UPDATE ?;",
                     [event.id].concat([Object.values(values)]).concat(values)
                 )
-                    .on("error", error => super.emit("error", error))
+                    .on("error", error => emitter.emit("warn", error))
                     .on("result", result => {
-                        super.emit("progress", { updated: result.affectedRows == 2 ? 1 : 0, inserted: result.affectedRows == 1 ? 1 : 0, unchanged: result.affectedRows == 0 ? 1 : 0 });
+                        emitter.emit("progress", { updated: result.affectedRows == 2 ? 1 : 0, inserted: result.affectedRows == 1 ? 1 : 0, unchanged: result.affectedRows == 0 ? 1 : 0 });
                     })
-                    .on("end", () => resolve);
+                    .on("end", () => resolve());
             }
         });
     }
 
     /**
      * Clean unknown events from the database
-     * @param {Array<Event|null>} events
+     * @param {EventEmitter} emitter
+     * @param {Array<string>} ids event IDs to keep
      * @param {string} prefix for example : DT, OA, ...
      * @returns {Promise<void>}
      */
-    clean(events, prefix) {
-        if (events.length == 0)
-            return Promise.resolve();
+    clean(emitter, ids, prefix) {
         return new Promise(resolve => {
-            var ids = events.filter(event => event != null).map(event => event.id);
-            this.pool.query("DELETE FROM `events` WHERE `id` LIKE '" + prefix + "%' AND `id` NOT IN (?)", [ids])
-                .on("error", error => super.emit("error", error))
+            this.pool.query("DELETE FROM `events` WHERE `id` LIKE '" + prefix + "%' AND `id` NOT IN (?)", [ids.concat([""])])
+                .on("error", error => emitter.emit("warn", error))
                 .on("result", result => {
-                    super.emit("progress", { deleted: result.affectedRows });
+                    emitter.emit("progress", { deleted: result.affectedRows });
                 })
-                .on("end", resolve);
+                .on("end", () => resolve());
         });
     }
 

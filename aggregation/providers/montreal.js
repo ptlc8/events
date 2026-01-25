@@ -5,7 +5,7 @@ import sanitizeHtml from "sanitize-html";
 import { Readable, Transform } from "stream";
 import z from "zod";
 import { findCategories } from "../utils/categories.js";
-import { Event, Status, EventsFetch } from "../event.js";
+import { Event, Status } from "../event.js";
 import Provider from "../provider.js";
 import { formatDateTime, IsoDateTimeSchema } from "../utils/datetime.js";
 
@@ -138,41 +138,42 @@ export default class MontrealProvider extends Provider {
     /**
      * Fetch all events from Montreal.ca
      * @param {string} csvUrl Montreal CSV URL
-     * @returns {EventsFetch}
+     * @returns {Readable}
      */
     fetchAll(csvUrl = super.getEnvVar("MONTREAL_CSV_URL")) {
-        /** @type {Array<Event>} */
-        var events = [];
-        const emitter = new EventsFetch();
-        const csvParser = CsvParser()
-            .on("data", () => emitter.emit("progress", { downloaded: 1 }))
-            .on("error", error => emitter.emit("error", error));
-        const eventParser = new Transform({
+        const out = new Transform({
             objectMode: true,
             async transform(obj, _encoding, callback) {
-                const mtlEvent = MontrealEventSchema.parse(obj);
-                const event = await parseEvent(mtlEvent);
-                emitter.emit("progress", { parsed: 1 });
-                if (event == null) {
-                    emitter.emit("progress", { ignored: 1 });
+                const { success, data: mtlEvent, error} = MontrealEventSchema.safeParse(obj);
+                if (!success) {
+                    out.emit("warn", error);
                     callback();
                     return;
                 }
-                events.push(event);
-                emitter.emit("events", [event]);
-                emitter.emit("progress", { events: 1 });
-                callback(null, event);
+                if (Math.random() < 0.2) {
+                    out.emit("warn", new Error("Random test error"));
+                    callback();
+                    return;
+                }
+                const event = await parseEvent(mtlEvent);
+                out.emit("progress", { parsed: 1 });
+                if (event == null) {
+                    out.emit("progress", { ignored: 1 });
+                    callback();
+                    return;
+                }
+                callback(null, [event]);
             }
         });
-        eventParser.on("end", () => emitter.emit("end", events));
-        eventParser.on("error", error => emitter.emit("error", error));
-        fetch(csvUrl)
-            .then(res => {
-                if (!res.body) emitter.emit("error", new Error("No response body"));
-                else Readable.fromWeb(res.body).pipe(csvParser).pipe(eventParser).resume();
-            })
-            .catch(error => emitter.emit("error", error));
-        return emitter;
+        const csvParser = CsvParser()
+            .on("data", () => out.emit("progress", { downloaded: 1 }))
+            .on("error", error => out.emit("warn", error));
+        fetch(csvUrl).then(res => {
+            if (!res.body)
+                throw new Error("No response body");
+            Readable.fromWeb(res.body).pipe(csvParser).pipe(out);
+        }).catch(error => out.emit("warn", error));
+        return out;
     }
 
 }
