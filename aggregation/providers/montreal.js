@@ -1,28 +1,52 @@
-/**
- * Module for fetching Montreal.ca events
- * @module montreal
- * @see https://www.montreal.ca/calendrier
- * @see https://donnees.montreal.ca/dataset/evenements-publics
- */
-
 import { default as CsvParser } from "csv-parser";
 import { DateTime } from "luxon";
 import { parse as parseHTML } from "node-html-parser";
 import sanitizeHtml from "sanitize-html";
 import { Readable, Transform } from "stream";
-import { findCategories } from "../categories.js";
+import z from "zod";
+import { findCategories } from "../utils/categories.js";
 import { Event, Status, EventsFetch } from "../event.js";
+import Provider from "../provider.js";
+import { formatDateTime, IsoDateTimeSchema } from "../utils/datetime.js";
 
-export const shortId = "MTL";
-export const envVars = ["MONTREAL_CSV_URL"];
+/**
+ * @typedef {z.infer<typeof MontrealEventSchema>} MontrealEvent
+ */
+const MontrealEventSchema = z.object({
+    titre: z.string(),
+    url_fiche: z.url(),
+    description: z.string(),
+    date_debut: IsoDateTimeSchema,
+    date_fin: IsoDateTimeSchema,
+    type_evenement: z.string(),
+    public_cible: z.string(),
+    emplacement: z.string(),
+    inscription: z.string(),
+    cout: z.string(),
+    arrondissement: z.string(),
+    titre_adresse: z.string(),
+    adresse_principale: z.string(),
+    adresse_secondaire: z.string(),
+    code_postal: z.string(),
+    lat: z.coerce.number(),
+    long: z.coerce.number(),
+    X: z.coerce.number(),
+    Y: z.coerce.number(),
+});
 
+const formatDateOpts = { zone: "America/Toronto" };
+
+/**
+ * @param {string} str 
+ * @returns {string?} 
+ */
 function nanToNull(str) {
     return (str == "nan" ? null : str);
 }
 
 /**
  * Parse a Montreal.ca event to an Event
- * @param {Object} mtlEvent
+ * @param {MontrealEvent} mtlEvent
  * @returns {Promise<Event?>}
  */
 async function parseEvent(mtlEvent) {
@@ -38,8 +62,8 @@ async function parseEvent(mtlEvent) {
         title: mtlEvent.titre,
         author: mtlEvent.arrondissement,
         description: moreData.description ?? mtlEvent.description,
-        start: moreData.start ?? formatDate(mtlEvent.date_debut),
-        end: moreData.end ?? formatDate(mtlEvent.date_fin),
+        start: moreData.start ?? formatDateTime(mtlEvent.date_debut, formatDateOpts),
+        end: moreData.end ?? formatDateTime(mtlEvent.date_fin, formatDateOpts),
         lng: mtlEvent.long,
         lat: mtlEvent.lat,
         placename: !address.length ? placename : `${placename} (${address.join(", ")})`,
@@ -48,14 +72,31 @@ async function parseEvent(mtlEvent) {
         imagesCredits: moreData.imagesCredits ?? [],
         status: moreData.cancelled ? Status.cancelled : Status.programmed,
         contact: [mtlEvent.url_fiche],
-        registration: [].concat(moreData.websites || []).concat(moreData.phones || []).concat(moreData.emails || []),
+        registration: (moreData.websites || []).concat(moreData.phones || []).concat(moreData.emails || []),
         public: true,
         createdAt: null,
-        updatedAt: formatDate(),
+        updatedAt: formatDateTime(undefined, formatDateOpts),
         sourceUrl: mtlEvent.url_fiche,
     };
 }
 
+/**
+ * Fetch more data from the event page
+ * @param {string} url_fiche
+ * @returns {Promise<{
+ *   description: string,
+ *   images: (string|undefined)[],
+ *   imagesCredits: (string|undefined)[],
+ *   start?: string,
+ *   end?: string,
+ *   placename?: string,
+ *   address?: string[],
+ *   websites: (string|undefined)[],
+ *   phones: (string|undefined)[],
+ *   emails: (string|undefined)[],
+ *   cancelled: boolean
+ * }>}
+ */
 async function fetchMoreData(url_fiche) {
     const res = await fetch(url_fiche);
     const html = await res.text();
@@ -64,64 +105,74 @@ async function fetchMoreData(url_fiche) {
     let longDescription = sanitizeHtml(root.querySelector("main .content-modules .content-module-stacked")?.innerHTML ?? "");
     let description = [shortDescription, longDescription].filter(Boolean).join("\n\n");
     let images = [
-        root.querySelector(".document-heading-image-container .document-heading-background")?.getAttribute("style")
-            ?.match(/background-image:url\(([^\)]+)\)/)[1]
+        ...[root.querySelector(".document-heading-image-container .document-heading-background")?.getAttribute("style")
+            ?.match(/background-image:url\(([^)]+)\)/)?.[1]]
     ];
-    let imagesCredits = [root.querySelector(".document-heading-image-container .badge-copyright .badge-label")?.textContent?.trim()];
+    let imagesCredits = [...[root.querySelector(".document-heading-image-container .badge-copyright .badge-label")?.textContent?.trim()]];
     images.push(...root.querySelectorAll("figure .image-wrapper img").map(img => img.getAttribute("src")));
     imagesCredits.push(...root.querySelectorAll("figure .image-wrapper .badge-copyright .badge-label").map(span => span.textContent.trim()));
-    let [start, end] = root.querySelectorAll("header time").map(time => formatDate(time.getAttribute("datetime")));
+    let [start, end] = root.querySelectorAll("header time").map(time => formatDateTime(time.getAttribute("datetime"), formatDateOpts) ?? undefined);
     if (!end && start)
-        end = DateTime.fromSQL(start).plus({ hours: 1 }).toSQL({ includeOffset: false });
+        end = DateTime.fromSQL(start).plus({ hours: 1 }).toSQL({ includeOffset: false }) ?? undefined;
     let placename = root.querySelector("aside .list-item-icon:has(.icon-location) :is(.link-icon-label, .list-item-icon-label)")?.textContent?.trim();
-    let address = root.querySelector("aside .list-item-icon:has(.icon-location) .list-item-icon-content :is(div:first-child:not(.list-item-icon-label), .list-item-icon-label + div div)")?.textContent?.split("\n")
+    let address = root.querySelector("aside .list-item-icon:has(.icon-location) .list-item-icon-content :is(div:first-child:not(.list-item-icon-label), .list-item-icon-label + div div)")?.textContent?.split("\n");
     let websites = root.querySelectorAll("a.link-has-icon[href^='http']").map(a => a.getAttribute("href"));
     let phones = root.querySelectorAll(".icon-phone + * .list-item-icon-label").map(span => span.textContent.trim());
-    let emails = root.querySelectorAll("a[href^='mailto:']").map(a => a.getAttribute("href").match(/mailto:([^?]+)/)[1]); // doesnt work because of email protection
+    let emails = root.querySelectorAll("a[href^='mailto:']").map(a => a.getAttribute("href")?.match(/mailto:([^?]+)/)?.[1]); // doesnt work because of email protection
     let cancelled = root.querySelector(".content-header .badge-danger")?.textContent == "Annulé";
     return { description, images, imagesCredits, start, end, placename, address, websites, phones, emails, cancelled };
 }
 
 /**
- * Fetch all events from Montreal.ca
- * @param {string} csvUrl Montreal CSV URL
- * @returns {EventsFetch}
+ * Montreal.ca events provider
+ * @see https://www.montreal.ca/calendrier
+ * @see https://donnees.montreal.ca/dataset/evenements-publics
  */
-export function fetchAll(csvUrl = process.env.MONTREAL_CSV_URL) {
-    var events = [];
-    const emitter = new EventsFetch();
-    const csvParser = CsvParser()
-        .on("data", () => emitter.emit("progress", { downloaded: 1 }))
-        .on("error", error => emitter.emit("error", error));
-    const eventParser = new Transform({
-        objectMode: true,
-        async transform(mtlEvent, _encoding, callback) {
-            const event = await parseEvent(mtlEvent);
-            emitter.emit("progress", { parsed: 1 });
-            if (event == null) {
-                emitter.emit("progress", { ignored: 1 });
-                callback();
-                return;
+
+export default class MontrealProvider extends Provider {
+
+    constructor() {
+        super("montreal", "MTL", ["MONTREAL_CSV_URL"]);
+    }
+
+    /**
+     * Fetch all events from Montreal.ca
+     * @param {string} csvUrl Montreal CSV URL
+     * @returns {EventsFetch}
+     */
+    fetchAll(csvUrl = super.getEnvVar("MONTREAL_CSV_URL")) {
+        /** @type {Array<Event>} */
+        var events = [];
+        const emitter = new EventsFetch();
+        const csvParser = CsvParser()
+            .on("data", () => emitter.emit("progress", { downloaded: 1 }))
+            .on("error", error => emitter.emit("error", error));
+        const eventParser = new Transform({
+            objectMode: true,
+            async transform(obj, _encoding, callback) {
+                const mtlEvent = MontrealEventSchema.parse(obj);
+                const event = await parseEvent(mtlEvent);
+                emitter.emit("progress", { parsed: 1 });
+                if (event == null) {
+                    emitter.emit("progress", { ignored: 1 });
+                    callback();
+                    return;
+                }
+                events.push(event);
+                emitter.emit("events", [event]);
+                emitter.emit("progress", { events: 1 });
+                callback(null, event);
             }
-            events.push(event);
-            emitter.emit("events", [event]);
-            emitter.emit("progress", { events: 1 });
-            callback(null, event);
-        }
-    })
-    eventParser.on("end", () => emitter.emit("end", events));
-    eventParser.on("error", error => emitter.emit("error", error));
-    fetch(csvUrl)
-        .then(res => Readable.fromWeb(res.body).pipe(csvParser).pipe(eventParser).resume())
-        .catch(error => emitter.emit("error", error));
-    return emitter;
-}
+        });
+        eventParser.on("end", () => emitter.emit("end", events));
+        eventParser.on("error", error => emitter.emit("error", error));
+        fetch(csvUrl)
+            .then(res => {
+                if (!res.body) emitter.emit("error", new Error("No response body"));
+                else Readable.fromWeb(res.body).pipe(csvParser).pipe(eventParser).resume();
+            })
+            .catch(error => emitter.emit("error", error));
+        return emitter;
+    }
 
-function formatDate(datetime) {
-    return (!datetime
-        ? DateTime.fromSeconds(0)
-        : DateTime.fromISO(datetime, { zone: "America/Toronto" })
-    ).toUTC().toSQL({ includeOffset: false });
 }
-
-export default { fetchAll };

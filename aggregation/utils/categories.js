@@ -3,7 +3,7 @@
 // https://gitlab.adullact.net/adntourisme/datatourisme/ontology/-/blob/master/thesaurus/thesaurus.ttl
 
 /**
- * @type {Map<string, Array<string>>}
+ * @type {Record<string, Array<string>>}
  */
 const categoriesKeywords = {
     "party": ["party", "fête"],
@@ -46,17 +46,17 @@ const categoriesKeywords = {
 
 /**
  * Find corresponding categories id based on texts
- * @param  {...string} texts
+ * @param {...string|undefined?} texts
  * @returns {Array<string>}
  */
 export function findCategories(...texts) {
-    texts = texts
+    const filteredTexts = texts
         .filter(t => t != null)
         .map(t => t.toLowerCase());
     return Object.entries(categoriesKeywords)
-        .filter(([category, keywords]) =>
+        .filter(([_category, keywords]) =>
             keywords.some(keyword =>
-                texts.some(text => text.match(new RegExp(keyword)))
+                filteredTexts.some(text => text.match(new RegExp(keyword)))
             )
         ).map(([category]) => category);
 }

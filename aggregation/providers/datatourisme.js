@@ -1,19 +1,74 @@
-/**
- * Module for fetching Datatourisme events
- * @module datatourisme
- * @see https://www.datatourisme.fr
- */
-
-import unzip from "unzipper";
+import axios from "axios";
 import crypto from "crypto";
 import fs from "fs";
+import { formatDateTime, IsoDateTimeSchema } from "../utils/datetime.js";
 import stream from "stream";
-import axios from "axios";
+import unzip from "unzipper";
+import z from "zod";
+import { findCategories } from "../utils/categories.js";
 import { Event, Status, EventsFetch } from "../event.js";
-import { findCategories } from "../categories.js";
+import Provider from "../provider.js";
 
-export const shortId = "DT";
-export const envVars = ["DATATOURISME_GET_URL"];
+const LangSchema = z.enum(["fr", "en", "de", "es", "it", "nl", "ru", "zh"]);
+const ContactSchema = z.object({
+    "schema:email": z.array(z.string()).optional(),
+    "schema:telephone": z.array(z.string()).optional(),
+    "foaf:homepage": z.array(z.url()).optional()
+});
+const RepresentationSchema = z.object({
+    "ebucore:hasRelatedResource": z.array(z.object({
+        "ebucore:locator": z.array(z.string())
+    })).optional(),
+    "ebucore:hasAnnotation": z.array(z.object({
+        credits: z.array(z.string()).optional(),
+        "ebucore:isCoveredBy": z.string().optional()
+    })).optional()
+});
+
+/**
+ * @typedef {z.infer<typeof DatatourismeEventSchema>} DatatourismeEvent
+ */
+const DatatourismeEventSchema = z.object({
+    "@id": z.string(),
+    "@type": z.array(z.string()),
+    creationDate: IsoDateTimeSchema,
+    "dc:identifier": z.string(),
+    hasBeenCreatedBy: z.object({
+        "schema:legalName": z.string()
+    }),
+    hasBookingContact: z.array(ContactSchema).optional(),
+    hasContact: z.array(ContactSchema),
+    hasDescription: z.array(z.object({
+        "dc:description": z.partialRecord(LangSchema, z.array(z.string()).optional()).optional()
+    })).optional(),
+    hasMainRepresentation: z.array(RepresentationSchema).optional(),
+    hasRepresentation: z.array(RepresentationSchema).optional(),
+    hasTheme: z.array(z.object({
+        "@id": z.string()
+    })).optional(),
+    isLocatedAt: z.array(z.object({
+        "schema:address": z.array(z.object({
+            "schema:addressLocality": z.string(),
+            "schema:postalCode": z.string(),
+            "schema:streetAddress": z.array(z.string()).optional()
+        })),
+        "schema:geo": z.object({
+            "schema:longitude": z.coerce.number(),
+            "schema:latitude": z.coerce.number()
+        })
+    })),
+    lastUpdateDatatourisme: IsoDateTimeSchema,
+    "rdfs:label": z.partialRecord(LangSchema, z.array(z.string()).optional()),
+    "rdfs:comment": z.partialRecord(LangSchema, z.array(z.string())).optional(),
+    takesPlaceAt: z.array(z.object({
+        startDate: IsoDateTimeSchema,
+        endDate: IsoDateTimeSchema.optional(),
+        startTime: IsoDateTimeSchema.optional(),
+        endTime: IsoDateTimeSchema.optional()
+    }))
+});
+
+
 
 /**
  * Get the index and events from a Datatourisme zip from url
@@ -24,7 +79,7 @@ function loadZipFromUrl(url) {
     var emitter = new EventsFetch();
     axios.get(url, { responseType: "stream" })
         .then(response => {
-            emitter.emit("progress", { downloading: true })
+            emitter.emit("progress", { downloading: true });
             loadZip(response.data, emitter);
             response.data
                 .on("finish", () => {
@@ -39,29 +94,30 @@ function loadZipFromUrl(url) {
  * @param {string} file
  * @returns {EventsFetch}
  */
-function loadZipFromFile(file) {
+function _loadZipFromFile(file) {
     return loadZip(fs.createReadStream(file));
 }
 
 /**
  * Get the index and events from a Datatourisme zip in stream
  * @param {stream.Readable} stream
- * @param {EventsFetch} [emitter=new EventsFetch()]
+ * @param {EventsFetch} emitter
  * @returns {EventsFetch}
  */
 function loadZip(stream, emitter = new EventsFetch()) {
+    /** @type {Event[]} */
     var events = [];
-    var index = null;
     emitter.emit("progress", { unzipping: true });
     stream.pipe(unzip.Parse())
         .on("entry", function (entry) {
             emitter.emit("progress", { unzipped: 1 });
             if (entry.path == "index.json") {
-                parseJSONFromStream(entry).then(obj => index = obj);
-                emitter.emit("progress", { index: 1 })
+                parseJSONFromStream(entry).then(obj => void obj);
+                emitter.emit("progress", { index: 1 });
             } else if (entry.path.endsWith(".json")) {
                 parseJSONFromStream(entry).then(obj => {
-                    let event = parseEvent(obj);
+                    const dtEvent = DatatourismeEventSchema.parse(obj);
+                    const event = parseEvent(dtEvent);
                     events.push(event);
                     emitter.emit("events", [event]);
                     emitter.emit("progress", { events: 1 });
@@ -82,10 +138,11 @@ function loadZip(stream, emitter = new EventsFetch()) {
 /**
  * Parse a JSON from a stream
  * @param {stream.Readable} stream
- * @returns {Promise<Object>}
+ * @returns {Promise<?>}
  */
 async function parseJSONFromStream(stream) {
     return new Promise((resolve, reject) => {
+        /** @type {Uint8Array<?>[]} */
         var chunks = [];
         stream.on("data", chunk => chunks.push(chunk));
         stream.on("end", () => {
@@ -97,7 +154,7 @@ async function parseJSONFromStream(stream) {
 
 /**
  * Parse a Datatourisme event to an Event
- * @param {Object} dtEvent
+ * @param {DatatourismeEvent} dtEvent
  * @returns {Event}
  */
 function parseEvent(dtEvent) {
@@ -105,18 +162,18 @@ function parseEvent(dtEvent) {
     if (id.length > 32)
         id = crypto.createHash('md5').update(id).digest('hex');
     var address = dtEvent.isLocatedAt[0]["schema:address"][0];
-    var title = dtEvent["rdfs:label"].fr[0];
+    var title = dtEvent["rdfs:label"]?.fr?.[0];
     var description = (dtEvent.hasDescription?.[0]?.["dc:description"] || dtEvent["rdfs:comment"])?.fr?.[0] ?? "";
-    var takesPlaceAt = dtEvent.takesPlaceAt ? dtEvent.takesPlaceAt.filter(t => new Date(t.endDate || t.startDate) >= new Date()).sort((a, b) => new Date(a) - new Date(b))[0] : {}; // TODO: fix that
-    if (!takesPlaceAt) takesPlaceAt = dtEvent.takesPlaceAt.sort((a, b) => new Date(b) - new Date(a))[0];
-    var dtCategories = dtEvent["@type"].concat(dtEvent.hasTheme?.map(theme => theme["@id"]) ?? [])
+    var takesPlaceAt = dtEvent.takesPlaceAt.filter(t => new Date(t.endDate || t.startDate) >= new Date()).sort((a, b) => new Date(a.endDate || a.startDate).getTime() - new Date(b.endDate || b.startDate).getTime())[0];
+    if (!takesPlaceAt) takesPlaceAt = dtEvent.takesPlaceAt.sort((a, b) => new Date(b.endDate || b.startDate).getTime() - new Date(a.endDate || a.startDate).getTime())[0];
+    var dtCategories = dtEvent["@type"].concat(dtEvent.hasTheme?.map(theme => theme["@id"]) ?? []);
     return {
         id,
         title,
         author: dtEvent.hasBeenCreatedBy["schema:legalName"],
         description,
-        start: formatDate(takesPlaceAt.startDate + " " + (takesPlaceAt.startTime || "")),
-        end: formatDate((takesPlaceAt.endDate || takesPlaceAt.startDate) + " " + (takesPlaceAt.endTime || "")),
+        start: formatDateTime(takesPlaceAt.startDate + (takesPlaceAt.startTime ? "T" + takesPlaceAt.startTime : "")),
+        end: formatDateTime((takesPlaceAt.endDate || takesPlaceAt.startDate) + (takesPlaceAt.endTime ? "T" + takesPlaceAt.endTime : "")),
         lng: dtEvent.isLocatedAt[0]["schema:geo"]["schema:longitude"],
         lat: dtEvent.isLocatedAt[0]["schema:geo"]["schema:latitude"],
         placename: [address["schema:addressLocality"], address["schema:postalCode"], address["schema:streetAddress"]].join(", "),
@@ -132,41 +189,32 @@ function parseEvent(dtEvent) {
             )?.flat() ?? []
         ).flat(),
         status: Status.programmed,
-        contact: dtEvent.hasContact.map(c => [c["schema:email"] ?? [], c["schema:telephone"] ?? [], c["foaf:homepage"] ?? []].flat()).flat(),
-        registration: dtEvent.hasBookingContact ? dtEvent.hasBookingContact.map(c => [c["schema:email"] ?? [], c["schema:telephone"] ?? [], c["foaf:homepage"] ?? []].flat()).flat() : [],
+        contact: dtEvent.hasContact.map(c => (c["schema:email"] ?? []).concat(c["schema:telephone"] ?? []).concat(c["foaf:homepage"] ?? [])).flat(),
+        registration: dtEvent.hasBookingContact ? dtEvent.hasBookingContact.map(c => (c["schema:email"] ?? []).concat(c["schema:telephone"] ?? []).concat(c["foaf:homepage"] ?? [])).flat() : [],
         public: true,
-        createdAt: formatDate(dtEvent.creationDate),
-        updatedAt: formatDate(dtEvent.lastUpdateDatatourisme),
+        createdAt: formatDateTime(dtEvent.creationDate),
+        updatedAt: formatDateTime(dtEvent.lastUpdateDatatourisme),
         sourceUrl: dtEvent["@id"]
     };
 }
 
 /**
- * Fetch all events from Datatourisme
- * @param {string} datatourismeUrl Datatourisme stream link
- * @returns {EventsFetch}
+ * Datatourisme events provider
+ * @see https://www.datatourisme.fr
  */
-export function fetchAll(datatourismeUrl = process.env.DATATOURISME_GET_URL) {
-    return loadZipFromUrl(datatourismeUrl);
-}
+export default class DatatourismeProvider extends Provider {
 
-/**
- * Fetch all events from Datatourisme and only return the last updated
- * @param {string} datatourismeUrl
- * @returns {EventsFetch}
- */
-function fetchLastUpdated(datatourismeUrl = process.env.DATATOURISME_GET_URL, date = Date.now()) {
-    var emitter = new EventsFetch();
-    loadZipFromUrl(datatourismeUrl)
-        .on("events", events => emitter.emit("events", events.filter(e => new Date(e.updatedAt) > date)))
-        .on("progress", progress => emitter.emit("progress", progress))
-        .on("error", error => emitter.emit("error", error))
-        .on("end", events => emitter.emit("end", events.filter(e => new Date(e.updatedAt) > date)));
-    return emitter;
-}
+    constructor() {
+        super("datatourisme", "DT", ["DATATOURISME_GET_URL"]);
+    }
 
-function formatDate(datetime) {
-    return new Date(datetime || 0).toISOString().replace("T", " ").replace("Z", "");
-}
+    /**
+     * Fetch all events from Datatourisme
+     * @param {string} datatourismeUrl Datatourisme stream link
+     * @returns {EventsFetch}
+     */
+    fetchAll(datatourismeUrl = super.getEnvVar("DATATOURISME_GET_URL")) {
+        return loadZipFromUrl(datatourismeUrl);
+    }
 
-export default { fetchAll, fetchLastUpdated, loadZipFromFile, loadZipFromUrl, loadZip };
+}

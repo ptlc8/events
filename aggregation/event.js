@@ -15,7 +15,7 @@ export const Status = {
 
 /**
  * An event
- * @typedef {Object} Event
+ * @typedef {Record<string, ?>} Event
  * @property {string} id Unique identifier
  * @property {string} title Title
  * @property {string} author Author identifier
@@ -43,14 +43,39 @@ export const Event = Object;
 import EventEmitter from "events";
 
 /**
+ * @typedef {{
+ *   events: (Event|null)[],
+ *   progress: {[key: string]: number|boolean},
+ *   end: (Event|null)[],
+ *   error: Error
+ * }} EventsFetchEventMap
+ */
+
+/**
  * An event fetcher,
  * emitting events during the fetch with "events" events, emitting all events with "end" event, emitting errors with "error" events, and emitting progress with "progress" events
- * @typedef {EventEmitter} EventsFetch
- * @fires EventsFetch#events
- * @fires EventsFetch#progress
- * @fires EventsFetch#end
- * @fires EventsFetch#error
  */
-export const EventsFetch = EventEmitter;
+export class EventsFetch extends EventEmitter {
+    /**
+     * @template {keyof EventsFetchEventMap | string} K
+     * @param {K} event
+     * @param {(payload: K extends keyof EventsFetchEventMap ? EventsFetchEventMap[K] : ?) => void} listener
+     * @returns {this}
+     */
+    on(event, listener) {
+        return super.on(event, listener);
+    }
 
-export default { Status, Event, EventsFetch }
+    /**
+     * @template {keyof EventsFetchEventMap | string} K
+     * @param {K} event
+     * @param {K extends keyof EventsFetchEventMap ? EventsFetchEventMap[K] : ?} payload
+     * @returns {boolean}
+     */
+    emit(event, payload) {
+        return super.emit(event, payload);
+    }
+
+}
+
+export default { Status, Event, EventsFetch };

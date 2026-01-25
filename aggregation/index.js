@@ -1,5 +1,6 @@
-import fs from "fs";
 import Database from "./database.js";
+import Provider from "./provider.js";
+import Providers from "./providers/index.js";
 
 import "dotenv/config.js";
 
@@ -11,34 +12,36 @@ const isInteractive = args.includes("-i");
 const wantedProviders = args.filter(a => !a.startsWith("-"));
 
 // Load providers
+/**
+ * @type {Array<Provider>}
+ */
 const providers = [];
-for (let file of fs.readdirSync(import.meta.dirname + "/providers")) {
-    if(!file.endsWith(".js"))
+for (let provider of Providers) {
+    if (!wantedProviders.includes(provider.name))
         continue;
-    let name = file.slice(0, -3);
-    if (wantedProviders.length != 0 && !wantedProviders.includes(name))
-        continue;
-    var module = await import("./providers/" + file);
-    console.log("Loaded provider", name, `(${file})`);
-    var missingVars = module.envVars.filter(v => !process.env[v]);
+    console.info("Loaded provider", provider.name);
+    var missingVars = provider.envVars.filter(v => !process.env[v]);
     if (missingVars.length != 0) {
-        console.error(`Provider ${name} is missing environment variables: ${missingVars.join(", ")}`);
+        console.error(`Provider ${provider.name} is missing environment variables: ${missingVars.join(", ")}`);
         continue;
     }
-    providers.push({
-        name,
-        shortId: module.shortId,
-        fetchAll: module.fetchAll
-    });
+    providers.push(provider);
 }
 
-// Progress tracking
+/**
+ * Progress tracking
+ * @type {Record<string, number|boolean>}
+ */
 var progress = {};
 
+/**
+ * @param {Record<string, number|boolean>} p 
+ * @param {string} prefix 
+ */
 function updateProgress(p, prefix = "") {
     for (let k in p) {
         if (typeof p[k] == "number")
-            progress[prefix + k] = (progress[prefix + k] || 0) + p[k];
+            progress[prefix + k] = Number(progress[prefix + k] || 0) + p[k];
         else if (p[k] === true)
             progress[prefix + k] = true;
         else if (p[k] === false)
@@ -50,12 +53,25 @@ function updateProgress(p, prefix = "") {
         process.stdout.write(Object.keys(progress).map(k => progress[k] === true ? k : `${k}: ${progress[k]}`).join(" | ") + "\r");
 }
 
+/**
+ * @param {Error} error 
+ * @param {string} prefix 
+ */
 function onError(error, prefix = "") {
     if (isInteractive)
-        console.log();
+        console.info();
     console.error(error);
     updateProgress({ errors: 1 }, prefix);
 }
+
+process.on("SIGINT", () => {
+    if (isInteractive)
+        console.info();
+    console.info("Process interrupted");
+    console.info(JSON.stringify(progress, null, 2));
+    db.end();
+    process.exit(130);
+});
 
 // Connect to the database
 const db = new Database({
@@ -78,5 +94,7 @@ await Promise.all(providers.map(provider =>
     })
 ));
 
-console.log(JSON.stringify(progress, null, 2));
+if (isInteractive)
+    console.info();
+console.info(JSON.stringify(progress, null, 2));
 db.end();

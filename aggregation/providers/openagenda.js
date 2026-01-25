@@ -1,117 +1,57 @@
-/**
- * Module for fetching OpenAgenda events
- * @module openagenda
- * @see https://developers.openagenda.com
- */
-
 import axios from "axios";
-import { Event, EventsFetch } from "../event.js";
-import { findCategories } from "../categories.js";
-import { isSafe } from "../filter.js";
-
-export const shortId = "OA";
-export const envVars = ["OPENAGENDA_KEY"];
-
-/**
- * Get all events from OpenAgenda
- * @param {string} key
- * @param {boolean} [official = false]
- * @returns {EventsFetch}
- */
-export function fetchAll(key = process.env.OPENAGENDA_KEY, official = false) {
-    var emitter = new EventsFetch();
-    var events = [];
-    var agendasCount = Infinity;
-    var agendasFetchedCount = 0;
-    fetchAgendas(key, official)
-        .on("agendas", agendas => {
-            for (let agenda of agendas) {
-                fetchAgendaEvents(key, agenda)
-                    .on("events", e => emitter.emit("events", e))
-                    .on("progress", progress => emitter.emit("progress", progress))
-                    .on("error", err => emitter.emit("error", err))
-                    .on("end", e => events.push(...e))
-                    .on("end", () => {
-                        agendasFetchedCount++;
-                        if (agendasFetchedCount == agendasCount)
-                            emitter.emit("end", events);
-                    });
-            }
-        })
-        .on("progress", progress => emitter.emit("progress", progress))
-        .on("error", err => emitter.emit("error", err))
-        .on("end", a => agendasCount = a.length);
-    return emitter;
-}
+import z from "zod";
+import { findCategories } from "../utils/categories.js";
+import { Event, EventsFetch, Status } from "../event.js";
+import { isSafe } from "../utils/filter.js";
+import Provider from "../provider.js";
+import { formatDateTime, IsoDateTimeSchema } from "../utils/datetime.js";
 
 /**
- * Get all agendas from OpenAgenda
- * @param {string} key
- * @param {boolean} [official = false]
- * @returns {EventsFetch}
+ * @typedef {z.infer<typeof OpenAgendaAgendaSchema>} OpenAgendaAgenda
+ * @typedef {z.infer<typeof OpenAgendaEventSchema>} OpenAgendaEvent
  */
-function fetchAgendas(key = process.env.OPENAGENDA_KEY, official = false) {
-    var emitter = new EventsFetch();
-    (async function() {
-        var after = []
-        var agendas = [];
-        emitter.emit("progress", { fetchingAgendas: true });
-        while (after != null) {
-            var url = `https://api.openagenda.com/v2/agendas?key=${key}&size=100&sort=createdAt.desc&official=${official ? 1 : 0}&` + after.map(v => "after[]=" + v).join("&");
-            let response = await axios.get(url);
-            let data = response.data;
-            if (!data.success) {
-                emitter.emit("error", data);
-                break;
-            }
-            data.agendas = data.agendas.filter(a => a.official || isSafe(a.title, a.description));
-            emitter.emit("progress", { agendas: data.agendas.length });
-            emitter.emit("agendas", data.agendas);
-            agendas.push(...data.agendas);
-            after = data.after;
-        }
-        emitter.emit("progress", { fetchingAgendas: false });
-        emitter.emit("end", agendas);
-    })().catch(err => emitter.emit("error", err));
-    return emitter;
-}
-
-/**
- * Get the events from an OpenAgenda agenda
- * @param {string} key
- * @param {Object} agenda OpenAgenda agenda
- * @returns {EventsFetch}
- */
-function fetchAgendaEvents(key = process.env.OPENAGENDA_KEY, agenda) {
-    var emitter = new EventsFetch();
-    (async function() {
-        var after = [];
-        var events = [];
-        while (after != null) {
-            var url = `https://api.openagenda.com/v2/agendas/${agenda.uid}/events?key=${key}&size=300&detailed=1&` + after.map(v => "after[]=" + v).join("&");
-            var response = await axios.get(url);
-            var data = response.data;
-            if (!data.success) {
-                emitter.emit("error", data);
-                break;
-            }
-            var results = data.events.map(e => parseEvent(e, agenda));
-            var ignored = results.filter(e => e == null).length;
-            results = results.filter(e => e != null);
-            emitter.emit("progress", { events: results.length, ignored });
-            emitter.emit("events", results);
-            events.push(...results);
-            after = data.after;
-        }
-        emitter.emit("end", events);
-    })().catch(err => emitter.emit("error", err));
-    return emitter;
-}
+const OpenAgendaAgendaSchema = z.object({
+    uid: z.number(),
+    slug: z.string(),
+    title: z.string(),
+    description: z.string(),
+    official: z.boolean()
+});
+const LangSchema = z.enum(["fr", "en", "oc", "it", "es", "de", "nl", "zh", "br", "hu", "pl"]);
+const OpenAgendaEventSchema = z.object({
+    uid: z.number(),
+    slug: z.string(),
+    title: z.record(LangSchema, z.string().optional()),
+    description: z.record(LangSchema, z.string().optional()),
+    longDescription: z.record(LangSchema, z.string().optional()).optional(),
+    nextTiming: z.object({
+        begin: IsoDateTimeSchema,
+        end: IsoDateTimeSchema
+    }).nullable(),
+    location: z.object({
+        latitude: z.number(),
+        longitude: z.number(),
+        address: z.string()
+    }).optional(),
+    keywords: z.record(LangSchema, z.array(z.string()).optional()).optional(),
+    image: z.object({
+        base: z.string(),
+        filename: z.string()
+    }).nullable(),
+    imageCredits: z.string().nullable().optional(),
+    status: z.union(Object.values(Status).map(k => z.literal(k))),
+    registration: z.array(z.object({
+        type: z.string(),
+        value: z.string().nullable()
+    })).optional(),
+    createdAt: IsoDateTimeSchema,
+    updatedAt: IsoDateTimeSchema
+});
 
 /**
  * Parse an OpenAgenda event to an Event
- * @param {Object} oaEvent OpenAgenda event
- * @param {Object} agenda OpenAgenda agenda
+ * @param {OpenAgendaEvent} oaEvent OpenAgenda event
+ * @param {OpenAgendaAgenda} agenda OpenAgenda agenda
  * @returns {Event?}
  */
 function parseEvent(oaEvent, agenda) {
@@ -125,8 +65,8 @@ function parseEvent(oaEvent, agenda) {
         title: oaEvent.title.fr ?? oaEvent.title.en ?? "",
         author: agenda.title,
         description: oaEvent.longDescription?.fr ?? oaEvent.longDescription?.en ?? oaEvent.description.fr ?? oaEvent.description.en ?? "",
-        start: formatDate(oaEvent.nextTiming.begin),
-        end: formatDate(oaEvent.nextTiming.end),
+        start: formatDateTime(oaEvent.nextTiming.begin),
+        end: formatDateTime(oaEvent.nextTiming.end),
         lng: oaEvent.location?.longitude ?? 0,
         lat: oaEvent.location?.latitude ?? 0,
         placename: oaEvent.location?.address ?? "",
@@ -137,15 +77,122 @@ function parseEvent(oaEvent, agenda) {
         contact: [url],
         registration: oaEvent.registration?.map(r => r.value) ?? [],
         public: true,
-        createdAt: formatDate(oaEvent.createdAt),
-        updatedAt: formatDate(oaEvent.updatedAt),
+        createdAt: formatDateTime(oaEvent.createdAt),
+        updatedAt: formatDateTime(oaEvent.updatedAt),
         sourceUrl: url
     };
     return event;
 }
 
-function formatDate(datetime) {
-    return new Date(datetime).toISOString().replace("T", " ").replace("Z", "");
-}
+/**
+ * OpenAgenda events provider
+ * @see https://developers.openagenda.com
+ */
+export default class OpenAgendaProvider extends Provider {
+    
+    constructor() {
+        super("openagenda", "OA", ["OPENAGENDA_KEY"]);
+    }
 
-export default { fetchAll };
+    /**
+     * Get all events from OpenAgenda
+     * @param {string} key
+     * @param {boolean} official
+     * @returns {EventsFetch}
+     */
+    fetchAll(key = super.getEnvVar("OPENAGENDA_KEY"), official = false) {
+        var emitter = new EventsFetch();
+        /** @type {Array<Event|null>} */
+        var events = [];
+        var agendasCount = Infinity;
+        var agendasFetchedCount = 0;
+        this.fetchAgendas(key, official)
+            .on("agendas", agendas => {
+                for (let agenda of agendas) {
+                    this.fetchAgendaEvents(key, agenda)
+                        .on("events", e => emitter.emit("events", e))
+                        .on("progress", progress => emitter.emit("progress", progress))
+                        .on("error", err => emitter.emit("error", err))
+                        .on("end", e => events.push(...e))
+                        .on("end", () => {
+                            agendasFetchedCount++;
+                            if (agendasFetchedCount == agendasCount)
+                                emitter.emit("end", events);
+                        });
+                }
+            })
+            .on("progress", progress => emitter.emit("progress", progress))
+            .on("error", err => emitter.emit("error", err))
+            .on("end", a => agendasCount = a.length);
+        return emitter;
+    }
+
+    /**
+     * Get all agendas from OpenAgenda
+     * @param {string} key
+     * @param {boolean} official
+     * @returns {EventsFetch}
+     */
+    fetchAgendas(key = super.getEnvVar("OPENAGENDA_KEY"), official = false) {
+        var emitter = new EventsFetch();
+        (async function() {
+            /** @type {string[]} */
+            var after = [];
+            var agendas = [];
+            emitter.emit("progress", { fetchingAgendas: true });
+            while (after != null) {
+                var url = `https://api.openagenda.com/v2/agendas?key=${key}&size=100&sort=createdAt.desc&official=${official ? 1 : 0}&` + after.map(v => "after[]=" + v).join("&");
+                let response = await axios.get(url);
+                let data = response.data;
+                if (!data.success) {
+                    emitter.emit("error", data);
+                    break;
+                }
+                let fetchedAgendas = z.array(OpenAgendaAgendaSchema).parse(data.agendas);
+                fetchedAgendas = fetchedAgendas.filter(a => a.official || isSafe(a.title, a.description));
+                emitter.emit("progress", { agendas: fetchedAgendas.length });
+                emitter.emit("agendas", fetchedAgendas);
+                agendas.push(...fetchedAgendas);
+                after = data.after;
+            }
+            emitter.emit("progress", { fetchingAgendas: false });
+            emitter.emit("end", agendas);
+        })().catch(err => emitter.emit("error", err));
+        return emitter;
+    }
+
+    /**
+     * Get the events from an OpenAgenda agenda
+     * @param {string} key
+     * @param {OpenAgendaAgenda} agenda OpenAgenda agenda
+     * @returns {EventsFetch}
+     */
+    fetchAgendaEvents(key = super.getEnvVar("OPENAGENDA_KEY"), agenda) {
+        var emitter = new EventsFetch();
+        (async function() {
+            /** @type {string[]} */
+            var after = [];
+            var allEvents = [];
+            while (after != null) {
+                var url = `https://api.openagenda.com/v2/agendas/${agenda.uid}/events?key=${key}&size=300&detailed=1&` + after.map(v => "after[]=" + v).join("&");
+                var response = await axios.get(url);
+                var data = response.data;
+                if (!data.success) {
+                    emitter.emit("error", data);
+                    break;
+                }
+                let fetchedEvents = z.array(OpenAgendaEventSchema).parse(data.events);
+                let events = fetchedEvents.map(e => parseEvent(e, agenda));
+                var ignored = events.filter(e => e == null).length;
+                events = events.filter(e => e != null);
+                emitter.emit("progress", { events: events.length, ignored });
+                emitter.emit("events", events);
+                allEvents.push(...events);
+                after = data.after;
+            }
+            emitter.emit("end", allEvents);
+        })().catch(err => emitter.emit("error", err));
+        return emitter;
+    }
+
+}

@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "scripts": {
     "start": "node .",
+    "lint": "eslint .",
+    "check-types": "tsc --noEmit --project ./jsconfig.json",
     "all": "node .",
     "datatourisme": "node . datatourisme",
     "openagenda": "node . openagenda",
@@ -17,7 +19,17 @@
     "mysql2": "^3.2.1",
     "node-html-parser": "^7.0.2",
     "sanitize-html": "^2.17.0",
-    "unzipper": "^0.10.11"
+    "unzipper": "^0.10.11",
+    "zod": "^4.3.6"
   },
-  "type": "module"
+  "type": "module",
+  "devDependencies": {
+    "@types/luxon": "^3.7.1",
+    "@types/node": "^25.0.10",
+    "@types/sanitize-html": "^2.16.0",
+    "@types/unzipper": "^0.10.11",
+    "eslint": "^9.39.2",
+    "eslint-plugin-jsdoc": "^62.4.1",
+    "typescript": "^5.9.3"
+  }
 }
